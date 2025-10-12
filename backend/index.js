@@ -89,7 +89,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to FIRS PROYECT application." });
 });
 
-require("./routes/bicycle.routes")(app);
+require("./routes/products.routes")(app);
+
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
 
 app.use(
   "/api-docs",
