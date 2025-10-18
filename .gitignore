@@ -1,10 +1,13 @@
 # Dependencies
 node_modules/
 */node_modules/
+**/node_modules/
 
 # Production builds
 dist/
 build/
+*/dist/
+*/build/
 
 # Angular cache and temporary files
 frontend/.angular/
@@ -23,12 +26,14 @@ frontend/plugins/
 .env.development.local
 .env.test.local
 .env.production.local
+**/.env
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+*.log
 
 # Runtime data
 pids
@@ -95,9 +100,11 @@ jspm_packages/
 ehthumbs.db
 Thumbs.db
 
-# IDE files
+# IDE files - Aplica a todas las carpetas
 .vscode/
+**/.vscode/
 .idea/
+**/.idea/
 *.swp
 *.swo
 *~
