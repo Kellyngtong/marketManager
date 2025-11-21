@@ -2,6 +2,10 @@
 
 Una aplicación web de comercio electrónico para supermercado que permite gestionar productos, realizar compras y administrar el inventario de forma simple e intuitiva.
 
+# GITHUB
+
+https://github.com/Kellyngtong/ionicApp. Sí te gusta deja una estrella! ;)
+
 ## Comenzando 🚀
 
 Estas instrucciones te permitirán obtener una copia del proyecto en funcionamiento en tu máquina local para propósitos de desarrollo y pruebas.
