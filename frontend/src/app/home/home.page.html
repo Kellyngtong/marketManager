@@ -1,13 +1,10 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Productos</ion-title>
-    <!-- Add button moved below header to avoid being covered by app header user UI -->
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <!-- Eliminado header condense y texto Blank -->
-
   <div class="product-grid">
     <app-product-card
       *ngFor="let product of products"
@@ -18,8 +15,13 @@
       (deleteProduct)="deleteProduct($event)"
     ></app-product-card>
   </div>
-  <!-- Floating action buttons: add product (above) and cart (below) -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" style="margin-bottom:72px;">
+
+  <ion-fab
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+    style="margin-bottom: 72px"
+  >
     <ion-fab-button (click)="openCreateModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
