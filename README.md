@@ -161,6 +161,11 @@ POST | `/api/products` | Crear un nuevo producto
 PUT | `/api/products/:id` | Actualizar un producto
 DELETE | `/api/products/:id` | Eliminar un producto
 
+# Para más información consultar el sguiente enlace a la colección de Postman.
+
+https://cloudy-rocket-987271.postman.co/workspace/WorkSpace-Murcia-Compartido~d9c18655-e906-494d-8d92-e20ad0d82e84/collection/33985259-b2eda180-e996-4e1c-a7cb-dcaf26df581e?action=share&creator=33985259&active-environment=33985259-c1b0753e-d014-458c-acfc-44e41c7d4f0c
+
+
 ### Ejemplo de uso:
 
 ```bash
