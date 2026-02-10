@@ -1,60 +1,212 @@
 const db = require("../models");
-const User = db.users;
+const Usuario = db.usuario;
+const Rol = db.rol;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET || "secretkey";
 
+// =====================================================
+// REGISTER - Crear nuevo usuario (solo empleado y admin pueden crear otros)
+// =====================================================
 exports.register = async (req, res) => {
   try {
-  const { username, email, password, avatar } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: "username, email and password are required" });
+    const { nombre, email, clave, idrol, telefono, direccion, num_documento } = req.body;
+    
+    // Validar campos requeridos
+    if (!nombre || !email || !clave) {
+      return res.status(400).json({ 
+        message: "nombre, email y clave son requeridos" 
+      });
     }
 
-    // check existing
-    const existing = await User.findOne({ where: { email } });
+    // Validar que el email no exista
+    const existing = await Usuario.findOne({ where: { email } });
     if (existing) {
-      return res.status(400).json({ message: "Email already in use" });
+      return res.status(400).json({ 
+        message: "El email ya está registrado" 
+      });
     }
 
-  const hashed = await bcrypt.hash(password, 10);
-  const createPayload = { username, email, password: hashed };
-  if (avatar) createPayload.avatar = avatar;
-  const user = await User.create(createPayload);
+    // Validar rol (por defecto rol 1 = cliente)
+    const rol = idrol || 1;
+    const rolExists = await Rol.findByPk(rol);
+    if (!rolExists) {
+      return res.status(400).json({ 
+        message: "Rol inválido" 
+      });
+    }
 
-    // Do not return password
-  const payload = { id: user.id, username: user.username, email: user.email, avatar: user.avatar };
-    res.json({ user: payload });
+    // Hash de la contraseña
+    const hashed = await bcrypt.hash(clave, 10);
+    
+    // Crear usuario
+    const usuario = await Usuario.create({
+      nombre,
+      email,
+      clave: hashed,
+      idrol: rol,
+      telefono: telefono || null,
+      direccion: direccion || null,
+      num_documento: num_documento || null,
+      condicion: 1,
+    });
+
+    // Obtener rol para devolver en respuesta
+    const usuarioWithRol = await Usuario.findByPk(usuario.idusuario, {
+      include: [{ model: db.rol, attributes: ["idrol", "nombre", "descripcion"] }],
+    });
+
+    // No devolver contraseña
+    res.status(201).json({ 
+      message: "Usuario creado exitosamente",
+      usuario: {
+        idusuario: usuarioWithRol.idusuario,
+        nombre: usuarioWithRol.nombre,
+        email: usuarioWithRol.email,
+        rol: usuarioWithRol.rol,
+      },
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error en register:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
+// =====================================================
+// LOGIN - Autenticación con JWT
+// =====================================================
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: "email and password are required" });
+    const { email, clave } = req.body;
+    
+    if (!email || !clave) {
+      return res.status(400).json({ 
+        message: "email y clave son requeridos" 
+      });
     }
 
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+    // Buscar usuario con su rol
+    const usuario = await Usuario.findOne({
+      where: { email },
+      include: [{ model: db.rol, attributes: ["idrol", "nombre"] }],
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ 
+        message: "Credenciales inválidas" 
+      });
     }
 
-    const match = await bcrypt.compare(password, user.password);
+    // Verificar contraseña
+    const match = await bcrypt.compare(clave, usuario.clave);
     if (!match) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ 
+        message: "Credenciales inválidas" 
+      });
     }
 
-  const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "24h" });
-  // include avatar in the returned user so frontend can show it immediately
-  res.json({ accessToken: token, user: { id: user.id, username: user.username, email: user.email, avatar: user.avatar } });
+    // Verificar que el usuario esté activo
+    if (!usuario.condicion) {
+      return res.status(401).json({ 
+        message: "Usuario desactivado" 
+      });
+    }
+
+    // Generar JWT con información del rol
+    const token = jwt.sign(
+      {
+        idusuario: usuario.idusuario,
+        email: usuario.email,
+        idrol: usuario.idrol,
+        rolNombre: usuario.rol.nombre,
+      },
+      JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.json({
+      message: "Login exitoso",
+      accessToken: token,
+      usuario: {
+        idusuario: usuario.idusuario,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        rol: {
+          idrol: usuario.rol.idrol,
+          nombre: usuario.rol.nombre,
+        },
+      },
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error en login:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
+
+// =====================================================
+// GET PROFILE - Obtener perfil del usuario autenticado
+// =====================================================
+exports.getProfile = async (req, res) => {
+  try {
+    const idusuario = req.idusuario;
+
+    const usuario = await Usuario.findByPk(idusuario, {
+      include: [{ model: db.rol, attributes: ["idrol", "nombre", "descripcion"] }],
+      attributes: { exclude: ["clave"] }, // Excluir contraseña
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ 
+        message: "Usuario no encontrado" 
+      });
+    }
+
+    res.json({
+      usuario,
+    });
+  } catch (err) {
+    console.error("Error en getProfile:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+// =====================================================
+// UPDATE PROFILE - Actualizar perfil del usuario
+// =====================================================
+exports.updateProfile = async (req, res) => {
+  try {
+    const idusuario = req.idusuario;
+    const { nombre, telefono, direccion } = req.body;
+
+    const usuario = await Usuario.findByPk(idusuario);
+    if (!usuario) {
+      return res.status(404).json({ 
+        message: "Usuario no encontrado" 
+      });
+    }
+
+    // Actualizar solo los campos permitidos
+    if (nombre) usuario.nombre = nombre;
+    if (telefono) usuario.telefono = telefono;
+    if (direccion) usuario.direccion = direccion;
+
+    await usuario.save();
+
+    res.json({
+      message: "Perfil actualizado exitosamente",
+      usuario: {
+        idusuario: usuario.idusuario,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        telefono: usuario.telefono,
+        direccion: usuario.direccion,
+      },
+    });
+  } catch (err) {
+    console.error("Error en updateProfile:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+

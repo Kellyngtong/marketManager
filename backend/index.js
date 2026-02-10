@@ -107,6 +107,8 @@ app.get("/", (req, res) => {
 require("./routes/products.routes")(app);
 require("./routes/auth.routes")(app);
 require("./routes/users.routes")(app);
+require("./routes/categorias.routes")(app);
+require("./routes/articulos.routes")(app);
 
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
