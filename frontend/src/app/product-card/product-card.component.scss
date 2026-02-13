@@ -27,9 +27,30 @@ ion-button {
   margin-top: 0.5em;
 }
 
-.action-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.product-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.5em;
-  margin-top: 0.5em;
+  margin: 0.75em 0;
+
+  .stock {
+    font-size: 0.9em;
+    color: #52606d;
+  }
+}
+
+.quantity-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  margin-bottom: 1em;
+
+  ion-input {
+    --padding-start: 0.5em;
+    --padding-end: 0.5em;
+    text-align: center;
+    max-width: 80px;
+  }
 }

@@ -1,0 +1,40 @@
+.spinner {
+  margin: 2rem auto;
+  display: block;
+}
+
+.venta-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.empty-state {
+  margin-top: 3rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--ion-color-medium);
+}
+
+.empty-state ion-icon {
+  font-size: 3rem;
+}
+
+.modal-totals {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.modal-totals div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-totals .grand {
+  font-size: 1.1rem;
+}

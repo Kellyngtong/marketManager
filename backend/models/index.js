@@ -42,6 +42,7 @@ db.detalle_ingreso = require("./detalle_ingreso.model.js")(sequelize, Sequelize)
 // Modelos de venta (ventas a clientes)
 db.venta = require("./venta.model.js")(sequelize, Sequelize);
 db.detalle_venta = require("./detalle_venta.model.js")(sequelize, Sequelize);
+db.carrito_item = require("./carrito_item.model.js")(sequelize, Sequelize);
 
 // =====================================================
 // RELACIONES (FOREIGN KEYS)
@@ -138,6 +139,26 @@ db.detalle_venta.belongsTo(db.articulo, {
   targetKey: "idarticulo",
 });
 db.articulo.hasMany(db.detalle_venta, { 
+  foreignKey: "idarticulo",
+});
+
+// CarritoItem -> Usuario
+db.carrito_item.belongsTo(db.usuario, {
+  foreignKey: "idusuario",
+  targetKey: "idusuario",
+  onDelete: "CASCADE",
+});
+db.usuario.hasMany(db.carrito_item, {
+  foreignKey: "idusuario",
+  onDelete: "CASCADE",
+});
+
+// CarritoItem -> Artículo
+db.carrito_item.belongsTo(db.articulo, {
+  foreignKey: "idarticulo",
+  targetKey: "idarticulo",
+});
+db.articulo.hasMany(db.carrito_item, {
   foreignKey: "idarticulo",
 });
 

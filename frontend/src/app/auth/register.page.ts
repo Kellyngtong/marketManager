@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -13,16 +14,18 @@ import { AuthService } from './auth.service';
   styleUrls: ['./register.page.scss'],
 })
 export class RegisterPage {
-  username = '';
+  nombre = '';
   email = '';
   password = '';
+  telefono = '';
+  direccion = '';
   avatarFile: File | null = null;
   previewUrl: string | null = null;
 
   constructor(private auth: AuthService, public router: Router, private toastCtrl: ToastController) {}
 
   async submit() {
-    if (!this.username || !this.email || !this.password) {
+    if (!this.nombre || !this.email || !this.password) {
       const t = await this.toastCtrl.create({ message: 'Completa todos los campos', duration: 2000, color: 'warning' });
       await t.present();
       return;
@@ -33,7 +36,7 @@ export class RegisterPage {
       let avatarUrl: string | undefined = undefined;
       if (this.avatarFile) {
         try {
-          const up: any = await this.auth.uploadAvatar(this.avatarFile).toPromise();
+          const up: any = await firstValueFrom(this.auth.uploadAvatar(this.avatarFile));
           if (up && up.imageUrl) avatarUrl = up.imageUrl;
         } catch (uploadErr: any) {
           console.error('Avatar upload error during register', uploadErr);
@@ -43,10 +46,17 @@ export class RegisterPage {
         }
       }
 
-      const payload: any = { username: this.username, email: this.email, password: this.password };
+      const payload: any = {
+        nombre: this.nombre,
+        email: this.email,
+        password: this.password,
+        telefono: this.telefono || undefined,
+        direccion: this.direccion || undefined,
+      };
+
       if (avatarUrl) payload.avatar = avatarUrl;
 
-      await this.auth.register(payload).toPromise();
+      await firstValueFrom(this.auth.register(payload));
       const t = await this.toastCtrl.create({ message: 'Registro correcto. Ya puedes iniciar sesión.', duration: 2000 });
       await t.present();
       this.router.navigateByUrl('/login');

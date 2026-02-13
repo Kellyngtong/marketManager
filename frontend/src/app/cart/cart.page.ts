@@ -1,4 +1,8 @@
 import { Component } from '@angular/core';
+import { ToastController } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
+import { CarritoService, CartItem } from '../services/carrito.service';
 
 @Component({
   selector: 'app-cart',
@@ -7,32 +11,84 @@ import { Component } from '@angular/core';
   standalone: false,
 })
 export class CartPage {
-  updateQuantity(index: number, delta: number) {
-    if (this.cart[index].quantity + delta > 0) {
-      this.cart[index].quantity += delta;
-      localStorage.setItem('cart', JSON.stringify(this.cart));
+  cartItems$ = this.carritoService.cartItems$;
+  totals$ = this.carritoService.cartTotals$;
+  user$ = this.auth.user$;
+
+  constructor(
+    private carritoService: CarritoService,
+    private toastCtrl: ToastController,
+    private auth: AuthService
+  ) {}
+
+  ionViewWillEnter() {
+    this.refreshCart();
+  }
+
+  async refreshCart(event?: any) {
+    try {
+      await firstValueFrom(this.carritoService.refreshCart());
+    } catch (error) {
+      await this.presentError(error);
+    } finally {
+      event?.target?.complete();
     }
-    if (this.cart[index].quantity === 0) {
-      this.removeItem(index);
+  }
+
+  async increment(item: CartItem) {
+    await this.updateItem(item, item.cantidad + 1);
+  }
+
+  async decrement(item: CartItem) {
+    const nextQty = item.cantidad - 1;
+    if (nextQty <= 0) {
+      await this.removeItem(item);
+    } else {
+      await this.updateItem(item, nextQty);
     }
   }
 
-  removeItem(index: number) {
-    this.cart.splice(index, 1);
-    localStorage.setItem('cart', JSON.stringify(this.cart));
-  }
-  cart: any[] = [];
-
-  constructor() {
-    this.loadCart();
+  async updateItem(item: CartItem, cantidad: number) {
+    try {
+      await firstValueFrom(this.carritoService.updateItem(item.idcarrito_item, cantidad));
+    } catch (error) {
+      await this.presentError(error);
+    }
   }
 
-  loadCart() {
-    const cartData = localStorage.getItem('cart');
-    this.cart = cartData ? JSON.parse(cartData) : [];
+  async removeItem(item: CartItem) {
+    try {
+      await firstValueFrom(this.carritoService.removeItem(item.idcarrito_item));
+    } catch (error) {
+      await this.presentError(error);
+    }
   }
 
-  getTotal() {
-    return this.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  async clearCart() {
+    if (!confirm('¿Vaciar el carrito completo?')) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.carritoService.clearCart());
+      const t = await this.toastCtrl.create({ message: 'Carrito vaciado', duration: 1500, color: 'medium' });
+      await t.present();
+    } catch (error) {
+      await this.presentError(error);
+    }
+  }
+
+  trackByItem(_: number, item: CartItem) {
+    return item.idcarrito_item;
+  }
+
+  private async presentError(error: any) {
+    const message =
+      error?.error?.message ||
+      error?.error?.error ||
+      error?.message ||
+      'Ocurrió un error con el carrito';
+    const t = await this.toastCtrl.create({ message, duration: 2500, color: 'danger' });
+    await t.present();
   }
 }

@@ -1,40 +1,70 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+
+interface RegisterPayload {
+  nombre?: string;
+  username?: string;
+  email: string;
+  password?: string;
+  clave?: string;
+  telefono?: string;
+  direccion?: string;
+  avatar?: string;
+  idrol?: number;
+}
+
+interface LoginPayload {
+  email: string;
+  password?: string;
+  clave?: string;
+}
+
+interface UpdateProfilePayload {
+  nombre?: string;
+  telefono?: string;
+  direccion?: string;
+  email?: string;
+  avatar?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
+  private readonly base = `${this.API_HOST}/api/auth`;
 
-  private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
-  private base = `${this.API_HOST}/api/auth`;
-
-  private userSubject = new BehaviorSubject<any>(this._loadUser());
+  private userSubject = new BehaviorSubject<any>(this.loadUser());
   public user$ = this.userSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // If we have a token but no cached user, try to fetch the profile
     const token = this.getToken();
     if (token && !this.userSubject.value) {
       this.getProfile().subscribe({ next: () => {}, error: () => {} });
     }
   }
 
-  register(payload: { username: string; email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.base}/register`, payload);
+  register(payload: RegisterPayload): Observable<any> {
+    const body = {
+      nombre: payload.nombre || payload.username,
+      email: payload.email,
+      clave: payload.clave || payload.password,
+      telefono: payload.telefono || null,
+      direccion: payload.direccion || null,
+      avatar: payload.avatar || null,
+      idrol: payload.idrol || 1,
+    };
+
+    return this.http.post(`${this.base}/register`, body);
   }
 
-  login(payload: { email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.base}/login`, payload).pipe(
-      tap((res: any) => {
-        if (res && res.accessToken) {
-          localStorage.setItem('accessToken', res.accessToken);
-          if (res.user) {
-            localStorage.setItem('currentUser', JSON.stringify(res.user));
-            this.userSubject.next(res.user);
-          }
-        }
-      })
+  login(payload: LoginPayload): Observable<any> {
+    const body = {
+      email: payload.email,
+      clave: payload.clave || payload.password,
+    };
+
+    return this.http.post(`${this.base}/login`, body).pipe(
+      tap((res: any) => this.persistSession(res))
     );
   }
 
@@ -45,33 +75,36 @@ export class AuthService {
   }
 
   updateAvatarUrl(avatarUrl: string) {
-    const token = this.getToken();
-    const headers: any = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.http.put(`${this.API_HOST}/api/users/avatar`, { avatar: avatarUrl }, { headers }).pipe(
+    const user = this.currentUserValue;
+    if (!user) {
+      return throwError(() => new Error('No hay usuario autenticado'));
+    }
+
+    return this.updateUsuario(user.idusuario || user.id, { avatar: avatarUrl });
+  }
+
+  getProfile() {
+    const cfg = this.withAuth();
+    if (!cfg) {
+      return throwError(() => new Error('No hay sesión activa'));
+    }
+
+    return this.http.get(`${this.base}/profile`, cfg).pipe(
       tap((res: any) => {
-        // if server returns updated user, update local storage and subject
-        if (res) {
-          const user = res;
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          this.userSubject.next(user);
+        if (res?.usuario) {
+          this.persistUser(this.normalizeUser(res.usuario));
         }
       })
     );
   }
 
-  getProfile() {
-    const token = this.getToken();
-    const headers: any = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.http.get(`${this.API_HOST}/api/users/me`, { headers }).pipe(
-      tap((res: any) => {
-        if (res) {
-          localStorage.setItem('currentUser', JSON.stringify(res));
-          this.userSubject.next(res);
-        }
-      })
-    );
+  updateProfile(payload: UpdateProfilePayload) {
+    const user = this.currentUserValue;
+    if (!user) {
+      return throwError(() => new Error('No hay usuario autenticado'));
+    }
+
+    return this.updateUsuario(user.idusuario || user.id, payload);
   }
 
   logout() {
@@ -88,11 +121,71 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  private _loadUser() {
+  get currentUserValue() {
+    return this.userSubject.value;
+  }
+
+  private persistSession(res: any) {
+    if (res && res.accessToken) {
+      localStorage.setItem('accessToken', res.accessToken);
+      const user = this.normalizeUser(res.usuario || res.user);
+      if (user) {
+        this.persistUser(user);
+      }
+    }
+  }
+
+  private updateUsuario(id: number, payload: UpdateProfilePayload) {
+    const cfg = this.withAuth();
+    if (!cfg) {
+      return throwError(() => new Error('No hay sesión activa'));
+    }
+
+    return this.http.put(`${this.API_HOST}/api/usuarios/${id}`, payload, cfg).pipe(
+      tap((res: any) => {
+        if (res?.usuario) {
+          this.persistUser(this.normalizeUser(res.usuario));
+        }
+      })
+    );
+  }
+
+  private withAuth() {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
+
+  private persistUser(user: any) {
+    if (!user) return;
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    this.userSubject.next(user);
+  }
+
+  private normalizeUser(user: any) {
+    if (!user) return null;
+    if (user.idusuario) return user;
+    if (user.id) {
+      return {
+        idusuario: user.id,
+        nombre: user.nombre || user.username,
+        email: user.email,
+        avatar: user.avatar,
+        telefono: user.telefono || null,
+        direccion: user.direccion || null,
+        rol: user.rol || null,
+      };
+    }
+    return user;
+  }
+
+  private loadUser() {
     try {
       const raw = localStorage.getItem('currentUser');
       return raw ? JSON.parse(raw) : null;
-    } catch (e) {
+    } catch (error) {
       return null;
     }
   }

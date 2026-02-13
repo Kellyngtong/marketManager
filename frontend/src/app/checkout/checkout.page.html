@@ -8,14 +8,115 @@
 </ion-header>
 
 <ion-content>
-  <div
-    style="
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 80vh;
-    "
-  >
-    <h1>Próximamente</h1>
-  </div>
+  <ng-container *ngIf="cartItems$ | async as items">
+    <section class="summary">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Resumen de productos</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+          <ng-container *ngIf="items.length; else summaryEmpty">
+            <div class="summary-item" *ngFor="let item of items">
+              <div>
+                <strong>{{ item.articulo?.nombre }}</strong>
+                <p>
+                  {{ item.cantidad }} x {{ item.articulo?.precio_venta | currency:'EUR' }}
+                  <span class="offer-label" *ngIf="item.articulo?.oferta">OFERTA</span>
+                </p>
+              </div>
+              <span>{{ (item.cantidad * (item.articulo?.precio_venta || 0)) | currency:'EUR' }}</span>
+            </div>
+          </ng-container>
+        </ion-card-content>
+      </ion-card>
+    </section>
+
+    <form *ngIf="items.length; else emptyCart" [formGroup]="checkoutForm" class="checkout-form">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Datos de envío</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Dirección</ion-label>
+          <ion-input formControlName="direccion" placeholder="Calle, número, ciudad"></ion-input>
+        </ion-item>
+        <ion-note color="danger" *ngIf="checkoutForm.get('direccion')?.touched && checkoutForm.get('direccion')?.invalid">
+          La dirección es obligatoria.
+        </ion-note>
+
+        <ion-item>
+          <ion-label position="stacked">Teléfono</ion-label>
+          <ion-input formControlName="telefono" type="tel" placeholder="Número de contacto"></ion-input>
+        </ion-item>
+        <ion-note color="danger" *ngIf="checkoutForm.get('telefono')?.touched && checkoutForm.get('telefono')?.invalid">
+          El teléfono es obligatorio.
+        </ion-note>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Método de pago</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-select formControlName="metodoPago">
+            <ion-select-option value="tarjeta">Tarjeta de crédito</ion-select-option>
+            <ion-select-option value="transferencia">Transferencia bancaria</ion-select-option>
+            <ion-select-option value="contraentrega">Pago contra entrega</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item *ngIf="checkoutForm.get('metodoPago')?.value === 'tarjeta'">
+          <ion-label position="stacked">Número de tarjeta</ion-label>
+          <ion-input
+            formControlName="numeroTarjeta"
+            type="tel"
+            maxlength="19"
+            placeholder="1234 5678 9012 3456"
+          ></ion-input>
+        </ion-item>
+        <ion-note color="danger" *ngIf="checkoutForm.get('numeroTarjeta')?.touched && checkoutForm.get('numeroTarjeta')?.invalid && checkoutForm.get('metodoPago')?.value === 'tarjeta'">
+          Ingresa un número de tarjeta válido.
+        </ion-note>
+      </ion-card-content>
+    </ion-card>
+
+      <ion-card *ngIf="totals$ | async as totals">
+      <ion-card-header>
+        <ion-card-title>Total a pagar</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="total-row">
+          <span>Subtotal</span>
+          <strong>{{ totals.subtotal | currency:'EUR' }}</strong>
+        </div>
+        <div class="total-row">
+          <span>Impuestos</span>
+          <strong>{{ totals.impuesto | currency:'EUR' }}</strong>
+        </div>
+        <div class="total-row total-row__grand">
+          <span>Total</span>
+          <strong>{{ totals.total | currency:'EUR' }}</strong>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+      <ion-button expand="block" color="success" (click)="completarCompra()" [disabled]="checkoutForm.invalid || !items.length">
+      Completar Compra
+    </ion-button>
+    </form>
+  </ng-container>
+
+  <ng-template #summaryEmpty>
+    <p class="summary-empty">Agrega productos al carrito para ver el detalle.</p>
+  </ng-template>
+
+  <ng-template #emptyCart>
+    <div class="empty-message">
+      <ion-icon name="cart"></ion-icon>
+      <p>Tu carrito está vacío.</p>
+      <ion-button routerLink="/home" color="primary">Volver a la tienda</ion-button>
+    </div>
+  </ng-template>
 </ion-content>

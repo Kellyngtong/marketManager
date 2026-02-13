@@ -1,0 +1,117 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Historial de Compras</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadHistorial($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-spinner name="crescent" *ngIf="isLoading" class="spinner"></ion-spinner>
+
+  <ion-list *ngIf="historial.length; else emptyState">
+    <ion-card *ngFor="let venta of historial; trackBy: trackByVenta">
+      <ion-card-header>
+        <ion-card-subtitle>{{ venta.fecha | date:'medium' }}</ion-card-subtitle>
+        <ion-card-title>#{{ venta.numero }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="venta-meta">
+          <span>Estado:</span>
+          <ion-badge [color]="venta.estado === 'Completada' ? 'success' : 'warning'">{{ venta.estado }}</ion-badge>
+        </div>
+        <div class="venta-meta">
+          <span>Total:</span>
+          <strong>{{ venta.total | currency:'EUR' }}</strong>
+        </div>
+        <div class="venta-meta">
+          <span>Método:</span>
+          <strong>{{ venta.metodo_pago }}</strong>
+        </div>
+        <ion-button expand="block" fill="clear" (click)="verDetalle(venta)">
+          Ver detalle
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <ion-icon name="receipt"></ion-icon>
+      <p>Aún no tienes compras registradas.</p>
+      <ion-button routerLink="/home" color="primary">Empezar a comprar</ion-button>
+    </div>
+  </ng-template>
+
+  <ion-modal [isOpen]="detailOpen" (didDismiss)="closeDetalle()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Detalle de compra</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeDetalle()">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content *ngIf="selectedVenta">
+        <ion-list>
+          <ion-item>
+            <ion-label>
+              <h2>Número</h2>
+              <p>{{ selectedVenta.numero }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h2>Fecha</h2>
+              <p>{{ selectedVenta.fecha | date:'medium' }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h2>Dirección</h2>
+              <p>{{ selectedVenta.direccion_envio }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+
+        <ion-list>
+          <ion-list-header>
+            <ion-label>Productos</ion-label>
+          </ion-list-header>
+          <ion-item *ngFor="let item of selectedVenta.items">
+            <ion-label>
+              <h3>{{ item.articulo?.nombre }}</h3>
+              <p>{{ item.cantidad }} x {{ item.precio | currency:'EUR' }}</p>
+            </ion-label>
+            <ion-note slot="end">{{ item.subtotal | currency:'EUR' }}</ion-note>
+          </ion-item>
+        </ion-list>
+
+        <div class="modal-totals">
+          <div>
+            <span>Subtotal</span>
+            <strong>{{ (selectedVenta.total - selectedVenta.impuesto) | currency:'EUR' }}</strong>
+          </div>
+          <div>
+            <span>Impuesto</span>
+            <strong>{{ selectedVenta.impuesto | currency:'EUR' }}</strong>
+          </div>
+          <div class="grand">
+            <span>Total</span>
+            <strong>{{ selectedVenta.total | currency:'EUR' }}</strong>
+          </div>
+        </div>
+
+        <ion-button expand="block" fill="outline" color="medium">
+          Descargar factura (Próx. Sprint)
+        </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

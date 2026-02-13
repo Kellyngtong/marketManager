@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -26,9 +27,9 @@ export class LoginPage {
     }
 
     try {
-      const res: any = await this.auth.login({ email: this.email, password: this.password }).toPromise();
+      const res: any = await firstValueFrom(this.auth.login({ email: this.email, password: this.password }));
       if (res && res.accessToken) {
-        this.router.navigateByUrl('/home');
+        this.router.navigateByUrl('/home', { replaceUrl: true });
       }
     } catch (err: any) {
       let msg = 'Login failed';
