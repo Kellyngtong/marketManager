@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mi Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-content class="profile-header" *ngIf="user as current">
+      <ion-avatar>
+        <img [src]="current.avatar || 'https://www.gravatar.com/avatar?d=mp&s=160'" alt="avatar" />
+      </ion-avatar>
+      <div>
+        <h2>{{ current.nombre || current.username }}</h2>
+        <ion-chip color="primary">
+          <ion-label>{{ current.rol?.nombre || 'Cliente' }}</ion-label>
+        </ion-chip>
+        <p class="hint">Puedes actualizar tu avatar desde la barra superior.</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <form [formGroup]="profileForm">
+    <ion-item>
+      <ion-label position="stacked">Nombre</ion-label>
+      <ion-input formControlName="nombre"></ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="profileForm.get('nombre')?.touched && profileForm.get('nombre')?.invalid">
+      El nombre es obligatorio.
+    </ion-note>
+
+    <ion-item>
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input formControlName="email" type="email"></ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.invalid">
+      Ingresa un email válido.
+    </ion-note>
+
+    <ion-item>
+      <ion-label position="stacked">Teléfono</ion-label>
+      <ion-input formControlName="telefono" type="tel"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Dirección</ion-label>
+      <ion-textarea formControlName="direccion" autoGrow="true"></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Rol</ion-label>
+      <ion-input formControlName="rol" readonly></ion-input>
+    </ion-item>
+  </form>
+
+  <div class="actions">
+    <ion-button expand="block" color="success" (click)="saveProfile()"
+      >Guardar cambios</ion-button
+    >
+    <ion-button expand="block" fill="outline" (click)="changePassword()"
+      >Cambiar contraseña</ion-button
+    >
+    <ion-button expand="block" fill="clear" color="medium" (click)="logout()"
+      >Cerrar sesión</ion-button
+    >
+  </div>
+</ion-content>

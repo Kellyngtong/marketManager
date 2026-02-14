@@ -19,6 +19,11 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       unique: true,
     },
+    tipo: {
+      type: Sequelize.STRING(50),
+      allowNull: false,
+      defaultValue: "general",
+    },
     precio_venta: {
       type: Sequelize.DECIMAL(11, 2),
       allowNull: false,
@@ -26,6 +31,11 @@ module.exports = (sequelize, Sequelize) => {
     stock: {
       type: Sequelize.INTEGER,
       defaultValue: 0,
+    },
+    oferta: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
     descripcion: {
       type: Sequelize.STRING(256),

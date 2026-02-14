@@ -7,8 +7,8 @@
 <ion-content class="ion-padding">
   <form (ngSubmit)="submit()">
     <ion-item>
-      <ion-label position="stacked">Usuario</ion-label>
-      <ion-input type="text" [(ngModel)]="username" name="username" required></ion-input>
+      <ion-label position="stacked">Nombre completo</ion-label>
+      <ion-input type="text" [(ngModel)]="nombre" name="nombre" required></ion-input>
     </ion-item>
 
     <ion-item>
@@ -19,6 +19,16 @@
     <ion-item>
       <ion-label position="stacked">Contraseña</ion-label>
       <ion-input type="password" [(ngModel)]="password" name="password" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Teléfono</ion-label>
+      <ion-input type="tel" [(ngModel)]="telefono" name="telefono"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Dirección</ion-label>
+      <ion-input type="text" [(ngModel)]="direccion" name="direccion"></ion-input>
     </ion-item>
 
     <ion-item lines="none">

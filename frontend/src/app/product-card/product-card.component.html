@@ -1,46 +1,58 @@
 <ion-card class="product-card">
   <img
-    [src]="product.image || 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&auto=format'"
-    alt="{{ product.name }}"
-    (click)="goToDetail.emit(product.id)"
+    [src]="product.imagen || product.image || 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&auto=format'"
+    alt="{{ product.nombre || product.name }}"
+    (click)="goToDetail.emit(product.idarticulo || product.id)"
   />
   <ion-card-header
-    (click)="goToDetail.emit(product.id)"
+    (click)="goToDetail.emit(product.idarticulo || product.id)"
     style="cursor: pointer"
   >
-    <ion-card-title>{{ product.name }}</ion-card-title>
-    <ion-card-subtitle>{{
-      product.price | currency : "EUR"
-    }}</ion-card-subtitle>
+    <ion-card-title>{{ product.nombre || product.name }}</ion-card-title>
+    <ion-card-subtitle>
+      {{ (product.precio_venta !== undefined ? product.precio_venta : product.price) | currency : "EUR" }}
+      <span style="color: var(--ion-color-danger); font-weight: 700" *ngIf="product.oferta">OFERTA</span>
+    </ion-card-subtitle>
   </ion-card-header>
   <ion-card-content>
-    <p>{{ product.description }}</p>
+    <p>{{ product.descripcion || product.description }}</p>
+    <div class="product-meta">
+      <ion-chip color="tertiary" mode="md">
+        {{ (product.tipo || 'general') | titlecase }}
+      </ion-chip>
+      <span class="stock">Stock: {{ product.stock ?? 0 }}</span>
+    </div>
+
+    <div class="quantity-picker">
+      <ion-button fill="clear" size="small" (click)="decreaseQuantity()" [disabled]="quantity <= 1">
+        <ion-icon slot="icon-only" name="remove"></ion-icon>
+      </ion-button>
+      <ion-input
+        type="number"
+        inputmode="numeric"
+        min="1"
+        [max]="product.stock || 1"
+        [(ngModel)]="quantity"
+        (ionChange)="normalizeQuantity($event)"
+      ></ion-input>
+      <ion-button
+        fill="clear"
+        size="small"
+        (click)="increaseQuantity()"
+        [disabled]="quantity >= (product.stock || 1)"
+      >
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </div>
+
     <ion-button
       expand="block"
       color="primary"
-      (click)="addToCart.emit(product)"
+      (click)="emitAddToCart()"
+      [disabled]="(product?.stock ?? 0) < 1"
     >
       <ion-icon slot="start" name="cart"></ion-icon>
       Añadir al carrito
     </ion-button>
-
-    <div class="action-buttons">
-      <ion-button
-        expand="block"
-        color="warning"
-        (click)="editProduct.emit(product)"
-      >
-        <ion-icon slot="start" name="create"></ion-icon>
-        Editar
-      </ion-button>
-      <ion-button
-        expand="block"
-        color="danger"
-        (click)="deleteProduct.emit(product.id)"
-      >
-        <ion-icon slot="start" name="trash"></ion-icon>
-        Borrar
-      </ion-button>
-    </div>
   </ion-card-content>
 </ion-card>

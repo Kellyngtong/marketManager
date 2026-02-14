@@ -25,6 +25,21 @@ const routes: Routes = [
       import('./checkout/checkout.module').then((m) => m.CheckoutPageModule),
   },
   {
+    path: 'historial',
+    loadChildren: () =>
+      import('./historial/historial.module').then((m) => m.HistorialPageModule),
+  },
+  {
+    path: 'employers',
+    loadChildren: () =>
+      import('./employers/employers.module').then((m) => m.EmployersPageModule),
+  },
+  {
+    path: 'profile',
+    loadChildren: () =>
+      import('./profile/profile.module').then((m) => m.ProfilePageModule),
+  },
+  {
     path: 'welcome',
     loadChildren: () => import('./auth/welcome.module').then((m) => m.WelcomePageModule),
   },

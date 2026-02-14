@@ -37,6 +37,14 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.DECIMAL(11, 2),
       allowNull: false,
     },
+    metodo_pago: {
+      type: Sequelize.STRING(30),
+      allowNull: true,
+    },
+    direccion_envio: {
+      type: Sequelize.STRING(200),
+      allowNull: true,
+    },
     estado: {
       type: Sequelize.STRING(20),
       allowNull: false,

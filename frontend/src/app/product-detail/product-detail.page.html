@@ -9,14 +9,21 @@
 
 <ion-content *ngIf="product">
   <ion-card>
-    <img *ngIf="product.image" [src]="product.image" alt="{{product.name}}" />
+    <img *ngIf="product.imagen || product.image" [src]="product.imagen || product.image" alt="{{product.nombre || product.name}}" />
     <ion-card-header>
-      <ion-card-title>{{product.name}}</ion-card-title>
-      <ion-card-subtitle>{{product.price | currency:'EUR'}}</ion-card-subtitle>
+      <ion-card-title>{{product.nombre || product.name}}</ion-card-title>
+      <ion-card-subtitle>
+        {{(product.precio_venta !== undefined ? product.precio_venta : product.price) | currency:'EUR'}}
+        <span style="color: var(--ion-color-danger); font-weight: 700" *ngIf="product.oferta">OFERTA</span>
+      </ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <p>{{product.description}}</p>
+      <p>{{product.descripcion || product.description}}</p>
       <p><strong>Stock:</strong> {{product.stock}}</p>
+      <ion-button expand="block" color="primary" (click)="addToCart()">
+        <ion-icon slot="start" name="cart"></ion-icon>
+        Añadir al carrito
+      </ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>

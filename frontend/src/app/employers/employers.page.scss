@@ -1,0 +1,72 @@
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  gap: 1rem;
+}
+
+.filter-label {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.filter-bar h3 {
+  margin: 0.2rem 0 0;
+  font-size: 1.1rem;
+}
+
+.tipo-popover ion-item {
+  --min-height: 42px;
+}
+
+.loading-placeholder {
+  padding: 1em;
+  display: grid;
+  gap: 0.75em;
+}
+
+.inventory-list ion-card {
+  margin: 0 1em 1em;
+}
+
+.inventory-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  margin-bottom: 0.5em;
+
+  .meta-label {
+    font-size: 0.75em;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+}
+
+.description {
+  font-size: 0.9em;
+  color: #3c3c3c;
+  margin-bottom: 0.75em;
+}
+
+.offer-label {
+  color: var(--ion-color-danger);
+  font-size: 0.75rem;
+  margin-left: 0.35rem;
+  font-weight: 700;
+}
+
+.inventory-actions {
+  display: flex;
+  gap: 0.5em;
+}
+
+.empty-state {
+  text-align: center;
+  color: #6b7280;
+  padding: 2em 1em;
+}

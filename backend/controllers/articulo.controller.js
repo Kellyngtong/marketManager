@@ -8,7 +8,14 @@ const Op = db.Sequelize.Op;
 // =====================================================
 exports.getAllArticulos = async (req, res) => {
   try {
-    const { idcategoria, search, page = 1, limit = 10, orderBy = "nombre" } = req.query;
+    const {
+      idcategoria,
+      search,
+      page = 1,
+      limit = 10,
+      orderBy = "nombre",
+      tipo,
+    } = req.query;
     const offset = (page - 1) * limit;
 
     // Construir condiciones de búsqueda
@@ -16,6 +23,10 @@ exports.getAllArticulos = async (req, res) => {
 
     if (idcategoria) {
       whereCondition.idcategoria = idcategoria;
+    }
+
+    if (tipo) {
+      whereCondition.tipo = String(tipo).trim().toLowerCase();
     }
 
     if (search) {
@@ -137,13 +148,31 @@ exports.getArticuloByCodigo = async (req, res) => {
 // =====================================================
 exports.createArticulo = async (req, res) => {
   try {
-    const { codigo, nombre, precio_venta, stock, descripcion, idcategoria, imagen } = req.body;
+    const {
+      codigo,
+      nombre,
+      precio_venta,
+      stock,
+      descripcion,
+      idcategoria,
+      imagen,
+      tipo,
+      oferta,
+    } = req.body;
 
     // Validar campos requeridos
     if (!nombre || !precio_venta || idcategoria === undefined) {
       return res.status(400).json({
         message: "nombre, precio_venta e idcategoria son requeridos",
       });
+    }
+
+    const normalizedTipo = String(tipo || "")
+      .trim()
+      .toLowerCase();
+
+    if (!normalizedTipo) {
+      return res.status(400).json({ message: "tipo es requerido" });
     }
 
     // Validar que la categoría exista
@@ -180,7 +209,9 @@ exports.createArticulo = async (req, res) => {
       codigo: codigo || null,
       nombre,
       precio_venta,
+      tipo: normalizedTipo,
       stock: stock || 0,
+      oferta: !!oferta,
       descripcion: descripcion || null,
       imagen: imagen || null,
       condicion: 1,
@@ -207,7 +238,17 @@ exports.createArticulo = async (req, res) => {
 exports.updateArticulo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { codigo, nombre, precio_venta, stock, descripcion, idcategoria, imagen } = req.body;
+    const {
+      codigo,
+      nombre,
+      precio_venta,
+      stock,
+      descripcion,
+      idcategoria,
+      imagen,
+      tipo,
+      oferta,
+    } = req.body;
 
     const articulo = await Articulo.findOne({
       where: { idarticulo: id, condicion: 1 },
@@ -256,6 +297,14 @@ exports.updateArticulo = async (req, res) => {
     if (descripcion !== undefined) articulo.descripcion = descripcion;
     if (idcategoria) articulo.idcategoria = idcategoria;
     if (imagen !== undefined) articulo.imagen = imagen;
+    if (oferta !== undefined) articulo.oferta = !!oferta;
+    if (tipo !== undefined) {
+      const normalizedTipo = String(tipo).trim().toLowerCase();
+      if (!normalizedTipo) {
+        return res.status(400).json({ message: "tipo no puede estar vacío" });
+      }
+      articulo.tipo = normalizedTipo;
+    }
 
     await articulo.save();
 

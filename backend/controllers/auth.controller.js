@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "secretkey";
 // =====================================================
 exports.register = async (req, res) => {
   try {
-    const { nombre, email, clave, idrol, telefono, direccion, num_documento } = req.body;
+    const { nombre, email, clave, idrol, telefono, direccion, num_documento, avatar } = req.body;
     
     // Validar campos requeridos
     if (!nombre || !email || !clave) {
@@ -50,6 +50,7 @@ exports.register = async (req, res) => {
       telefono: telefono || null,
       direccion: direccion || null,
       num_documento: num_documento || null,
+      avatar: avatar || null,
       condicion: 1,
     });
 
@@ -65,6 +66,7 @@ exports.register = async (req, res) => {
         idusuario: usuarioWithRol.idusuario,
         nombre: usuarioWithRol.nombre,
         email: usuarioWithRol.email,
+        avatar: usuarioWithRol.avatar,
         rol: usuarioWithRol.rol,
       },
     });
