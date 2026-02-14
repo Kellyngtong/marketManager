@@ -25,6 +25,16 @@ const routes: Routes = [
       import('./checkout/checkout.module').then((m) => m.CheckoutPageModule),
   },
   {
+    path: 'payment-success',
+    loadChildren: () =>
+      import('./payment-success/payment-success.module').then((m) => m.PaymentSuccessPageModule),
+  },
+  {
+    path: 'payment-cancel',
+    loadChildren: () =>
+      import('./payment-cancel/payment-cancel.module').then((m) => m.PaymentCancelPageModule),
+  },
+  {
     path: 'historial',
     loadChildren: () =>
       import('./historial/historial.module').then((m) => m.HistorialPageModule),

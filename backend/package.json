@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "migrate": "node db/migrate.js",
+    "seed": "node db/seeder.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "aitor peña sánchez",
@@ -17,6 +21,7 @@
     "multer": "^2.0.2",
     "mysql2": "^3.15.2",
     "sequelize": "^6.37.7",
+    "stripe": "^20.3.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   }
