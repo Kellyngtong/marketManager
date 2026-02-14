@@ -61,7 +61,9 @@ async function discoverAndRunMigrations() {
           error.message.includes("already exists") ||
           error.message.includes("Duplicate key")
         ) {
-          console.log(`⚠️  ${migrationFile} - Columnas/índices ya existen (ignorado)\n`);
+          console.log(
+            `⚠️  ${migrationFile} - Columnas/índices ya existen (ignorado)\n`,
+          );
           successCount++;
         } else {
           console.error(`❌ Error en ${migrationFile}:`, error.message);
@@ -70,7 +72,9 @@ async function discoverAndRunMigrations() {
       }
     }
 
-    console.log(`\n✅ Todas las migraciones completadas (${successCount}/${migrationFiles.length})`);
+    console.log(
+      `\n✅ Todas las migraciones completadas (${successCount}/${migrationFiles.length})`,
+    );
     console.log("📦 Base de datos actualizada exitosamente");
 
     await connection.end();
@@ -87,4 +91,7 @@ if (require.main === module) {
   discoverAndRunMigrations();
 }
 
-module.exports = { discoverAndRunMigrations, runMigrations: discoverAndRunMigrations };
+module.exports = {
+  discoverAndRunMigrations,
+  runMigrations: discoverAndRunMigrations,
+};

@@ -7,15 +7,17 @@ const jwt = require("jsonwebtoken");
 exports.extractTenant = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
-    
+
     if (!token) {
       return res.status(401).json({ message: "Token no proporcionado" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
-    
+
     if (!decoded.id_tenant) {
-      return res.status(401).json({ message: "Tenant no identificado en el token" });
+      return res
+        .status(401)
+        .json({ message: "Tenant no identificado en el token" });
     }
 
     // Agregar tenant info a req
@@ -29,7 +31,9 @@ exports.extractTenant = (req, res, next) => {
 
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Token inválido o expirado", error: err.message });
+    return res
+      .status(401)
+      .json({ message: "Token inválido o expirado", error: err.message });
   }
 };
 
@@ -45,7 +49,9 @@ exports.validateTenant = (req, res, next) => {
   // Si hay un tenant_id en los params, validar que coincida
   if (req.params.id_tenant) {
     if (parseInt(req.params.id_tenant) !== req.tenant.id_tenant) {
-      return res.status(403).json({ message: "Acceso denegado: tenant no autorizado" });
+      return res
+        .status(403)
+        .json({ message: "Acceso denegado: tenant no autorizado" });
     }
   }
 
@@ -62,7 +68,9 @@ exports.requireTenantAdmin = (req, res, next) => {
 
   // Rol 4 = Admin, Rol 3 = Empleado (manager)
   if (req.tenant.idrol !== 4 && req.tenant.idrol !== 3) {
-    return res.status(403).json({ message: "Requiere permisos de administrador" });
+    return res
+      .status(403)
+      .json({ message: "Requiere permisos de administrador" });
   }
 
   next();

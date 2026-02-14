@@ -16,7 +16,7 @@ async function seedDatabase() {
       `INSERT IGNORE INTO tenant (nombre, email, plan) VALUES 
        ('MarketManager Admin', 'admin@marketmanager.local', 'enterprise'),
        ('Supermercado García', 'garcia@supermercado.local', 'pro'),
-       ('Tienda López', 'lopez@tienda.local', 'free')`
+       ('Tienda López', 'lopez@tienda.local', 'free')`,
     );
     console.log("✅ Tenants creados");
 
@@ -26,7 +26,7 @@ async function seedDatabase() {
        (1, 'Tienda Principal Admin', 'Calle Principal 123', '555-0001'),
        (2, 'García - Sucursal Centro', 'Centro 456', '555-0002'),
        (2, 'García - Sucursal Norte', 'Norte 789', '555-0003'),
-       (3, 'López - Única', 'Avenida López 100', '555-0004')`
+       (3, 'López - Única', 'Avenida López 100', '555-0004')`,
     );
     console.log("✅ Stores creados");
 
@@ -61,11 +61,11 @@ async function seedDatabase() {
           nombre: "Verduras",
           descripcion: "Vegetales y hortalizas",
         },
-        { 
-          idcategoria: 3, 
+        {
+          idcategoria: 3,
           id_tenant: 1,
-          nombre: "Bebidas", 
-          descripcion: "Bebidas diversas" 
+          nombre: "Bebidas",
+          descripcion: "Bebidas diversas",
         },
         {
           idcategoria: 4,
@@ -355,25 +355,37 @@ async function seedDatabase() {
     // 3.5 ASIGNAR ARTÍCULOS A TENANTS (MULTITENANT)
     // Obtener todos los artículos creados
     const allArticulos = await db.articulo.findAll();
-    
+
     if (allArticulos.length > 0) {
       // Separar en dos grupos: Tenant 1 (primeros 15) y Tenant 2 (últimos)
       const halfPoint = Math.ceil(allArticulos.length / 2);
-      
+
       // Tenant 1: Tienda Principal Admin
       await db.articulo.update(
         { id_tenant: 1, id_store: 1 },
-        { where: { idarticulo: allArticulos.slice(0, halfPoint).map(a => a.idarticulo) } }
+        {
+          where: {
+            idarticulo: allArticulos
+              .slice(0, halfPoint)
+              .map((a) => a.idarticulo),
+          },
+        },
       );
-      
+
       // Tenant 2: García - Sucursal Centro (si hay más artículos)
       if (allArticulos.length > halfPoint) {
         await db.articulo.update(
           { id_tenant: 2, id_store: 3 },
-          { where: { idarticulo: allArticulos.slice(halfPoint).map(a => a.idarticulo) } }
+          {
+            where: {
+              idarticulo: allArticulos
+                .slice(halfPoint)
+                .map((a) => a.idarticulo),
+            },
+          },
         );
       }
-      
+
       console.log(`✅ Artículos asignados a tenants`);
     }
 

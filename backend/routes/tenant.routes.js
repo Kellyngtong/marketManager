@@ -18,7 +18,7 @@ router.post("/admin/tenant", async (req, res) => {
 
     const existing = await db.sequelize.query(
       "SELECT * FROM tenant WHERE email = ?",
-      { replacements: [email], type: db.sequelize.QueryTypes.SELECT }
+      { replacements: [email], type: db.sequelize.QueryTypes.SELECT },
     );
 
     if (existing.length > 0) {
@@ -27,7 +27,7 @@ router.post("/admin/tenant", async (req, res) => {
 
     const [result] = await db.sequelize.query(
       "INSERT INTO tenant (nombre, email, plan, estado) VALUES (?, ?, ?, 1)",
-      { replacements: [nombre, email, plan || "free"] }
+      { replacements: [nombre, email, plan || "free"] },
     );
 
     res.status(201).json({
@@ -47,7 +47,7 @@ router.get("/admin/tenants", async (req, res) => {
   try {
     const tenants = await db.sequelize.query(
       "SELECT id_tenant, nombre, email, plan, estado, fecha_creacion FROM tenant ORDER BY fecha_creacion DESC",
-      { type: db.sequelize.QueryTypes.SELECT }
+      { type: db.sequelize.QueryTypes.SELECT },
     );
 
     res.json({
@@ -119,7 +119,15 @@ router.post("/tenant/store", extractTenant, async (req, res) => {
 
     const [storeId] = await db.sequelize.query(
       "INSERT INTO store (id_tenant, nombre, direccion, telefono, email, estado) VALUES (?, ?, ?, ?, ?, 1)",
-      { replacements: [id_tenant, nombre, direccion || null, telefono || null, email || null] }
+      {
+        replacements: [
+          id_tenant,
+          nombre,
+          direccion || null,
+          telefono || null,
+          email || null,
+        ],
+      },
     );
 
     res.status(201).json({
@@ -141,7 +149,7 @@ router.get("/tenant/stores", extractTenant, async (req, res) => {
 
     const stores = await db.sequelize.query(
       "SELECT id_store, id_tenant, nombre, direccion, telefono, email, estado FROM store WHERE id_tenant = ? ORDER BY nombre",
-      { replacements: [id_tenant], type: db.sequelize.QueryTypes.SELECT }
+      { replacements: [id_tenant], type: db.sequelize.QueryTypes.SELECT },
     );
 
     res.json({
@@ -167,11 +175,16 @@ router.put("/tenant/store/:id_store", extractTenant, async (req, res) => {
     // Validar que la store pertenece al tenant
     const store = await db.sequelize.query(
       "SELECT * FROM store WHERE id_store = ? AND id_tenant = ?",
-      { replacements: [id_store, id_tenant], type: db.sequelize.QueryTypes.SELECT }
+      {
+        replacements: [id_store, id_tenant],
+        type: db.sequelize.QueryTypes.SELECT,
+      },
     );
 
     if (store.length === 0) {
-      return res.status(403).json({ message: "Store no encontrada o acceso denegado" });
+      return res
+        .status(403)
+        .json({ message: "Store no encontrada o acceso denegado" });
     }
 
     const updateFields = [];

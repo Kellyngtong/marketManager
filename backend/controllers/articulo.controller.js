@@ -19,7 +19,7 @@ exports.getAllArticulos = async (req, res) => {
     const offset = (page - 1) * limit;
 
     // MULTITENANT: Agregar filtro por tenant_id y store_id
-    let whereCondition = { 
+    let whereCondition = {
       condicion: 1,
       id_tenant: req.tenant?.id_tenant || null,
       id_store: req.tenant?.id_store || null,
@@ -91,8 +91,8 @@ exports.getArticuloById = async (req, res) => {
     const { id } = req.params;
 
     const articulo = await Articulo.findOne({
-      where: { 
-        idarticulo: id, 
+      where: {
+        idarticulo: id,
         condicion: 1,
         id_tenant: req.tenant?.id_tenant || null,
         id_store: req.tenant?.id_store || null,
@@ -137,8 +137,8 @@ exports.getArticuloByCodigo = async (req, res) => {
     });
 
     if (!articulo) {
-      return res.status(404).json({ 
-        message: `Artículo con código ${codigo} no encontrado` 
+      return res.status(404).json({
+        message: `Artículo con código ${codigo} no encontrado`,
       });
     }
 
@@ -358,7 +358,8 @@ exports.deleteArticulo = async (req, res) => {
 
     if (detalleVentaCount > 0 || detalleIngresoCount > 0) {
       return res.status(400).json({
-        message: "No se puede eliminar. El artículo tiene historial de transacciones",
+        message:
+          "No se puede eliminar. El artículo tiene historial de transacciones",
       });
     }
 

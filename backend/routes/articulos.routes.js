@@ -41,7 +41,7 @@ module.exports = (app) => {
     "/",
     authJwt.verifyToken,
     authJwt.isEmpleadoOrAdmin,
-    articuloController.createArticulo
+    articuloController.createArticulo,
   );
 
   /**
@@ -54,7 +54,7 @@ module.exports = (app) => {
     "/:id",
     authJwt.verifyToken,
     authJwt.isEmpleadoOrAdmin,
-    articuloController.updateArticulo
+    articuloController.updateArticulo,
   );
 
   /**
@@ -67,7 +67,7 @@ module.exports = (app) => {
     "/:id",
     authJwt.verifyToken,
     authJwt.isEmpleadoOrAdmin,
-    articuloController.deleteArticulo
+    articuloController.deleteArticulo,
   );
 
   /**
@@ -80,7 +80,7 @@ module.exports = (app) => {
     "/:id/stock",
     authJwt.verifyToken,
     authJwt.isEmpleadoOrAdmin,
-    articuloController.updateStock
+    articuloController.updateStock,
   );
 
   app.use("/api/articulos", router);
