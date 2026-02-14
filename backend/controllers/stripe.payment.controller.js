@@ -17,7 +17,11 @@ const buildNumeroComprobante = () => {
 
 const ensureCliente = async (usuario, datosEnvio, transaction) => {
   const email = usuario.email;
-  let cliente = await Cliente.findOne({ where: { email }, transaction, lock: transaction.LOCK.UPDATE });
+  let cliente = await Cliente.findOne({
+    where: { email },
+    transaction,
+    lock: transaction.LOCK.UPDATE,
+  });
 
   if (!cliente) {
     cliente = await Cliente.create(
@@ -29,7 +33,7 @@ const ensureCliente = async (usuario, datosEnvio, transaction) => {
         tipo_documento: usuario.tipo_documento || null,
         num_documento: usuario.num_documento || null,
       },
-      { transaction }
+      { transaction },
     );
   }
 
@@ -64,7 +68,9 @@ exports.crearSesionPago = async (req, res) => {
     for (const item of items) {
       if (!item.articulo || !item.articulo.condicion) {
         await transaction.rollback();
-        return res.status(400).json({ message: "Uno de los artículos no está disponible" });
+        return res
+          .status(400)
+          .json({ message: "Uno de los artículos no está disponible" });
       }
       if (item.articulo.stock < item.cantidad) {
         await transaction.rollback();
@@ -153,7 +159,11 @@ exports.stripeWebhook = async (req, res) => {
     let event;
 
     try {
-      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET,
+      );
     } catch (err) {
       await transaction.rollback();
       return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -237,7 +247,7 @@ const procesarPagoExitoso = async (session, transaction) => {
         direccion_envio: datosEnvio.direccion || usuario.direccion || null,
         stripe_session_id: session.id,
       },
-      { transaction }
+      { transaction },
     );
 
     // Crear detalles de venta y actualizar stock
@@ -250,7 +260,7 @@ const procesarPagoExitoso = async (session, transaction) => {
           precio: item.articulo.precio_venta,
           descuento: 0,
         },
-        { transaction }
+        { transaction },
       );
 
       item.articulo.stock -= item.cantidad;
@@ -285,7 +295,9 @@ exports.obtenerEstadoSesion = async (req, res) => {
     });
   } catch (err) {
     console.error("Error obteniendo estado sesión:", err);
-    return res.status(500).json({ message: "Error obteniendo estado de sesión" });
+    return res
+      .status(500)
+      .json({ message: "Error obteniendo estado de sesión" });
   }
 };
 

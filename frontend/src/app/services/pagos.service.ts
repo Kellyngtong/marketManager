@@ -20,22 +20,30 @@ export class PagosService {
   private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
   private baseUrl = `${this.API_HOST}/api/pagos`;
 
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+  ) {}
 
   /**
    * Crear sesión de Stripe Checkout
    * Valida que el carrito no esté vacío antes de redirigir a Stripe
    */
-  crearSesionPago(datosEnvio: { direccion: string; telefono?: string }): Observable<StripeSessionResponse> {
+  crearSesionPago(datosEnvio: {
+    direccion: string;
+    telefono?: string;
+  }): Observable<StripeSessionResponse> {
     const cfg = this.authHeaders();
     if (!cfg) {
-      return throwError(() => new Error('Debes iniciar sesión para completar la compra'));
+      return throwError(
+        () => new Error('Debes iniciar sesión para completar la compra'),
+      );
     }
 
     return this.http.post<StripeSessionResponse>(
       `${this.baseUrl}/crear-sesion`,
       { datosEnvio },
-      cfg
+      cfg,
     );
   }
 
@@ -51,7 +59,7 @@ export class PagosService {
 
     return this.http.get<StripeSessionStatus>(
       `${this.baseUrl}/sesion/${sessionId}`,
-      cfg
+      cfg,
     );
   }
 
@@ -67,7 +75,7 @@ export class PagosService {
     return this.http.post<{ message: string }>(
       `${this.baseUrl}/cancelar-sesion/${sessionId}`,
       {},
-      cfg
+      cfg,
     );
   }
 

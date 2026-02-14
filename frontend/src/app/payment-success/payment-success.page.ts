@@ -19,7 +19,7 @@ export class PaymentSuccessPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private pagosService: PagosService,
-    private carritoService: CarritoService
+    private carritoService: CarritoService,
   ) {}
 
   ngOnInit() {
@@ -33,7 +33,9 @@ export class PaymentSuccessPage implements OnInit {
 
   private async verificarPago(sessionId: string) {
     try {
-      const status = await this.pagosService.obtenerEstadoSesion(sessionId).toPromise();
+      const status = await this.pagosService
+        .obtenerEstadoSesion(sessionId)
+        .toPromise();
       if (status && status.status === 'paid') {
         // Pago confirmado, refrescar carrito para verificar que se limpió
         this.carritoService.refreshCart().subscribe();

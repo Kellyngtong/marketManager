@@ -116,13 +116,15 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generar JWT con información del rol
+    // Generar JWT con información del rol + TENANT MULTITENANT
     const token = jwt.sign(
       {
         idusuario: usuario.idusuario,
         email: usuario.email,
         idrol: usuario.idrol,
         rolNombre: usuario.rol.nombre,
+        id_tenant: usuario.id_tenant,
+        id_store: usuario.id_store,
       },
       JWT_SECRET,
       { expiresIn: "24h" }
@@ -135,6 +137,8 @@ exports.login = async (req, res) => {
         idusuario: usuario.idusuario,
         nombre: usuario.nombre,
         email: usuario.email,
+        id_tenant: usuario.id_tenant,
+        id_store: usuario.id_store,
         rol: {
           idrol: usuario.rol.idrol,
           nombre: usuario.rol.nombre,

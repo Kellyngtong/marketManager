@@ -46,6 +46,14 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.BOOLEAN,
       defaultValue: 1,
     },
+    id_tenant: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    id_store: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
   }, {
     timestamps: false,
     tableName: "usuario",
