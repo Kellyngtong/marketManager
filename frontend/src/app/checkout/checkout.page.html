@@ -57,28 +57,14 @@
 
     <ion-card>
       <ion-card-header>
-        <ion-card-title>Método de pago</ion-card-title>
+        <ion-card-title>Información de pago</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ion-item>
-          <ion-select formControlName="metodoPago">
-            <ion-select-option value="tarjeta">Tarjeta de crédito</ion-select-option>
-            <ion-select-option value="transferencia">Transferencia bancaria</ion-select-option>
-            <ion-select-option value="contraentrega">Pago contra entrega</ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-item *ngIf="checkoutForm.get('metodoPago')?.value === 'tarjeta'">
-          <ion-label position="stacked">Número de tarjeta</ion-label>
-          <ion-input
-            formControlName="numeroTarjeta"
-            type="tel"
-            maxlength="19"
-            placeholder="1234 5678 9012 3456"
-          ></ion-input>
-        </ion-item>
-        <ion-note color="danger" *ngIf="checkoutForm.get('numeroTarjeta')?.touched && checkoutForm.get('numeroTarjeta')?.invalid && checkoutForm.get('metodoPago')?.value === 'tarjeta'">
-          Ingresa un número de tarjeta válido.
-        </ion-note>
+        <p class="payment-info">
+          <ion-icon name="shield-checkmark-outline" color="success"></ion-icon>
+          El pago se procesará de forma segura con <strong>Stripe</strong>
+        </p>
+        <small>Se redireccionará al formulario seguro de pago de Stripe.</small>
       </ion-card-content>
     </ion-card>
 
@@ -102,8 +88,9 @@
       </ion-card-content>
     </ion-card>
 
-      <ion-button expand="block" color="success" (click)="completarCompra()" [disabled]="checkoutForm.invalid || !items.length">
-      Completar Compra
+      <ion-button expand="block" color="success" (click)="irAPago()" [disabled]="checkoutForm.invalid || !items.length || isProcessing">
+      <ion-spinner *ngIf="isProcessing" name="crescent"></ion-spinner>
+      {{ isProcessing ? 'Procesando...' : 'Ir a Pagar con Stripe' }}
     </ion-button>
     </form>
   </ng-container>

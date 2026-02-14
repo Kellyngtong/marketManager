@@ -7,6 +7,27 @@ const swaggerSpec = require("./config/swagger.config");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
 
+// Verificar si se debe ejecutar migraciones
+const shouldMigrate = process.argv.includes("--revert-db");
+
+// Función para ejecutar migraciones y luego iniciar el servidor
+const initializeApp = async () => {
+  if (shouldMigrate) {
+    console.log("🔄 Relanzando migraciones de base de datos...");
+    try {
+      const { runMigrations } = require("./db/migrate");
+      await runMigrations();
+    } catch (error) {
+      console.error("❌ Error al ejecutar migraciones:", error);
+      process.exit(1);
+    }
+  }
+  
+  startServer();
+};
+
+const startServer = () => {
+
 const defaultOrigins = [
   "http://localhost:8100",
   "http://localhost:8101",
@@ -45,6 +66,10 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Webhook de Stripe ANTES de body parsers
+const pagoController = require("./controllers/stripe.payment.controller");
+app.post("/api/pagos/webhook", express.raw({ type: "application/json" }), pagoController.stripeWebhook);
 
 app.use(express.json());
 
@@ -244,12 +269,20 @@ const seedCatalog = async () => {
 };
 
 const seedLegacyAdmin = async () => {
-  const User = db.users;
-  const existing = await User.findOne({ where: { email: "admin@local" } });
-  if (!existing) {
-    const hashed = await bcrypt.hash("admin123", 10);
-    await User.create({ username: "admin", email: "admin@local", password: hashed });
-    console.log("Usuario admin legacy creado: admin@local / admin123");
+  try {
+    const User = db.users;
+    const existing = await User.findOne({ where: { email: "admin@local" } });
+    if (!existing) {
+      const hashed = await bcrypt.hash("admin123", 10);
+      await User.create({ username: "admin", email: "admin@local", password: hashed });
+      console.log("Usuario admin legacy creado: admin@local / admin123");
+    }
+  } catch (err) {
+    if (err.name === 'SequelizeUniqueConstraintError') {
+      console.log("ℹ️  Usuario admin ya existe, saltando...");
+    } else {
+      throw err;
+    }
   }
 };
 
@@ -284,6 +317,7 @@ require("./routes/articulos.routes")(app);
 require("./routes/carrito.routes")(app);
 require("./routes/ventas.routes")(app);
 require("./routes/usuarios.routes")(app);
+require("./routes/pagos.routes")(app);
 
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -297,11 +331,6 @@ app.use(
     customSiteTitle: "LaTienditaApi - Documentación",
   })
 );
-
-const PORT = process.env.PORT || 4800;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
-});
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to FIRST PROYECT application." });
@@ -337,3 +366,14 @@ app.post('/api/upload', (req, res) => {
 
 
 app.use("/public", express.static(path.join(__dirname, "public")));
+
+const PORT = process.env.PORT || 4800;
+app.listen(PORT, () => {
+  console.log(`✅ Server is running on port ${PORT}.`);
+  console.log(`📚 Documentación disponible en http://localhost:${PORT}/api-docs`);
+});
+
+}; // Cierre de startServer
+
+// Iniciar la aplicación con manejo de migraciones
+initializeApp();

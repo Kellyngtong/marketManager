@@ -1,3 +1,62 @@
 ion-content {
   --padding-top: 16px;
 }
+
+.dev-accounts-card {
+  margin-bottom: 20px;
+  border: 2px dashed #ffc107;
+  background: rgba(255, 193, 7, 0.05);
+}
+
+.dev-accounts-card ion-card-header {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  padding: 12px 16px;
+  border-radius: 4px 4px 0 0;
+
+  ion-card-title {
+    color: #fff;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+.dev-accounts-card ion-item {
+  cursor: pointer;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 193, 7, 0.1);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  h2 {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 12px;
+    color: #666;
+
+    &.role-badge {
+      display: inline-block;
+      background: #e0e0e0;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+  }
+}
+

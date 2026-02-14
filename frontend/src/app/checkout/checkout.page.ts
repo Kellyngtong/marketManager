@@ -4,7 +4,7 @@ import { LoadingController, NavController, ToastController } from '@ionic/angula
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { CarritoService } from '../services/carrito.service';
-import { VentasService } from '../services/ventas.service';
+import { PagosService } from '../services/pagos.service';
 
 @Component({
   selector: 'app-checkout',
@@ -16,12 +16,13 @@ export class CheckoutPage implements OnDestroy {
   checkoutForm: FormGroup;
   cartItems$ = this.carritoService.cartItems$;
   totals$ = this.carritoService.cartTotals$;
+  isProcessing = false;
   private userSub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private carritoService: CarritoService,
-    private ventasService: VentasService,
+    private pagosService: PagosService,
     private auth: AuthService,
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
@@ -30,23 +31,7 @@ export class CheckoutPage implements OnDestroy {
     this.checkoutForm = this.fb.group({
       direccion: ['', Validators.required],
       telefono: ['', Validators.required],
-      metodoPago: ['tarjeta', Validators.required],
-      numeroTarjeta: [''],
     });
-
-    this.checkoutForm.get('metodoPago')?.valueChanges.subscribe((metodo) => {
-      const cardCtrl = this.checkoutForm.get('numeroTarjeta');
-      if (!cardCtrl) return;
-
-      if (metodo === 'tarjeta') {
-        cardCtrl.setValidators([Validators.required, Validators.pattern(/^[0-9\s]{12,19}$/)]);
-      } else {
-        cardCtrl.clearValidators();
-        cardCtrl.setValue('', { emitEvent: false });
-      }
-      cardCtrl.updateValueAndValidity({ emitEvent: false });
-    });
-    this.checkoutForm.get('metodoPago')?.updateValueAndValidity({ emitEvent: true });
 
     this.userSub = this.auth.user$.subscribe((user) => {
       if (user) {
@@ -62,35 +47,36 @@ export class CheckoutPage implements OnDestroy {
     this.carritoService.refreshCart().subscribe({ error: (err) => this.presentError(err) });
   }
 
-  async completarCompra() {
+  async irAPago() {
     if (this.checkoutForm.invalid) {
       this.checkoutForm.markAllAsTouched();
       return;
     }
 
-    const loading = await this.loadingCtrl.create({ message: 'Procesando compra...' });
+    this.isProcessing = true;
+    const loading = await this.loadingCtrl.create({ message: 'Preparando pago...' });
     await loading.present();
 
     const formValue = this.checkoutForm.value;
     try {
-      await firstValueFrom(
-        this.ventasService.checkout({
-          metodoPago: formValue.metodoPago,
-          numeroTarjeta: formValue.metodoPago === 'tarjeta' ? formValue.numeroTarjeta : null,
-          datosEnvio: {
-            direccion: formValue.direccion,
-            telefono: formValue.telefono,
-          },
+      // Crear sesión de Stripe
+      const response = await firstValueFrom(
+        this.pagosService.crearSesionPago({
+          direccion: formValue.direccion,
+          telefono: formValue.telefono,
         })
       );
 
+      // Guardar public key para usarlo después
+      localStorage.setItem('stripe_public_key', response.publicKey);
+
       await loading.dismiss();
-      await firstValueFrom(this.carritoService.refreshCart());
-      const t = await this.toastCtrl.create({ message: 'Su compra ha sido realizada', duration: 2200, color: 'success' });
-      await t.present();
-      this.navCtrl.navigateRoot('/historial');
+
+      // Redirigir a Stripe Checkout
+      await this.pagosService.redirigirAStripe(response.sessionId);
     } catch (error) {
       await loading.dismiss();
+      this.isProcessing = false;
       await this.presentError(error);
     }
   }

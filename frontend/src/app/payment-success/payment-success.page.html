@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Pago Exitoso</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="success-container">
+    <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
+    <h1>¡Compra Exitosa!</h1>
+    <p>Tu compra ha sido procesada correctamente.</p>
+    <p class="order-number" *ngIf="orderNumber">
+      Número de comprobante: <strong>{{ orderNumber }}</strong>
+    </p>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Próximos pasos</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ul>
+          <li>Recibirás un correo de confirmación en breve</li>
+          <li>Tu pedido será preparado para envío</li>
+          <li>Podrás ver el estado en tu historial de compras</li>
+        </ul>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="button-group">
+      <ion-button expand="block" color="success" routerLink="/historial">
+        <ion-icon slot="start" name="receipt"></ion-icon>
+        Ver Historial de Compras
+      </ion-button>
+      <ion-button expand="block" color="primary" routerLink="/home">
+        <ion-icon slot="start" name="storefront"></ion-icon>
+        Continuar Comprando
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

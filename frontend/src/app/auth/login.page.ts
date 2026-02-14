@@ -6,6 +6,13 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 
+interface TestAccount {
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+}
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -17,7 +24,40 @@ export class LoginPage {
   email = '';
   password = '';
 
+  // Cuentas de prueba para desarrollo
+  testAccounts: TestAccount[] = [
+    {
+      email: 'admin@test.com',
+      password: 'admin123',
+      name: '👨‍💼 Admin',
+      role: 'Administrador',
+    },
+    {
+      email: 'empleado@test.com',
+      password: 'emp123',
+      name: '👨‍💻 Empleado',
+      role: 'Staff',
+    },
+    {
+      email: 'cliente@test.com',
+      password: 'cli123',
+      name: '🛒 Cliente',
+      role: 'Cliente estándar',
+    },
+    {
+      email: 'premium@test.com',
+      password: 'pre123',
+      name: '⭐ Premium',
+      role: 'Cliente premium',
+    },
+  ];
+
   constructor(private auth: AuthService, public router: Router, private toastCtrl: ToastController) {}
+
+  selectTestAccount(account: TestAccount) {
+    this.email = account.email;
+    this.password = account.password;
+  }
 
   async submit() {
     if (!this.email || !this.password) {
@@ -43,3 +83,4 @@ export class LoginPage {
     }
   }
 }
+

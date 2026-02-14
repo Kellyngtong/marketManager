@@ -5,6 +5,28 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- CUENTAS DE PRUEBA (DESARROLLO) -->
+  <ion-card *ngIf="testAccounts.length > 0" class="dev-accounts-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="beaker-outline"></ion-icon> Cuentas de Prueba (Dev)
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let account of testAccounts" button (click)="selectTestAccount(account)">
+          <ion-label>
+            <h2>{{ account.name }}</h2>
+            <p>{{ account.email }}</p>
+            <p class="role-badge">{{ account.role }}</p>
+          </ion-label>
+          <ion-icon name="chevron-forward" slot="end"></ion-icon>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- FORMULARIO DE LOGIN -->
   <form (ngSubmit)="submit()">
     <ion-item>
       <ion-label position="stacked">Email</ion-label>

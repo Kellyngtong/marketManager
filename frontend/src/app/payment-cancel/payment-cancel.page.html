@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Pago Cancelado</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="cancel-container">
+    <ion-icon name="close-circle" class="cancel-icon"></ion-icon>
+    <h1>Pago Cancelado</h1>
+    <p>Tu pago fue cancelado o expiró.</p>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>¿Qué pasó?</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ul>
+          <li>La sesión de pago expiró</li>
+          <li>Decidiste cancelar la transacción</li>
+          <li>Hubo un error durante el proceso</li>
+        </ul>
+        <p class="info-text">Tu carrito se ha mantenido intacto. Puedes intentar nuevamente cuando desees.</p>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="button-group">
+      <ion-button expand="block" color="warning" routerLink="/checkout">
+        <ion-icon slot="start" name="arrow-back"></ion-icon>
+        Volver a Checkout
+      </ion-button>
+      <ion-button expand="block" color="primary" routerLink="/cart">
+        <ion-icon slot="start" name="cart"></ion-icon>
+        Ver Carrito
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
