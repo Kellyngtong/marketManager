@@ -17,25 +17,51 @@ export interface StripeSessionStatus {
 
 @Injectable({ providedIn: 'root' })
 export class PagosService {
-  private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
+  private API_HOST = this.getApiHost();
   private baseUrl = `${this.API_HOST}/api/pagos`;
 
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  private getApiHost(): string {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // Si estamos en ngrok, usar el hostname de ngrok sin puerto
+    if (hostname.includes('ngrok')) {
+      return `${protocol}//${hostname}`;
+    }
+    
+    // Si estamos en localhost, usar localhost:4800
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:4800`;
+    }
+    
+    // Por defecto, asumir que el API está en el mismo host
+    return `${protocol}//${hostname}`;
+  }
+
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+  ) {}
 
   /**
    * Crear sesión de Stripe Checkout
    * Valida que el carrito no esté vacío antes de redirigir a Stripe
    */
-  crearSesionPago(datosEnvio: { direccion: string; telefono?: string }): Observable<StripeSessionResponse> {
+  crearSesionPago(datosEnvio: {
+    direccion: string;
+    telefono?: string;
+  }): Observable<StripeSessionResponse> {
     const cfg = this.authHeaders();
     if (!cfg) {
-      return throwError(() => new Error('Debes iniciar sesión para completar la compra'));
+      return throwError(
+        () => new Error('Debes iniciar sesión para completar la compra'),
+      );
     }
 
     return this.http.post<StripeSessionResponse>(
       `${this.baseUrl}/crear-sesion`,
       { datosEnvio },
-      cfg
+      cfg,
     );
   }
 
@@ -51,7 +77,7 @@ export class PagosService {
 
     return this.http.get<StripeSessionStatus>(
       `${this.baseUrl}/sesion/${sessionId}`,
-      cfg
+      cfg,
     );
   }
 
@@ -67,7 +93,7 @@ export class PagosService {
     return this.http.post<{ message: string }>(
       `${this.baseUrl}/cancelar-sesion/${sessionId}`,
       {},
-      cfg
+      cfg,
     );
   }
 
@@ -96,10 +122,10 @@ export class PagosService {
   /**
    * Redirigir a Stripe Checkout
    */
-  async redirigirAStripe(sessionId: string) {
+  async redirigirAStripe(sessionId: string, publicKey: string) {
     try {
       const Stripe = await this.cargarStripeJs();
-      const stripe = Stripe(localStorage.getItem('stripe_public_key') || '');
+      const stripe = Stripe(publicKey);
       const result = await stripe.redirectToCheckout({ sessionId });
 
       if (result.error) {

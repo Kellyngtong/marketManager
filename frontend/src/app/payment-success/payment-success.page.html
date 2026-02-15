@@ -1,11 +1,18 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Pago Exitoso</ion-title>
+    <ion-title>Estado del Pago</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div class="success-container">
+  <!-- Estado de carga -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner></ion-spinner>
+    <p>Verificando estado de tu pago...</p>
+  </div>
+
+  <!-- Pago exitoso -->
+  <div *ngIf="!isLoading && paymentStatus === 'success'" class="success-container">
     <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
     <h1>¡Compra Exitosa!</h1>
     <p>Tu compra ha sido procesada correctamente.</p>
@@ -27,13 +34,20 @@
     </ion-card>
 
     <div class="button-group">
-      <ion-button expand="block" color="success" routerLink="/historial">
-        <ion-icon slot="start" name="receipt"></ion-icon>
-        Ver Historial de Compras
+      <ion-button expand="block" color="success" (click)="volver()">
+        Volver al Inicio
       </ion-button>
-      <ion-button expand="block" color="primary" routerLink="/home">
-        <ion-icon slot="start" name="storefront"></ion-icon>
-        Continuar Comprando
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!isLoading && paymentStatus === 'error'" class="error-container">
+    <ion-icon name="close-circle" class="error-icon"></ion-icon>
+    <h1>Error Verificando Pago</h1>
+    <p>No se pudo verificar el estado de tu pago.</p>
+    <div class="button-group">
+      <ion-button expand="block" color="danger" (click)="volver()">
+        Volver al Carrito
       </ion-button>
     </div>
   </div>

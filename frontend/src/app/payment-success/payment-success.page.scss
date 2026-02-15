@@ -1,4 +1,7 @@
-.success-container {
+.loading-container,
+.success-container,
+.pending-container,
+.error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -7,16 +10,40 @@
   padding: 2rem 0;
 }
 
-.success-icon {
+.success-icon,
+.pending-icon,
+.error-icon {
   font-size: 5rem;
-  color: #2dd36f;
   animation: slideIn 0.5s ease-out;
+}
+
+.success-icon {
+  color: #2dd36f;
+}
+
+.pending-icon {
+  color: #ffc409;
+}
+
+.error-icon {
+  color: #eb445a;
 }
 
 h1 {
   text-align: center;
-  color: #2dd36f;
   margin: 0;
+}
+
+.success-container h1 {
+  color: #2dd36f;
+}
+
+.pending-container h1 {
+  color: #ffc409;
+}
+
+.error-container h1 {
+  color: #eb445a;
 }
 
 p {
@@ -46,13 +73,6 @@ ion-card {
 
       &:last-child {
         border-bottom: none;
-      }
-
-      &::before {
-        content: '✓ ';
-        color: #2dd36f;
-        font-weight: bold;
-        margin-right: 0.5rem;
       }
     }
   }

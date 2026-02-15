@@ -11,7 +11,11 @@ module.exports = (app) => {
    * Body: { datosEnvio: { direccion, telefono } }
    * Response: { sessionId, publicKey }
    */
-  router.post("/crear-sesion", authJwt.verifyToken, pagoController.crearSesionPago);
+  router.post(
+    "/crear-sesion",
+    authJwt.verifyToken,
+    pagoController.crearSesionPago,
+  );
 
   /**
    * GET /api/pagos/sesion/:sessionId
@@ -19,14 +23,22 @@ module.exports = (app) => {
    * Requiere: autenticación de usuario
    * Response: { id, status, customer_email, metadata }
    */
-  router.get("/sesion/:sessionId", authJwt.verifyToken, pagoController.obtenerEstadoSesion);
+  router.get(
+    "/sesion/:sessionId",
+    authJwt.verifyToken,
+    pagoController.obtenerEstadoSesion,
+  );
 
   /**
    * POST /api/pagos/cancelar-sesion/:sessionId
    * Cancelar sesión (para UI)
    * Requiere: autenticación de usuario
    */
-  router.post("/cancelar-sesion/:sessionId", authJwt.verifyToken, pagoController.cancelarSesion);
+  router.post(
+    "/cancelar-sesion/:sessionId",
+    authJwt.verifyToken,
+    pagoController.cancelarSesion,
+  );
 
   // NOTA: El webhook se registra directamente en index.js ANTES de los body parsers
   // para que express.raw() funcione correctamente con Stripe

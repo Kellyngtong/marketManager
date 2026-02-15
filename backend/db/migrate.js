@@ -2,7 +2,11 @@ const mysql = require("mysql2/promise");
 const fs = require("fs");
 const path = require("path");
 
-async function runMigrations() {
+/**
+ * Descubre y ejecuta migraciones en orden secuencial
+ * Las migraciones deben estar nombradas con formato: NN_nombre.sql (01_, 02_, etc.)
+ */
+async function discoverAndRunMigrations() {
   try {
     // Conectar a MySQL sin especificar BD
     const connection = await mysql.createConnection({
@@ -14,17 +18,64 @@ async function runMigrations() {
 
     console.log("✅ Conectado a MySQL");
 
-    // Leer archivo SQL
-    const sqlPath = path.join(__dirname, "..", "sql", "01_schema_mvp.sql");
-    const sqlContent = fs.readFileSync(sqlPath, "utf8");
+    // Leer archivos de migración
+    const migrationsDir = path.join(__dirname, "..", "migrations");
 
-    console.log("📝 Ejecutando migraciones...");
-    
-    // Ejecutar todas las sentencias SQL
-    await connection.query(sqlContent);
+    if (!fs.existsSync(migrationsDir)) {
+      console.warn("⚠️  Carpeta de migraciones no encontrada:", migrationsDir);
+      await connection.end();
+      return;
+    }
 
-    console.log("✅ Migraciones completadas exitosamente");
-    console.log("📦 Base de datos 'market_manager' recreada");
+    // Obtener todos los archivos .sql y ordenarlos
+    const migrationFiles = fs
+      .readdirSync(migrationsDir)
+      .filter((file) => file.endsWith(".sql"))
+      .sort(); // Ordena por nombre: 01_, 02_, etc.
+
+    if (migrationFiles.length === 0) {
+      console.warn("⚠️  No se encontraron archivos de migración");
+      await connection.end();
+      return;
+    }
+
+    console.log(`📁 Encontradas ${migrationFiles.length} migraciones`);
+    console.log("📝 Ejecutando migraciones en orden...\n");
+
+    let successCount = 0;
+
+    // Ejecutar cada migración en orden
+    for (const migrationFile of migrationFiles) {
+      const migrationPath = path.join(migrationsDir, migrationFile);
+      const sqlContent = fs.readFileSync(migrationPath, "utf8");
+
+      try {
+        console.log(`⏳ Ejecutando: ${migrationFile}`);
+        await connection.query(sqlContent);
+        successCount++;
+        console.log(`✅ ${migrationFile} completada\n`);
+      } catch (error) {
+        // Ignorar algunos errores comunes durante ALTER TABLE
+        if (
+          error.message.includes("Duplicate column") ||
+          error.message.includes("already exists") ||
+          error.message.includes("Duplicate key")
+        ) {
+          console.log(
+            `⚠️  ${migrationFile} - Columnas/índices ya existen (ignorado)\n`,
+          );
+          successCount++;
+        } else {
+          console.error(`❌ Error en ${migrationFile}:`, error.message);
+          throw error;
+        }
+      }
+    }
+
+    console.log(
+      `\n✅ Todas las migraciones completadas (${successCount}/${migrationFiles.length})`,
+    );
+    console.log("📦 Base de datos actualizada exitosamente");
 
     await connection.end();
     process.exit(0);
@@ -37,7 +88,10 @@ async function runMigrations() {
 // Ejecutar si se llama directamente
 if (require.main === module) {
   require("dotenv").config({ path: path.resolve(__dirname, "..", ".env") });
-  runMigrations();
+  discoverAndRunMigrations();
 }
 
-module.exports = { runMigrations };
+module.exports = {
+  discoverAndRunMigrations,
+  runMigrations: discoverAndRunMigrations,
+};

@@ -20,18 +20,17 @@
           <li>Decidiste cancelar la transacción</li>
           <li>Hubo un error durante el proceso</li>
         </ul>
-        <p class="info-text">Tu carrito se ha mantenido intacto. Puedes intentar nuevamente cuando desees.</p>
+        <p class="info-text">
+          Tu carrito se ha mantenido intacto. Puedes intentar nuevamente cuando
+          desees.
+        </p>
       </ion-card-content>
     </ion-card>
 
     <div class="button-group">
-      <ion-button expand="block" color="warning" routerLink="/checkout">
+      <ion-button expand="block" color="warning" (click)="volver()">
         <ion-icon slot="start" name="arrow-back"></ion-icon>
-        Volver a Checkout
-      </ion-button>
-      <ion-button expand="block" color="primary" routerLink="/cart">
-        <ion-icon slot="start" name="cart"></ion-icon>
-        Ver Carrito
+        Volver al Carrito
       </ion-button>
     </div>
   </div>

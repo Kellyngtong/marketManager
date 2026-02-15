@@ -13,9 +13,17 @@ const buildNumeroComprobante = () => {
   return `MM${timestamp}`;
 };
 
-const ensureCliente = async (usuario, datosEnvio, transaction) => {
+const ensureCliente = async (usuario, datosEnvio, transaction, id_tenant, id_store) => {
   const email = usuario.email;
-  let cliente = await Cliente.findOne({ where: { email }, transaction, lock: transaction.LOCK.UPDATE });
+  let cliente = await Cliente.findOne({ 
+    where: { 
+      email,
+      id_tenant,
+      id_store,
+    }, 
+    transaction, 
+    lock: transaction.LOCK.UPDATE 
+  });
 
   if (!cliente) {
     cliente = await Cliente.create(
@@ -26,6 +34,8 @@ const ensureCliente = async (usuario, datosEnvio, transaction) => {
         direccion: datosEnvio?.direccion || usuario.direccion || null,
         tipo_documento: usuario.tipo_documento || null,
         num_documento: usuario.num_documento || null,
+        id_tenant,
+        id_store,
       },
       { transaction }
     );
@@ -61,7 +71,14 @@ exports.checkout = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     const idusuario = req.idusuario;
+    const id_tenant = req.tenant?.id_tenant;
+    const id_store = req.tenant?.id_store;
     const { datosEnvio = {}, metodoPago, numeroTarjeta } = req.body;
+
+    if (!id_tenant || !id_store) {
+      await transaction.rollback();
+      return res.status(401).json({ message: "Tenant o Store no identificado" });
+    }
 
     if (!metodoPago) {
       await transaction.rollback();
@@ -77,7 +94,10 @@ exports.checkout = async (req, res) => {
     }
 
     const items = await CarritoItem.findAll({
-      where: { idusuario },
+      where: { 
+        idusuario,
+        id_tenant,
+      },
       include: [{ model: Articulo }],
       transaction,
       lock: transaction.LOCK.UPDATE,
@@ -115,12 +135,14 @@ exports.checkout = async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    const cliente = await ensureCliente(usuario, datosEnvio, transaction);
+    const cliente = await ensureCliente(usuario, datosEnvio, transaction, id_tenant, id_store);
 
     const venta = await Venta.create(
       {
         idcliente: cliente.idcliente,
         idusuario,
+        id_tenant,
+        id_store,
         tipo_comprobante: "BOL",
         serie_comprobante: "MM01",
         num_comprobante: buildNumeroComprobante(),

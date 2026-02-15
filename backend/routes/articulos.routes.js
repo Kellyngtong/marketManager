@@ -1,6 +1,7 @@
 module.exports = (app) => {
   const articuloController = require("../controllers/articulo.controller.js");
   const authJwt = require("../middlewares/authJwt.js");
+  const { extractTenant } = require("../middlewares/tenant.js");
   const router = require("express").Router();
 
   /**
@@ -12,16 +13,16 @@ module.exports = (app) => {
    *   - page: número de página (default 1)
    *   - limit: artículos por página (default 10)
    *   - orderBy: nombre | precio_asc | precio_desc | stock | reciente
-   * Acceso: Público
+   * Acceso: Con autenticación (multitenant)
    */
-  router.get("/", articuloController.getAllArticulos);
+  router.get("/", extractTenant, articuloController.getAllArticulos);
 
   /**
    * GET /api/articulos/:id
    * Obtener artículo por ID
-   * Acceso: Público
+   * Acceso: Con autenticación (multitenant)
    */
-  router.get("/:id", articuloController.getArticuloById);
+  router.get("/:id", extractTenant, articuloController.getArticuloById);
 
   /**
    * GET /api/articulos/codigo/:codigo
@@ -40,7 +41,7 @@ module.exports = (app) => {
     "/",
     authJwt.verifyToken,
     authJwt.isEmpleadoOrAdmin,
-    articuloController.createArticulo
+    articuloController.createArticulo,
   );
 
   /**
@@ -53,7 +54,7 @@ module.exports = (app) => {
     "/:id",
     authJwt.verifyToken,
     authJwt.isEmpleadoOrAdmin,
-    articuloController.updateArticulo
+    articuloController.updateArticulo,
   );
 
   /**
@@ -66,7 +67,7 @@ module.exports = (app) => {
     "/:id",
     authJwt.verifyToken,
     authJwt.isEmpleadoOrAdmin,
-    articuloController.deleteArticulo
+    articuloController.deleteArticulo,
   );
 
   /**
@@ -79,7 +80,7 @@ module.exports = (app) => {
     "/:id/stock",
     authJwt.verifyToken,
     authJwt.isEmpleadoOrAdmin,
-    articuloController.updateStock
+    articuloController.updateStock,
   );
 
   app.use("/api/articulos", router);
