@@ -5,6 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
 
 export interface AuthRequest extends Request {
   idusuario?: number;
+  email?: string;
   idrol?: number;
   rolNombre?: string;
 }

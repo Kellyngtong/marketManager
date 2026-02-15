@@ -13,6 +13,8 @@ import swaggerSpec from './config/swagger.config';
 // Import routes
 import authRoutes from './routes/auth.routes';
 import articulosRoutes from './routes/articulos.routes';
+import carritoRoutes from './routes/carrito.routes';
+import pagosRoutes from './routes/pagos.routes';
 
 const app: Express = express();
 
@@ -74,13 +76,32 @@ const startServer = (): void => {
 
   app.use(cors(corsOptions));
 
-  // Webhook de Stripe ANTES de body parsers
+  // Middleware para confiar en ngrok headers
+  app.use((req, res, next) => {
+    const host = req.get('host') || '';
+    // Permitir ngrok, localhost y desarrollo
+    if (host.includes('ngrok') || host.includes('localhost') || host.includes('127.0.0.1')) {
+      return next();
+    }
+    // En desarrollo, confiar en todos los hosts
+    if (process.env.NODE_ENV === 'development') {
+      return next();
+    }
+    next();
+  });
+
+  // Webhook de Stripe ANTES de body parsers (debe recibir raw body)
   app.post(
     '/api/pagos/webhook',
     express.raw({ type: 'application/json' }),
-    (req, res) => {
-      // Stripe webhook handler será migrado a TS después
-      res.json({ message: 'Webhook received' });
+    (req, res, next) => {
+      // Convertir buffer a string si es necesario
+      if (Buffer.isBuffer(req.body)) {
+        (req as any).rawBody = req.body.toString('utf8');
+      } else {
+        (req as any).rawBody = req.body;
+      }
+      next();
     }
   );
 
@@ -96,6 +117,8 @@ const startServer = (): void => {
       // Routes
       authRoutes(app);
       articulosRoutes(app);
+      carritoRoutes(app);
+      pagosRoutes(app);
 
       // Health check
       app.get('/api/health', (req, res) => {

@@ -20,12 +20,17 @@ export const getAllArticulos = async (req: TenantRequest, res: Response): Promis
     const limitNum = parseInt(limit as string);
     const offset = (pageNum - 1) * limitNum;
 
-    // Filtro MULTITENANT
+    // Filtro MULTITENANT - Si hay tenant, filtrar por tenant. Si no, mostrar todos los artículos públicos
     const whereCondition: any = {
       condicion: 1,
-      id_tenant: req.tenant?.id_tenant || null,
-      id_store: req.tenant?.id_store || null,
     };
+
+    // Si el usuario está autenticado, filtrar por su tenant
+    if (req.tenant?.id_tenant) {
+      whereCondition.id_tenant = req.tenant.id_tenant;
+      whereCondition.id_store = req.tenant.id_store || null;
+    }
+    // Si no hay autenticación, mostrar todos los artículos (públicos)
 
     if (idcategoria) {
       whereCondition.idcategoria = idcategoria;
@@ -83,18 +88,24 @@ export const getAllArticulos = async (req: TenantRequest, res: Response): Promis
   }
 };
 
-// GET BY ID - Obtener artículo por ID (MULTITENANT)
+// GET BY ID - Obtener artículo por ID (PÚBLICO - opcional token para filtro multitenant)
 export const getArticuloById = async (req: TenantRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
+    const whereClause: any = {
+      idarticulo: id,
+      condicion: 1,
+    };
+
+    // Si hay tenant, filtrar por tenant. Si no, mostrar artículo público
+    if (req.tenant?.id_tenant) {
+      whereClause.id_tenant = req.tenant.id_tenant;
+      whereClause.id_store = req.tenant.id_store || null;
+    }
+
     const articulo = await (db.articulo as typeof Articulo).findOne({
-      where: {
-        idarticulo: id,
-        condicion: 1,
-        id_tenant: req.tenant?.id_tenant || null,
-        id_store: req.tenant?.id_store || null,
-      },
+      where: whereClause,
       include: [
         {
           model: db.categoria,

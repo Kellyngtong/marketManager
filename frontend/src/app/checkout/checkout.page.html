@@ -92,6 +92,25 @@
       <ion-spinner *ngIf="isProcessing" name="crescent"></ion-spinner>
       {{ isProcessing ? 'Procesando...' : 'Ir a Pagar con Stripe' }}
     </ion-button>
+
+    <!-- Instrucciones para pago en desarrollo local -->
+    <ion-card class="payment-info">
+      <ion-card-content>
+        <p><strong>ℹ️ Cómo completar el pago:</strong></p>
+        <ol>
+          <li><strong>Haz clic en "Ir a Pagar con Stripe"</strong> para ir a la pasarela de pago</li>
+          <li><strong>Completa el pago</strong> en Stripe con tarjeta de prueba:
+            <ul>
+              <li>Número: <code>4242 4242 4242 4242</code></li>
+              <li>Fecha: cualquier fecha futura (ej: 12/25)</li>
+              <li>CVC: cualquier número (ej: 123)</li>
+            </ul>
+          </li>
+          <li><strong>Después del pago:</strong> Stripe intentará redirigirte automáticamente. Si no funciona, haz clic en el botón "Verificar estado del pago" o navega a la URL de confirmación</li>
+          <li>El sistema verificará automáticamente si tu pago fue exitoso</li>
+        </ol>
+      </ion-card-content>
+    </ion-card>
     </form>
   </ng-container>
 

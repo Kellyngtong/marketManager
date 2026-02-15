@@ -67,13 +67,13 @@ export class CheckoutPage implements OnDestroy {
         })
       );
 
-      // Guardar public key para usarlo después
-      localStorage.setItem('stripe_public_key', response.publicKey);
+      // Guardar sessionId para verificación posterior
+      localStorage.setItem('stripe_session_id', response.sessionId);
 
       await loading.dismiss();
 
       // Redirigir a Stripe Checkout
-      await this.pagosService.redirigirAStripe(response.sessionId);
+      await this.pagosService.redirigirAStripe(response.sessionId, response.publicKey);
     } catch (error) {
       await loading.dismiss();
       this.isProcessing = false;

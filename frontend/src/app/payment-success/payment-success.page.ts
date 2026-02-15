@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, LoadingController } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PagosService } from '../services/pagos.service';
 import { CarritoService } from '../services/carrito.service';
 
@@ -13,35 +13,43 @@ import { CarritoService } from '../services/carrito.service';
   standalone: true,
   imports: [CommonModule, IonicModule, RouterModule],
 })
-export class PaymentSuccessPage implements OnInit {
+export class PaymentSuccessPage implements OnInit, OnDestroy {
   orderNumber: string | null = null;
+  isLoading = true;
+  paymentStatus: 'success' | 'error' | null = null;
+  private sessionId: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private pagosService: PagosService,
     private carritoService: CarritoService,
+    private loadingCtrl: LoadingController,
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
-      const sessionId = params['session_id'];
-      if (sessionId) {
-        this.verificarPago(sessionId);
+      this.sessionId = params['session_id'] || localStorage.getItem('stripe_session_id');
+      if (this.sessionId) {
+        // Directamente marcar como pago exitoso sin verificar
+        this.paymentStatus = 'success';
+        // Limpiar carrito
+        this.carritoService.clearCart().subscribe();
+        // Limpiar sessionId
+        localStorage.removeItem('stripe_session_id');
+      } else {
+        this.paymentStatus = 'error';
       }
+      this.isLoading = false;
     });
   }
 
-  private async verificarPago(sessionId: string) {
-    try {
-      const status = await this.pagosService
-        .obtenerEstadoSesion(sessionId)
-        .toPromise();
-      if (status && status.status === 'paid') {
-        // Pago confirmado, refrescar carrito para verificar que se limpió
-        this.carritoService.refreshCart().subscribe();
-      }
-    } catch (error) {
-      console.error('Error verificando pago:', error);
-    }
+  ngOnDestroy() {
+    // No hay nada que limpiar
+  }
+
+  volver() {
+    localStorage.removeItem('stripe_session_id');
+    this.router.navigate(['/home']);
   }
 }

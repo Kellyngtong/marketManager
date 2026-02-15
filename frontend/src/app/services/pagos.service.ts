@@ -17,8 +17,26 @@ export interface StripeSessionStatus {
 
 @Injectable({ providedIn: 'root' })
 export class PagosService {
-  private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
+  private API_HOST = this.getApiHost();
   private baseUrl = `${this.API_HOST}/api/pagos`;
+
+  private getApiHost(): string {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // Si estamos en ngrok, usar el hostname de ngrok sin puerto
+    if (hostname.includes('ngrok')) {
+      return `${protocol}//${hostname}`;
+    }
+    
+    // Si estamos en localhost, usar localhost:4800
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:4800`;
+    }
+    
+    // Por defecto, asumir que el API está en el mismo host
+    return `${protocol}//${hostname}`;
+  }
 
   constructor(
     private http: HttpClient,
@@ -104,10 +122,10 @@ export class PagosService {
   /**
    * Redirigir a Stripe Checkout
    */
-  async redirigirAStripe(sessionId: string) {
+  async redirigirAStripe(sessionId: string, publicKey: string) {
     try {
       const Stripe = await this.cargarStripeJs();
-      const stripe = Stripe(localStorage.getItem('stripe_public_key') || '');
+      const stripe = Stripe(publicKey);
       const result = await stripe.redirectToCheckout({ sessionId });
 
       if (result.error) {
