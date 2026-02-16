@@ -1,7 +1,12 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { LandingPage } from './landing/landing.page';
 
 const routes: Routes = [
+  {
+    path: '',
+    component: LandingPage,
+  },
   {
     path: 'home',
     loadChildren: () =>
@@ -62,8 +67,8 @@ const routes: Routes = [
     loadChildren: () => import('./auth/register.module').then((m) => m.RegisterPageModule),
   },
   {
-    path: '',
-    redirectTo: 'welcome',
+    path: '**',
+    redirectTo: '',
     pathMatch: 'full',
   },
 ];

@@ -1,0 +1,83 @@
+<ion-header mode="ios" class="landing-header">
+  <ion-toolbar>
+    <div class="navbar-wrapper">
+      <!-- LOGO -->
+      <div class="navbar-logo">
+        <span class="logo-text">Mercachona</span>
+      </div>
+
+      <!-- MENU DESKTOP -->
+      <nav class="navbar-menu-desktop">
+        <a href="#" class="menu-item">Conócenos</a>
+        <a href="#" class="menu-item">Supermercados</a>
+        <a href="#" class="menu-item">Trabaja con nosotros</a>
+        <a href="#" class="menu-item">Atención al cliente</a>
+      </nav>
+
+      <!-- ACTIONS -->
+      <div class="navbar-actions">
+        <!-- LANGUAGE SELECTOR -->
+        <div class="language-selector">
+          <button class="lang-btn" (click)="toggleLanguage()">
+            <ion-icon name="globe"></ion-icon>
+            <span class="lang-label">{{ currentLanguage | uppercase }}</span>
+          </button>
+        </div>
+
+        <!-- ACCEDER -->
+        <ion-button (click)="goToWelcome()" color="primary" fill="outline" size="small">
+          Acceder
+        </ion-button>
+
+        <!-- MENU MOBILE -->
+        <ion-menu-button menu="menu-principal" class="menu-mobile-btn"></ion-menu-button>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<!-- MOBILE MENU -->
+<ion-menu side="end" menuId="menu-principal">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Menú</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-list>
+      <ion-menu-toggle>
+        <ion-item button href="#" class="menu-mobile-item">
+          <ion-icon name="information-circle" slot="start"></ion-icon>
+          <ion-label>Conócenos</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      <ion-menu-toggle>
+        <ion-item button href="#" class="menu-mobile-item">
+          <ion-icon name="storefront" slot="start"></ion-icon>
+          <ion-label>Supermercados</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      <ion-menu-toggle>
+        <ion-item button href="#" class="menu-mobile-item">
+          <ion-icon name="briefcase" slot="start"></ion-icon>
+          <ion-label>Trabaja con nosotros</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      <ion-menu-toggle>
+        <ion-item button href="#" class="menu-mobile-item">
+          <ion-icon name="help-circle" slot="start"></ion-icon>
+          <ion-label>Atención al cliente</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      <ion-item>
+        <ion-label>Idioma</ion-label>
+      </ion-item>
+      <ion-menu-toggle>
+        <ion-item button (click)="goToWelcome()" class="menu-mobile-item">
+          <ion-icon name="log-in" slot="start"></ion-icon>
+          <ion-label>Acceder</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    </ion-list>
+  </ion-content>
+</ion-menu>

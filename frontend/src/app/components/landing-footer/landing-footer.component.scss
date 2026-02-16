@@ -1,0 +1,113 @@
+// Colores
+$primary: #3fa646;
+$primary-dark: #2e7d32;
+$secondary: #f2a900;
+$text-primary: #1f2933;
+$text-secondary: #6b7280;
+
+// FOOTER
+ion-footer.landing-footer {
+  color: white;
+  background: #{$text-primary};
+  padding: 1%;
+  padding-left: 5%;
+
+  .footer-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 40px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .footer-section {
+      h4 {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        color: #{$secondary};
+      }
+
+      p {
+        color: #ccc;
+        font-size: 14px;
+        margin: 0;
+      }
+    }
+
+    .footer-links {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+
+      @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .footer-column {
+        h5 {
+          font-size: 14px;
+          font-weight: 600;
+          margin: 0 0 12px 0;
+          color: #{$secondary};
+          text-transform: uppercase;
+        }
+
+        a {
+          display: block;
+          color: #ccc;
+          text-decoration: none;
+          font-size: 13px;
+          margin-bottom: 8px;
+          transition: color 0.3s;
+
+          &:hover {
+            color: #{$secondary};
+          }
+
+          ion-icon {
+            font-size: 20px;
+            margin-right: 8px;
+          }
+        }
+
+        .social-links {
+          display: flex;
+          gap: 12px;
+
+          a {
+            margin: 0;
+            padding: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.3s;
+
+            &:hover {
+              background: rgba(242, 169, 0, 0.2);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .footer-bottom {
+    text-align: center;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 1200px;
+    margin: 6px auto;
+
+    p {
+      color: #999;
+      font-size: 12px;
+      margin: 0;
+    }
+  }
+}
