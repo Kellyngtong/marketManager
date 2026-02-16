@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { colourPalette } from '../../styles';
 import { LandingHeaderComponent } from '../components/landing-header/landing-header.component';
 import { LandingFooterComponent } from '../components/landing-footer/landing-footer.component';
+import { StartShoppingButtonComponent } from '../components/start-shopping-button/start-shopping-button.component';
 
 @Component({
   selector: 'app-landing',
@@ -19,6 +20,7 @@ import { LandingFooterComponent } from '../components/landing-footer/landing-foo
     FormsModule,
     LandingHeaderComponent,
     LandingFooterComponent,
+    StartShoppingButtonComponent,
   ],
 })
 export class LandingPage implements OnInit {

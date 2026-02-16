@@ -1,0 +1,34 @@
+@use '../_colors' as colors;
+
+.btn-start-shopping {
+  background: colors.$secondary;
+  color: colors.$textPrimary;
+  border: none;
+  padding: 14px 48px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(242, 169, 0, 0.25);
+  white-space: nowrap;
+
+  span {
+    display: block;
+  }
+
+  &:hover {
+    background: darken(colors.$secondary, 8%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(242, 169, 0, 0.35);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px 36px;
+    font-size: 15px;
+  }
+}

@@ -1,14 +1,10 @@
 // Colores
-$primary: #3fa646;
-$primary-dark: #2e7d32;
-$secondary: #f2a900;
-$text-primary: #1f2933;
-$text-secondary: #6b7280;
+@use '../_colors' as colors;
 
 // FOOTER
 ion-footer.landing-footer {
   color: white;
-  background: #{$text-primary};
+  background: #{colors.$textPrimary};
   padding: 1%;
   padding-left: 5%;
 
@@ -29,13 +25,17 @@ ion-footer.landing-footer {
         font-size: 24px;
         font-weight: 700;
         margin: 0 0 8px 0;
-        color: #{$secondary};
+        color: #{colors.$secondary};
       }
 
       p {
         color: #ccc;
         font-size: 14px;
-        margin: 0;
+        margin: 0 0 20px 0;
+      }
+
+      app-start-shopping-button {
+        display: inline-block;
       }
     }
 
@@ -53,7 +53,7 @@ ion-footer.landing-footer {
           font-size: 14px;
           font-weight: 600;
           margin: 0 0 12px 0;
-          color: #{$secondary};
+          color: #{colors.$secondary};
           text-transform: uppercase;
         }
 
@@ -66,7 +66,7 @@ ion-footer.landing-footer {
           transition: color 0.3s;
 
           &:hover {
-            color: #{$secondary};
+            color: #{colors.$secondary};
           }
 
           ion-icon {
