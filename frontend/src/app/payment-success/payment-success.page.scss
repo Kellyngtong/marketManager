@@ -1,3 +1,5 @@
+@use '../components/_colors' as colors;
+
 .loading-container,
 .success-container,
 .pending-container,
@@ -18,15 +20,15 @@
 }
 
 .success-icon {
-  color: #2dd36f;
+  color: colors.$success;
 }
 
 .pending-icon {
-  color: #ffc409;
+  color: colors.$warning;
 }
 
 .error-icon {
-  color: #eb445a;
+  color: colors.$error;
 }
 
 h1 {
@@ -35,25 +37,25 @@ h1 {
 }
 
 .success-container h1 {
-  color: #2dd36f;
+  color: colors.$success;
 }
 
 .pending-container h1 {
-  color: #ffc409;
+  color: colors.$warning;
 }
 
 .error-container h1 {
-  color: #eb445a;
+  color: colors.$error;
 }
 
 p {
   text-align: center;
-  color: #666;
+  color: colors.$textSecondary;
   margin: 0.5rem 0;
 }
 
 .order-number {
-  background-color: #f4f5f8;
+  background-color: colors.$background;
   padding: 1rem;
   border-radius: 8px;
   width: 100%;
@@ -69,7 +71,7 @@ ion-card {
 
     li {
       padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid colors.$border;
 
       &:last-child {
         border-bottom: none;

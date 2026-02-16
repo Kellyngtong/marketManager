@@ -1,3 +1,5 @@
+@use '../components/_colors' as colors;
+
 .cancel-container {
   display: flex;
   flex-direction: column;
@@ -9,19 +11,19 @@
 
 .cancel-icon {
   font-size: 5rem;
-  color: #ff6b6b;
+  color: colors.$error;
   animation: slideIn 0.5s ease-out;
 }
 
 h1 {
   text-align: center;
-  color: #ff6b6b;
+  color: colors.$error;
   margin: 0;
 }
 
 p {
   text-align: center;
-  color: #666;
+  color: colors.$textSecondary;
   margin: 0.5rem 0;
 }
 
@@ -35,7 +37,7 @@ ion-card {
 
     li {
       padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid colors.$border;
 
       &:last-child {
         border-bottom: none;
@@ -43,7 +45,7 @@ ion-card {
 
       &::before {
         content: '• ';
-        color: #ff6b6b;
+        color: colors.$error;
         font-weight: bold;
         margin-right: 0.5rem;
       }
@@ -51,10 +53,10 @@ ion-card {
   }
 
   .info-text {
-    background-color: #fff3cd;
+    background-color: rgba(245, 158, 11, 0.1);
     padding: 1rem;
     border-radius: 4px;
-    border-left: 4px solid #ffc107;
+    border-left: 4px solid colors.$warning;
   }
 }
 

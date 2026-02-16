@@ -1,6 +1,10 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LoadingController, NavController, ToastController } from '@ionic/angular';
+import {
+  LoadingController,
+  NavController,
+  ToastController,
+} from '@ionic/angular';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { CarritoService } from '../services/carrito.service';
@@ -26,7 +30,7 @@ export class CheckoutPage implements OnDestroy {
     private auth: AuthService,
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
-    private navCtrl: NavController
+    private navCtrl: NavController,
   ) {
     this.checkoutForm = this.fb.group({
       direccion: ['', Validators.required],
@@ -35,16 +39,21 @@ export class CheckoutPage implements OnDestroy {
 
     this.userSub = this.auth.user$.subscribe((user) => {
       if (user) {
-        this.checkoutForm.patchValue({
-          direccion: user.direccion || '',
-          telefono: user.telefono || '',
-        }, { emitEvent: false });
+        this.checkoutForm.patchValue(
+          {
+            direccion: user.direccion || '',
+            telefono: user.telefono || '',
+          },
+          { emitEvent: false },
+        );
       }
     });
   }
 
   ionViewWillEnter() {
-    this.carritoService.refreshCart().subscribe({ error: (err) => this.presentError(err) });
+    this.carritoService
+      .refreshCart()
+      .subscribe({ error: (err) => this.presentError(err) });
   }
 
   async irAPago() {
@@ -54,7 +63,9 @@ export class CheckoutPage implements OnDestroy {
     }
 
     this.isProcessing = true;
-    const loading = await this.loadingCtrl.create({ message: 'Preparando pago...' });
+    const loading = await this.loadingCtrl.create({
+      message: 'Preparando pago...',
+    });
     await loading.present();
 
     const formValue = this.checkoutForm.value;
@@ -64,7 +75,7 @@ export class CheckoutPage implements OnDestroy {
         this.pagosService.crearSesionPago({
           direccion: formValue.direccion,
           telefono: formValue.telefono,
-        })
+        }),
       );
 
       // Guardar sessionId para verificación posterior
@@ -73,7 +84,10 @@ export class CheckoutPage implements OnDestroy {
       await loading.dismiss();
 
       // Redirigir a Stripe Checkout
-      await this.pagosService.redirigirAStripe(response.sessionId, response.publicKey);
+      await this.pagosService.redirigirAStripe(
+        response.sessionId,
+        response.publicKey,
+      );
     } catch (error) {
       await loading.dismiss();
       this.isProcessing = false;
@@ -91,7 +105,11 @@ export class CheckoutPage implements OnDestroy {
       error?.error?.error ||
       error?.message ||
       'No se pudo completar la operación';
-    const t = await this.toastCtrl.create({ message, duration: 3000, color: 'danger' });
+    const t = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color: 'danger',
+    });
     await t.present();
   }
 }

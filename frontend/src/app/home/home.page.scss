@@ -1,3 +1,5 @@
+@use '../components/_colors' as colors;
+
 // Estilos modernos para la cuadrícula de productos
 .home-toolbar {
   display: flex;
@@ -34,7 +36,7 @@
   width: 64px;
   height: 64px;
   --border-radius: 18px;
-  background: #e5e7eb;
+  background: colors.$border;
   border-radius: 18px;
   overflow: hidden;
 }
@@ -49,20 +51,20 @@
   width: 100%;
   height: 100%;
   font-size: 3.2rem;
-  color: #94a3b8;
+  color: colors.$textSecondary;
 }
 
 .avatar-button ion-icon {
   font-size: 64px;
-  color: #94a3b8;
+  color: colors.$textSecondary;
 }
 
 .camera-icon {
   position: absolute;
   bottom: 0;
   right: 0;
-  background: #2563eb;
-  color: #fff;
+  background: colors.$primary;
+  color: colors.$surface;
   border-radius: 999px;
   font-size: 1rem;
   padding: 0.2rem;
@@ -101,7 +103,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: colors.$textSecondary;
   margin: 0;
 }
 
@@ -118,7 +120,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: colors.$textSecondary;
 }
 
 .filter-bar h3 {

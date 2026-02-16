@@ -69,7 +69,10 @@ export class LandingPage implements OnInit {
     // Cambiar idioma entre ES/EN/CA
     const languages = ['es', 'en', 'ca'];
     const currentIndex = languages.indexOf('es');
-    console.log('Idioma cambiado a:', languages[(currentIndex + 1) % languages.length]);
+    console.log(
+      'Idioma cambiado a:',
+      languages[(currentIndex + 1) % languages.length],
+    );
   }
 
   notifyZone() {

@@ -1,3 +1,5 @@
+@use '../components/_colors' as colors;
+
 .profile-header {
   display: flex;
   align-items: center;
@@ -11,7 +13,7 @@
 
 .profile-header .hint {
   margin-top: 0.25rem;
-  color: var(--ion-color-medium);
+  color: colors.$textSecondary;
 }
 
 form {

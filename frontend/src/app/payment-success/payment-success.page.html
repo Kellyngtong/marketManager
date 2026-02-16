@@ -12,7 +12,10 @@
   </div>
 
   <!-- Pago exitoso -->
-  <div *ngIf="!isLoading && paymentStatus === 'success'" class="success-container">
+  <div
+    *ngIf="!isLoading && paymentStatus === 'success'"
+    class="success-container"
+  >
     <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
     <h1>¡Compra Exitosa!</h1>
     <p>Tu compra ha sido procesada correctamente.</p>

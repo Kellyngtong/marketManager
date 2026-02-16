@@ -16,7 +16,7 @@ const routes: Routes = [
     path: 'product/:id',
     loadChildren: () =>
       import('./product-detail/product-detail.module').then(
-        (m) => m.ProductDetailPageModule
+        (m) => m.ProductDetailPageModule,
       ),
   },
   {
@@ -32,12 +32,16 @@ const routes: Routes = [
   {
     path: 'payment-success',
     loadChildren: () =>
-      import('./payment-success/payment-success.module').then((m) => m.PaymentSuccessPageModule),
+      import('./payment-success/payment-success.module').then(
+        (m) => m.PaymentSuccessPageModule,
+      ),
   },
   {
     path: 'payment-cancel',
     loadChildren: () =>
-      import('./payment-cancel/payment-cancel.module').then((m) => m.PaymentCancelPageModule),
+      import('./payment-cancel/payment-cancel.module').then(
+        (m) => m.PaymentCancelPageModule,
+      ),
   },
   {
     path: 'historial',
@@ -56,15 +60,18 @@ const routes: Routes = [
   },
   {
     path: 'welcome',
-    loadChildren: () => import('./auth/welcome.module').then((m) => m.WelcomePageModule),
+    loadChildren: () =>
+      import('./auth/welcome.module').then((m) => m.WelcomePageModule),
   },
   {
     path: 'login',
-    loadChildren: () => import('./auth/login.module').then((m) => m.LoginPageModule),
+    loadChildren: () =>
+      import('./auth/login.module').then((m) => m.LoginPageModule),
   },
   {
     path: 'register',
-    loadChildren: () => import('./auth/register.module').then((m) => m.RegisterPageModule),
+    loadChildren: () =>
+      import('./auth/register.module').then((m) => m.RegisterPageModule),
   },
   {
     path: '**',

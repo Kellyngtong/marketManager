@@ -29,7 +29,8 @@ export class PaymentSuccessPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
-      this.sessionId = params['session_id'] || localStorage.getItem('stripe_session_id');
+      this.sessionId =
+        params['session_id'] || localStorage.getItem('stripe_session_id');
       if (this.sessionId) {
         // Directamente marcar como pago exitoso sin verificar
         this.paymentStatus = 'success';

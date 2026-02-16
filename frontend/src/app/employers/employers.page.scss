@@ -1,3 +1,5 @@
+@use '../components/_colors' as colors;
+
 .filter-bar {
   display: flex;
   align-items: center;
@@ -11,7 +13,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: colors.$textSecondary;
 }
 
 .filter-bar h3 {
@@ -41,7 +43,7 @@
 
   .meta-label {
     font-size: 0.75em;
-    color: #6b7280;
+    color: colors.$textSecondary;
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
@@ -49,12 +51,12 @@
 
 .description {
   font-size: 0.9em;
-  color: #3c3c3c;
+  color: colors.$textPrimary;
   margin-bottom: 0.75em;
 }
 
 .offer-label {
-  color: var(--ion-color-danger);
+  color: colors.$error;
   font-size: 0.75rem;
   margin-left: 0.35rem;
   font-weight: 700;
@@ -67,6 +69,6 @@
 
 .empty-state {
   text-align: center;
-  color: #6b7280;
+  color: colors.$textSecondary;
   padding: 2em 1em;
 }
