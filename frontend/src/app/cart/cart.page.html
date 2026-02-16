@@ -3,96 +3,180 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Carrito</ion-title>
+    <ion-title>Mi Carrito</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="cart-content">
   <ion-refresher slot="fixed" (ionRefresh)="refreshCart($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <ng-container *ngIf="user$ | async as user; else guestState">
-    <ng-container *ngIf="cartItems$ | async as items">
-      <ng-container *ngIf="items.length; else emptyState">
-        <ion-list>
-          <ion-item *ngFor="let item of items; trackBy: trackByItem">
-            <ion-thumbnail slot="start">
-              <img [src]="item.articulo?.imagen || 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200&auto=format'" alt="{{ item.articulo?.nombre }}" />
-            </ion-thumbnail>
-            <ion-label>
-              <h2>{{ item.articulo?.nombre }}</h2>
-              <p>{{ item.articulo?.descripcion }}</p>
-              <div class="price-row">
-                <strong>
-                  {{ item.articulo?.precio_venta | currency:'EUR' }}
-                  <span style="color: var(--ion-color-danger); font-weight: 700" *ngIf="item.articulo?.oferta">OFERTA</span>
-                </strong>
-                <ion-chip color="medium">
-                  <ion-label>Stock: {{ item.articulo?.stock }}</ion-label>
-                </ion-chip>
-              </div>
-              <div class="qty-row">
-                <ion-button size="small" fill="outline" (click)="decrement(item)">
-                  <ion-icon name="remove"></ion-icon>
-                </ion-button>
-                <span class="qty">{{ item.cantidad }}</span>
-                <ion-button size="small" fill="outline" (click)="increment(item)">
-                  <ion-icon name="add"></ion-icon>
-                </ion-button>
-                <ion-button size="small" fill="clear" color="danger" (click)="removeItem(item)">
-                  <ion-icon slot="icon-only" name="trash"></ion-icon>
-                </ion-button>
-              </div>
-            </ion-label>
-          </ion-item>
-        </ion-list>
-
-        <ion-card class="totals-card" *ngIf="totals$ | async as totals">
-          <ion-card-header>
-            <ion-card-title>Resumen</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="total-row">
-              <span>Subtotal</span>
-              <strong>{{ totals.subtotal | currency:'EUR' }}</strong>
-            </div>
-            <div class="total-row">
-              <span>Impuesto ({{ (totals.tasaImpuesto * 100) | number:'1.0-0' }}%)</span>
-              <strong>{{ totals.impuesto | currency:'EUR' }}</strong>
-            </div>
-            <div class="total-row total-row__grand">
-              <span>Total</span>
-              <strong>{{ totals.total | currency:'EUR' }}</strong>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <div class="actions">
-          <ion-button expand="block" fill="clear" color="medium" (click)="clearCart()">
-            Vaciar carrito
-          </ion-button>
-          <ion-button expand="block" color="success" routerLink="/checkout">
-            Proceder al pago
-          </ion-button>
-        </div>
-      </ng-container>
+  <!-- Empty Cart State -->
+  <ng-container *ngIf="(cartItems$ | async) as items">
+    <ng-container
+      *ngIf="!items.length && (user$ | async) as user; else cartContainer"
+    >
+      <div class="empty-state">
+        <ion-icon name="cart"></ion-icon>
+        <h2>Tu carrito está vacío</h2>
+        <p>Añade productos para empezar a comprar</p>
+        <ion-button
+          routerLink="/home"
+          color="primary"
+          fill="solid"
+          size="large"
+        >
+          Ver Productos
+        </ion-button>
+      </div>
     </ng-container>
   </ng-container>
 
-  <ng-template #guestState>
+  <!-- No User State -->
+  <ng-container *ngIf="!(user$ | async) as user">
     <div class="empty-state">
       <ion-icon name="lock-closed"></ion-icon>
-      <p>Inicia sesión para ver tu carrito.</p>
-      <ion-button routerLink="/login" color="primary">Ir a Login</ion-button>
+      <h2>Inicia sesión</h2>
+      <p>Necesitas estar conectado para ver tu carrito</p>
+      <ion-button routerLink="/login" color="primary" fill="solid" size="large">
+        Ir a Login
+      </ion-button>
     </div>
-  </ng-template>
+  </ng-container>
 
-  <ng-template #emptyState>
-    <div class="empty-state">
-      <ion-icon name="cart"></ion-icon>
-      <p>Tu carrito está vacío.</p>
-      <ion-button routerLink="/home" color="primary">Explorar productos</ion-button>
-    </div>
+  <!-- Cart Container -->
+  <ng-template #cartContainer>
+    <ng-container *ngIf="cartItems$ | async as items">
+      <ng-container *ngIf="items.length > 0">
+        <div class="cart-wrapper">
+          <!-- Cart Items -->
+          <div class="cart-items">
+            <div
+              class="cart-item"
+              *ngFor="let item of items; trackBy: trackByItem"
+            >
+              <div class="item-image">
+                <img
+                  [src]="item.articulo?.imagen || 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200&auto=format'"
+                  alt="{{ item.articulo?.nombre }}"
+                />
+              </div>
+
+              <div class="item-details">
+                <h3 class="item-name">{{ item.articulo?.nombre }}</h3>
+                <p class="item-description">{{ item.articulo?.descripcion }}</p>
+
+                <div class="item-pricing">
+                  <div>
+                    <span class="item-price"
+                      >€{{ item.articulo?.precio_venta | number:'1.2-2' }}</span
+                    >
+                    <span
+                      class="item-original-price"
+                      *ngIf="item.articulo?.oferta"
+                    >
+                      €{{ ((item.articulo?.precio_venta || 0) * 1.1) |
+                      number:'1.2-2' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="item-actions">
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  color="danger"
+                  (click)="removeItem(item)"
+                  class="delete-btn"
+                >
+                  <ion-icon slot="icon-only" name="trash"></ion-icon>
+                </ion-button>
+
+                <div class="quantity-controls">
+                  <ion-button
+                    fill="outline"
+                    size="small"
+                    (click)="decrement(item)"
+                    class="qty-btn"
+                  >
+                    <ion-icon slot="icon-only" name="remove"></ion-icon>
+                  </ion-button>
+                  <span class="qty-display">{{ item.cantidad }}</span>
+                  <ion-button
+                    fill="outline"
+                    size="small"
+                    (click)="increment(item)"
+                    class="qty-btn"
+                  >
+                    <ion-icon slot="icon-only" name="add"></ion-icon>
+                  </ion-button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Summary (Sticky) -->
+          <div class="order-summary" *ngIf="totals$ | async as totals">
+            <h2 class="summary-title">Resumen del Pedido</h2>
+
+            <div class="summary-content">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span class="summary-value"
+                  >€{{ totals.subtotal | number:'1.2-2' }}</span
+                >
+              </div>
+
+              <div class="summary-row">
+                <span>Envío</span>
+                <span
+                  class="summary-value"
+                  [class.free-shipping]="totals.subtotal >= 50"
+                >
+                  {{ totals.subtotal >= 50 ? 'Gratis' : '€4.99' }}
+                </span>
+              </div>
+
+              <div class="summary-divider"></div>
+
+              <div class="summary-row total">
+                <span>Total</span>
+                <span class="total-amount">
+                  €{{ (totals.subtotal >= 50 ? totals.subtotal : totals.subtotal
+                  + 4.99) | number:'1.2-2' }}
+                </span>
+              </div>
+
+              <p class="shipping-notice" *ngIf="totals.subtotal < 50">
+                Añade €{{ (50 - totals.subtotal) | number:'1.2-2' }} más para
+                obtener envío gratis
+              </p>
+            </div>
+
+            <div class="summary-actions">
+              <ion-button
+                expand="block"
+                color="primary"
+                fill="solid"
+                (click)="handleCheckout()"
+                class="checkout-btn"
+              >
+                Realizar Pedido
+              </ion-button>
+              <ion-button
+                expand="block"
+                fill="outline"
+                routerLink="/home"
+                class="continue-btn"
+              >
+                Seguir Comprando
+              </ion-button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
   </ng-template>
 </ion-content>

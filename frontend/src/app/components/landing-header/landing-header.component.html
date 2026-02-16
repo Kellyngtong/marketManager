@@ -3,36 +3,60 @@
     <div class="navbar-wrapper">
       <!-- LOGO -->
       <div class="navbar-logo">
-        <span class="logo-text">Mercachona</span>
+        <span class="logo-text" routerLink="/home" class="logo-link">Mercachona</span>
       </div>
 
-      <!-- MENU DESKTOP -->
-      <nav class="navbar-menu-desktop">
-        <a href="#" class="menu-item">Conócenos</a>
-        <a href="#" class="menu-item">Supermercados</a>
-        <a href="#" class="menu-item">Trabaja con nosotros</a>
-        <a href="#" class="menu-item">Atención al cliente</a>
-      </nav>
+      <!-- MENU DESKTOP (only show when no user) -->
+      <ng-container *ngIf="!(user$ | async)">
+        <nav class="navbar-menu-desktop">
+          <a href="#" class="menu-item">Conócenos</a>
+          <a href="#" class="menu-item">Supermercados</a>
+          <a href="#" class="menu-item">Trabaja con nosotros</a>
+          <a href="#" class="menu-item">Atención al cliente</a>
+        </nav>
+      </ng-container>
 
       <!-- ACTIONS -->
       <div class="navbar-actions">
-        <!-- LANGUAGE SELECTOR -->
-        <div class="language-selector">
-          <button class="lang-btn" (click)="toggleLanguage()">
-            <ion-icon name="globe"></ion-icon>
-            <span class="lang-label">{{ currentLanguage | uppercase }}</span>
-          </button>
-        </div>
+        <!-- CART (only show when user is logged) -->
+        <ng-container *ngIf="user$ | async">
+          <ion-button fill="clear" routerLink="/cart" class="cart-btn">
+            <ion-icon slot="icon-only" name="cart-outline"></ion-icon>
+          </ion-button>
+        </ng-container>
 
-        <!-- ACCEDER -->
-        <ion-button
-          (click)="goToWelcome()"
-          color="primary"
-          fill="outline"
-          size="small"
-        >
-          Acceder
-        </ion-button>
+        <!-- LANGUAGE SELECTOR (only show when no user) -->
+        <ng-container *ngIf="!(user$ | async)">
+          <div class="language-selector">
+            <button class="lang-btn" (click)="toggleLanguage()">
+              <ion-icon name="globe"></ion-icon>
+              <span class="lang-label">{{ currentLanguage | uppercase }}</span>
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- LOGIN / LOGOUT BUTTONS -->
+        <ng-container *ngIf="!(user$ | async); else logoutButton">
+          <ion-button
+            (click)="goToWelcome()"
+            color="primary"
+            fill="solid"
+            size="small"
+            class="auth-btn"
+          >
+            Acceder
+          </ion-button>
+        </ng-container>
+
+        <ng-template #logoutButton>
+          <ion-button
+            fill="clear"
+            (click)="logout()"
+            class="logout-btn"
+          >
+            <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+          </ion-button>
+        </ng-template>
 
         <!-- MENU MOBILE -->
         <ion-menu-button
@@ -53,37 +77,51 @@
   </ion-header>
   <ion-content>
     <ion-list>
-      <ion-menu-toggle>
+      <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button href="#" class="menu-mobile-item">
           <ion-icon name="information-circle" slot="start"></ion-icon>
           <ion-label>Conócenos</ion-label>
         </ion-item>
       </ion-menu-toggle>
-      <ion-menu-toggle>
+      <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button href="#" class="menu-mobile-item">
           <ion-icon name="storefront" slot="start"></ion-icon>
           <ion-label>Supermercados</ion-label>
         </ion-item>
       </ion-menu-toggle>
-      <ion-menu-toggle>
+      <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button href="#" class="menu-mobile-item">
           <ion-icon name="briefcase" slot="start"></ion-icon>
           <ion-label>Trabaja con nosotros</ion-label>
         </ion-item>
       </ion-menu-toggle>
-      <ion-menu-toggle>
+      <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button href="#" class="menu-mobile-item">
           <ion-icon name="help-circle" slot="start"></ion-icon>
           <ion-label>Atención al cliente</ion-label>
         </ion-item>
       </ion-menu-toggle>
-      <ion-item>
-        <ion-label>Idioma</ion-label>
-      </ion-item>
-      <ion-menu-toggle>
+      <ion-menu-toggle *ngIf="!(user$ | async)">
+        <ion-item>
+          <ion-label>Idioma</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button (click)="goToWelcome()" class="menu-mobile-item">
           <ion-icon name="log-in" slot="start"></ion-icon>
           <ion-label>Acceder</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      <ion-menu-toggle *ngIf="user$ | async">
+        <ion-item button routerLink="/cart" class="menu-mobile-item">
+          <ion-icon name="cart" slot="start"></ion-icon>
+          <ion-label>Carrito</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      <ion-menu-toggle *ngIf="user$ | async">
+        <ion-item button (click)="logout()" class="menu-mobile-item">
+          <ion-icon name="log-out" slot="start"></ion-icon>
+          <ion-label>Cerrar sesión</ion-label>
         </ion-item>
       </ion-menu-toggle>
     </ion-list>

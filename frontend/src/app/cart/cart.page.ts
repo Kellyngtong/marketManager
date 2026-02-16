@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
@@ -18,7 +19,8 @@ export class CartPage {
   constructor(
     private carritoService: CarritoService,
     private toastCtrl: ToastController,
-    private auth: AuthService
+    private auth: AuthService,
+    private router: Router
   ) {}
 
   ionViewWillEnter() {
@@ -59,6 +61,12 @@ export class CartPage {
   async removeItem(item: CartItem) {
     try {
       await firstValueFrom(this.carritoService.removeItem(item.idcarrito_item));
+      const t = await this.toastCtrl.create({ 
+        message: 'Producto eliminado del carrito', 
+        duration: 1500, 
+        color: 'success' 
+      });
+      await t.present();
     } catch (error) {
       await this.presentError(error);
     }
@@ -76,6 +84,17 @@ export class CartPage {
     } catch (error) {
       await this.presentError(error);
     }
+  }
+
+  async handleCheckout() {
+    const t = await this.toastCtrl.create({
+      message: '¡Pedido realizado con éxito!',
+      duration: 2000,
+      color: 'success'
+    });
+    await t.present();
+    await firstValueFrom(this.carritoService.clearCart());
+    this.router.navigateByUrl('/home');
   }
 
   trackByItem(_: number, item: CartItem) {

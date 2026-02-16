@@ -1,19 +1,21 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-landing-header',
   templateUrl: './landing-header.component.html',
   styleUrls: ['./landing-header.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, RouterModule],
 })
 export class LandingHeaderComponent {
   currentLanguage: string = 'es';
+  user$ = this.auth.user$;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private auth: AuthService) {}
 
   toggleLanguage() {
     const languages = ['es', 'en', 'ca'];
@@ -23,6 +25,11 @@ export class LandingHeaderComponent {
   }
 
   goToWelcome() {
+    this.router.navigate(['/welcome']);
+  }
+
+  logout() {
+    this.auth.logout();
     this.router.navigate(['/welcome']);
   }
 }
