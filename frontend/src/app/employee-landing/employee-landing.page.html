@@ -1,0 +1,17 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Empleado</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <section class="employee-landing">
+    <h2>Panel de empleado</h2>
+    <p>Selecciona el módulo al que deseas acceder.</p>
+
+    <ion-button expand="block" (click)="goToInventario()">Empleado de inventario</ion-button>
+    <ion-button expand="block" (click)="goToPedidos()">Administrador de pedidos</ion-button>
+    <ion-button expand="block" (click)="goToMarketing()">Administrador de Marketing</ion-button>
+    <ion-button expand="block" (click)="goToContable()">Contable</ion-button>
+  </section>
+</ion-content>

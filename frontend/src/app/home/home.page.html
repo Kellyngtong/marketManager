@@ -1,6 +1,6 @@
 <input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelected($event)" />
 
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar class="home-toolbar">
     <div class="identity-block">
       <button
@@ -10,7 +10,12 @@
         [disabled]="isUploadingAvatar"
       >
         <ion-avatar>
-          <img *ngIf="clientAvatar; else defaultAvatar" [src]="clientAvatar" alt="Avatar del cliente" />
+          <img
+            *ngIf="clientAvatar; else defaultAvatar"
+            [src]="clientAvatar"
+            alt="Avatar del cliente"
+            (error)="onAvatarImageError()"
+          />
           <ng-template #defaultAvatar>
             <ion-icon name="person-circle-outline"></ion-icon>
           </ng-template>
@@ -33,8 +38,13 @@
     </div>
 
     <ion-buttons slot="end">
-      <ion-button routerLink="/cart" fill="clear">
-        <ion-icon slot="icon-only" name="cart-outline"></ion-icon>
+      <ion-button class="cart-button" routerLink="/cart" fill="clear" aria-label="Carrito">
+        <span class="cart-icon-wrapper">
+          <ion-icon class="cart-icon" name="cart-outline"></ion-icon>
+          <ion-badge class="cart-badge" *ngIf="cartItemsCount > 0">
+            {{ cartBadgeLabel }}
+          </ion-badge>
+        </span>
       </ion-button>
       <ion-button routerLink="/historial" fill="clear">
         <ion-icon slot="icon-only" name="time-outline"></ion-icon>
@@ -84,6 +94,7 @@
     <app-product-card
       *ngFor="let product of products"
       [product]="product"
+      [cartCount]="getProductCartCount(product)"
       (addToCart)="addToCart($event)"
       (goToDetail)="goToDetail($event)"
     ></app-product-card>

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, LoadingController, ModalController, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { AuthService } from '../auth/auth.service';
 
@@ -44,9 +45,15 @@ export class EmployersPage {
     private modalCtrl: ModalController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     this.loadProducts();
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
   async loadProducts() {
@@ -54,14 +61,22 @@ export class EmployersPage {
     try {
       const params = new URLSearchParams({ limit: '100' });
       if (this.selectedTipo) {
-        params.set('tipo', this.selectedTipo);
+        const categoria = this.tipoCategoriaMap[this.selectedTipo];
+        if (categoria) {
+          params.set('idcategoria', String(categoria));
+        } else {
+          params.set('tipo', this.selectedTipo);
+        }
       }
       const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
       if (!response.ok) {
         throw new Error('No se pudo obtener el inventario');
       }
       const data = await response.json();
-      this.products = data?.articulos || [];
+      const articles = data?.articulos || [];
+      this.products = this.selectedTipo
+        ? articles.filter((product: any) => this.matchesSelectedTipo(product, this.selectedTipo as string))
+        : articles;
     } catch (error) {
       console.error('Error loading inventory', error);
       this.presentToast('No se pudo cargar el inventario', 'danger');
@@ -255,6 +270,20 @@ export class EmployersPage {
 
   private resolveCategoria(tipo: string) {
     return this.tipoCategoriaMap[tipo] || 1;
+  }
+
+  private matchesSelectedTipo(product: any, tipo: string) {
+    const normalizedTipo = String(product?.tipo || '').trim().toLowerCase();
+    if (normalizedTipo === tipo) {
+      return true;
+    }
+
+    const expectedCategory = this.tipoCategoriaMap[tipo];
+    if (!expectedCategory) {
+      return false;
+    }
+
+    return Number(product?.idcategoria) === expectedCategory;
   }
 
   private async uploadImage(file: File) {

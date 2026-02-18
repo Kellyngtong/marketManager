@@ -99,12 +99,40 @@ export class AuthService {
   }
 
   updateProfile(payload: UpdateProfilePayload) {
-    const user = this.currentUserValue;
-    if (!user) {
-      return throwError(() => new Error('No hay usuario autenticado'));
+    const cfg = this.withAuth();
+    if (!cfg) {
+      return throwError(() => new Error('No hay sesión activa'));
     }
 
-    return this.updateUsuario(user.idusuario || user.id, payload);
+    return this.http.put(`${this.base}/profile`, payload, cfg).pipe(
+      tap((res: any) => {
+        if (res?.usuario) {
+          const merged = {
+            ...this.currentUserValue,
+            ...this.normalizeUser(res.usuario),
+            ...payload,
+          };
+          this.persistUser(merged);
+          return;
+        }
+
+        if (this.currentUserValue) {
+          this.persistUser({
+            ...this.currentUserValue,
+            ...payload,
+          });
+        }
+      })
+    );
+  }
+
+  updateLocalUser(patch: any) {
+    const current = this.currentUserValue;
+    if (!current) return;
+    this.persistUser({
+      ...current,
+      ...patch,
+    });
   }
 
   logout() {

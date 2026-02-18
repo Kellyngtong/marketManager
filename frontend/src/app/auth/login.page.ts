@@ -34,7 +34,7 @@ export class LoginPage {
     },
     {
       email: 'empleado@test.com',
-      password: 'emp123',
+      password: 'empleado123',
       name: '👨‍💻 Empleado',
       role: 'Staff',
     },
@@ -69,7 +69,14 @@ export class LoginPage {
     try {
       const res: any = await firstValueFrom(this.auth.login({ email: this.email, password: this.password }));
       if (res && res.accessToken) {
-        this.router.navigateByUrl('/home', { replaceUrl: true });
+        const user = res?.usuario;
+        const rolId = user?.idrol ?? user?.rol?.idrol;
+        const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+        const isAdmin = rolId === 4 || rolNombre.includes('admin');
+        const isEmpleado = rolId === 3 || rolNombre.includes('empleado') || rolNombre.includes('staff');
+
+        const targetRoute = isAdmin ? '/admin' : isEmpleado ? '/empleado' : '/home';
+        this.router.navigateByUrl(targetRoute, { replaceUrl: true });
       }
     } catch (err: any) {
       let msg = 'Login failed';

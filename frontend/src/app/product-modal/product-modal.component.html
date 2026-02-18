@@ -8,7 +8,7 @@
 </ion-header>
 
 <ion-content>
-  <form (ngSubmit)="submit()" #formRef="ngForm" class="product-form">
+  <form (ngSubmit)="submit()" class="product-form">
     <ion-list>
       <ion-item>
         <ion-label position="floating">Nombre</ion-label>
@@ -90,7 +90,7 @@
       <ion-button color="medium" type="button" (click)="cancel()"
         >Cancelar</ion-button
       >
-      <ion-button type="submit" [disabled]="!formRef.form.valid"
+      <ion-button type="submit" [disabled]="!canSubmit()"
         >{{ mode === 'edit' ? 'Guardar cambios' : 'Crear' }}</ion-button
       >
     </div>

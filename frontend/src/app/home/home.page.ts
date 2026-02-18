@@ -24,6 +24,8 @@ export class HomePage implements OnDestroy {
   products: any[] = [];
   clientName = 'Cliente';
   clientAvatar: string | null = null;
+  cartItemsCount = 0;
+  private cartCountByArticulo: Record<number, number> = {};
   selectedTipo: string | null = null;
   isUploadingAvatar = false;
   readonly tipos = [
@@ -37,6 +39,16 @@ export class HomePage implements OnDestroy {
     { label: 'Bebidas alcohólicas', value: 'bebidas alcoholicas' },
     { label: 'Trigo', value: 'trigo' },
   ];
+  private readonly tipoCategoriaMap: Record<string, number> = {
+    fruta: 1,
+    verdura: 2,
+    bebidas: 3,
+    embutidos: 5,
+    carne: 6,
+    pescado: 7,
+    'bebidas alcoholicas': 8,
+    trigo: 9,
+  };
   private subscriptions = new Subscription();
 
   constructor(
@@ -51,6 +63,25 @@ export class HomePage implements OnDestroy {
         this.clientAvatar = user?.avatar || null;
       })
     );
+
+    this.subscriptions.add(
+      this.carritoService.cartItems$.subscribe((items) => {
+        const byArticulo: Record<number, number> = {};
+        (items || []).forEach((item) => {
+          const id = Number(item?.idarticulo);
+          if (!Number.isNaN(id) && id > 0) {
+            byArticulo[id] = (byArticulo[id] || 0) + (Number(item?.cantidad) || 0);
+          }
+        });
+
+        this.cartCountByArticulo = byArticulo;
+        this.cartItemsCount = (items || []).reduce(
+          (acc, item) => acc + (Number(item?.cantidad) || 0),
+          0
+        );
+      })
+    );
+
     this.loadProducts();
   }
 
@@ -62,7 +93,12 @@ export class HomePage implements OnDestroy {
     try {
       const params = new URLSearchParams({ limit: '50' });
       if (this.selectedTipo) {
-        params.set('tipo', this.selectedTipo);
+        const categoria = this.tipoCategoriaMap[this.selectedTipo];
+        if (categoria) {
+          params.set('idcategoria', String(categoria));
+        } else {
+          params.set('tipo', this.selectedTipo);
+        }
       }
       const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
       if (!response.ok) {
@@ -121,10 +157,10 @@ export class HomePage implements OnDestroy {
       return;
     }
 
-    const MAX = 30 * 1024 * 1024;
+    const MAX = 2 * 1024 * 1024;
     if (file.size > MAX) {
       const warn = await this.toastCtrl.create({
-        message: 'La imagen es demasiado grande (máximo 30MB).',
+        message: 'La imagen es demasiado grande (máximo 2MB).',
         duration: 3000,
         color: 'warning',
       });
@@ -135,14 +171,26 @@ export class HomePage implements OnDestroy {
 
     this.isUploadingAvatar = true;
     try {
-      const uploadRes: any = await firstValueFrom(this.authService.uploadAvatar(file));
-      const uploadedUrl = uploadRes?.imageUrl;
-      if (!uploadedUrl) {
+      let avatarUrl: string | null = null;
+
+      try {
+        const uploadRes: any = await firstValueFrom(this.authService.uploadAvatar(file));
+        avatarUrl = uploadRes?.imageUrl || uploadRes?.url || null;
+      } catch (uploadError: any) {
+        avatarUrl = await this.fileToDataUrl(file);
+      }
+
+      if (!avatarUrl) {
         throw new Error('No se pudo subir la foto');
       }
 
-      await firstValueFrom(this.authService.updateAvatarUrl(uploadedUrl));
-      this.clientAvatar = uploadedUrl;
+      try {
+        await firstValueFrom(this.authService.updateProfile({ avatar: avatarUrl }));
+      } catch (profileError) {
+        this.authService.updateLocalUser({ avatar: avatarUrl });
+      }
+
+      this.clientAvatar = avatarUrl;
 
       const toast = await this.toastCtrl.create({
         message: 'Foto de perfil actualizada',
@@ -168,6 +216,11 @@ export class HomePage implements OnDestroy {
     }
   }
 
+  onAvatarImageError() {
+    this.clientAvatar = null;
+    this.authService.updateLocalUser({ avatar: null });
+  }
+
   logout() {
     this.authService.logout();
     this.router.navigateByUrl('/login', { replaceUrl: true });
@@ -180,5 +233,33 @@ export class HomePage implements OnDestroy {
       err?.message ||
       null
     );
+  }
+
+  get cartBadgeLabel() {
+    return this.cartItemsCount > 99 ? '99+' : String(this.cartItemsCount);
+  }
+
+  getProductCartCount(product: any) {
+    const id = Number(product?.idarticulo || product?.id);
+    if (Number.isNaN(id) || id <= 0) {
+      return 0;
+    }
+    return this.cartCountByArticulo[id] || 0;
+  }
+
+  private fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result;
+        if (typeof result === 'string') {
+          resolve(result);
+          return;
+        }
+        reject(new Error('No se pudo leer la imagen'));
+      };
+      reader.onerror = () => reject(new Error('No se pudo leer la imagen'));
+      reader.readAsDataURL(file);
+    });
   }
 }

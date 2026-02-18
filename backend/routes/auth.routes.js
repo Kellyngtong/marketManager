@@ -41,6 +41,17 @@ module.exports = (app) => {
     auth.updateProfile
   );
 
+  /**
+   * GET /api/auth/users
+   * Listar usuarios del sistema (solo admin)
+   */
+  router.get(
+    "/users",
+    authJwt.verifyToken,
+    authJwt.isAdmin,
+    auth.listUsers
+  );
+
   app.use("/api/auth", router);
 };
 

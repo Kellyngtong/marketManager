@@ -1,6 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Inventario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -74,7 +79,7 @@
         </div>
         <p class="description">{{ product.descripcion }}</p>
         <div class="inventory-actions">
-          <ion-button fill="outline" size="small" (click)="editProduct(product)">
+          <ion-button class="edit-button" fill="solid" size="small" (click)="editProduct(product)">
             <ion-icon slot="start" name="create"></ion-icon>
             Editar
           </ion-button>
@@ -91,7 +96,7 @@
     <p>No hay artículos para este filtro.</p>
   </div>
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab class="fixed-add-fab" vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="openCreateModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>

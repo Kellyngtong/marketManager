@@ -72,7 +72,7 @@ export class CarritoService {
 
   constructor(private http: HttpClient, private auth: AuthService) {
     this.auth.user$.subscribe((user) => {
-      if (user) {
+      if (user && !this.isAdminUser(user)) {
         this.refreshCart().subscribe({ next: () => {}, error: () => {} });
       } else {
         this.cartItemsSubject.next([]);
@@ -153,5 +153,12 @@ export class CarritoService {
     const token = this.auth.getToken();
     if (!token) return null;
     return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
+
+  private isAdminUser(user: any) {
+    const topLevelRol = user?.idrol;
+    const nestedRol = user?.rol?.idrol;
+    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+    return topLevelRol === 4 || nestedRol === 4 || rolNombre.includes('admin');
   }
 }

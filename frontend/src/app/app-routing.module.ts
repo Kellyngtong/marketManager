@@ -54,6 +54,31 @@ const routes: Routes = [
       import('./employers/employers.module').then((m) => m.EmployersPageModule),
   },
   {
+    path: 'empleado',
+    loadChildren: () =>
+      import('./employee-landing/employee-landing.module').then((m) => m.EmployeeLandingPageModule),
+  },
+  {
+    path: 'adminPedidos',
+    loadChildren: () =>
+      import('./admin-pedidos/admin-pedidos.module').then((m) => m.AdminPedidosPageModule),
+  },
+  {
+    path: 'adminMarketing',
+    loadChildren: () =>
+      import('./admin-marketing/admin-marketing.module').then((m) => m.AdminMarketingPageModule),
+  },
+  {
+    path: 'contable',
+    loadChildren: () =>
+      import('./contable/contable.module').then((m) => m.ContablePageModule),
+  },
+  {
+    path: 'admin',
+    loadChildren: () =>
+      import('./admin/admin.module').then((m) => m.AdminPageModule),
+  },
+  {
     path: 'profile',
     loadChildren: () =>
       import('./profile/profile.module').then((m) => m.ProfilePageModule),

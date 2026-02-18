@@ -9,3 +9,18 @@
   height: 100%;
   text-align: center;
 }
+
+.register-btn {
+  --color: #{colors.$surface};
+  --border-color: #{colors.$primary};
+  --background: #{colors.$primary};
+  --background-activated: #{colors.$primaryDark};
+  --background-focused: #{colors.$primaryDark};
+}
+
+.guest-btn {
+  --color: #{colors.$surface};
+  --background: #{colors.$textSecondary};
+  --background-activated: #{colors.$textPrimary};
+  --background-focused: #{colors.$textPrimary};
+}
