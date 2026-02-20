@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 export class ProductModalComponent {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() initialProduct: any = null;
+  @Input() showOferta = true;
 
   product: any = {
     name: '',
@@ -108,12 +109,11 @@ export class ProductModalComponent {
 
   private hasRequiredFields() {
     const name = String(this.product.name || '').trim();
-    const description = String(this.product.description || '').trim();
     const tipo = String(this.product.tipo || '').trim();
     const price = Number(this.product.price);
     const stock = Number(this.product.stock);
 
-    return !!name && !!description && !!tipo && !Number.isNaN(price) && !Number.isNaN(stock);
+    return !!name && !!tipo && !Number.isNaN(price) && !Number.isNaN(stock);
   }
 
   private hasChanges() {

@@ -17,7 +17,6 @@
       <ion-item>
         <ion-label position="floating">Descripción</ion-label>
         <ion-textarea
-          required
           [(ngModel)]="product.description"
           name="description"
         ></ion-textarea>
@@ -57,7 +56,7 @@
         <ion-label position="floating">Imagen (URL opcional)</ion-label>
         <ion-input [(ngModel)]="product.image" name="image"></ion-input>
       </ion-item>
-      <ion-item>
+      <ion-item *ngIf="showOferta">
         <ion-label>Producto en oferta</ion-label>
         <ion-toggle [(ngModel)]="product.oferta" name="oferta"></ion-toggle>
       </ion-item>

@@ -27,6 +27,7 @@ export class HomePage implements OnDestroy {
   cartItemsCount = 0;
   private cartCountByArticulo: Record<number, number> = {};
   selectedTipo: string | null = null;
+  showOnlyOffers = false;
   isUploadingAvatar = false;
   readonly tipos = [
     { label: 'Todos', value: null },
@@ -91,21 +92,34 @@ export class HomePage implements OnDestroy {
 
   async loadProducts() {
     try {
-      const params = new URLSearchParams({ limit: '50' });
-      if (this.selectedTipo) {
-        const categoria = this.tipoCategoriaMap[this.selectedTipo];
-        if (categoria) {
-          params.set('idcategoria', String(categoria));
-        } else {
-          params.set('tipo', this.selectedTipo);
+      let page = 1;
+      let totalPages = 1;
+      const fullList: any[] = [];
+
+      while (page <= totalPages) {
+        const params = new URLSearchParams({
+          limit: '100',
+          page: String(page),
+        });
+        const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('No se pudo obtener la lista de artículos');
         }
+        const data = await response.json();
+        totalPages = Number(data?.totalPages || 1);
+        fullList.push(...(data?.articulos || []));
+        page += 1;
       }
-      const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error('No se pudo obtener la lista de artículos');
-      }
-      const data = await response.json();
-      this.products = data?.articulos || [];
+
+      this.products = fullList.filter((product: any) => {
+        const matchesTipo = this.selectedTipo
+          ? this.matchesSelectedTipo(product, this.selectedTipo as string)
+          : true;
+
+        const matchesOferta = this.showOnlyOffers ? !!product?.oferta : true;
+
+        return matchesTipo && matchesOferta;
+      });
     } catch (error) {
       console.error('Error loading products:', error);
       const t = await this.toastCtrl.create({ message: 'No se pudieron cargar los artículos', duration: 2500, color: 'danger' });
@@ -144,6 +158,11 @@ export class HomePage implements OnDestroy {
 
   getTipoLabel(value: string | null) {
     return this.tipos.find((tipo) => tipo.value === value)?.label || 'Todos';
+  }
+
+  toggleOffersOnly() {
+    this.showOnlyOffers = !this.showOnlyOffers;
+    this.loadProducts();
   }
 
   triggerAvatarPicker() {
@@ -245,6 +264,20 @@ export class HomePage implements OnDestroy {
       return 0;
     }
     return this.cartCountByArticulo[id] || 0;
+  }
+
+  private matchesSelectedTipo(product: any, tipo: string) {
+    const normalizedTipo = String(product?.tipo || '').trim().toLowerCase();
+    if (normalizedTipo === tipo) {
+      return true;
+    }
+
+    const expectedCategory = this.tipoCategoriaMap[tipo];
+    if (!expectedCategory) {
+      return false;
+    }
+
+    return Number(product?.idcategoria) === expectedCategory;
   }
 
   private fileToDataUrl(file: File): Promise<string> {

@@ -1,11 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Inventario</ion-title>
-    <ion-buttons slot="end">
-      <ion-button fill="clear" (click)="logout()">
-        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
-      </ion-button>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/empleado"></ion-back-button>
     </ion-buttons>
+    <ion-title>Inventario</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -69,7 +67,6 @@
             <span class="meta-label">Precio</span>
             <strong>
               {{ product.precio_venta | currency : 'EUR' }}
-              <span class="offer-label" *ngIf="product.oferta">OFERTA</span>
             </strong>
           </div>
           <div>

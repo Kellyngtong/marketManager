@@ -37,7 +37,17 @@
       </div>
     </div>
 
-    <ion-buttons slot="end">
+    <ion-buttons slot="end" class="header-actions">
+      <ion-button
+        class="offers-button"
+        fill="outline"
+        size="small"
+        [class.active]="showOnlyOffers"
+        (click)="toggleOffersOnly()"
+      >
+        <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+        <span class="offer-text">Ofertas</span>
+      </ion-button>
       <ion-button class="cart-button" routerLink="/cart" fill="clear" aria-label="Carrito">
         <span class="cart-icon-wrapper">
           <ion-icon class="cart-icon" name="cart-outline"></ion-icon>

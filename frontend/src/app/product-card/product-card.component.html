@@ -15,7 +15,7 @@
     <ion-card-title>{{ product.nombre || product.name }}</ion-card-title>
     <ion-card-subtitle>
       {{ (product.precio_venta !== undefined ? product.precio_venta : product.price) | currency : "EUR" }}
-      <span style="color: var(--ion-color-danger); font-weight: 700" *ngIf="product.oferta">OFERTA</span>
+      <span class="offer-label" *ngIf="product.oferta">OFERTA</span>
     </ion-card-subtitle>
   </ion-card-header>
   <ion-card-content>

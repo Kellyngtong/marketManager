@@ -59,24 +59,31 @@ export class EmployersPage {
   async loadProducts() {
     this.isLoading = true;
     try {
-      const params = new URLSearchParams({ limit: '100' });
-      if (this.selectedTipo) {
-        const categoria = this.tipoCategoriaMap[this.selectedTipo];
-        if (categoria) {
-          params.set('idcategoria', String(categoria));
-        } else {
-          params.set('tipo', this.selectedTipo);
+      let page = 1;
+      let totalPages = 1;
+      const fullList: any[] = [];
+
+      while (page <= totalPages) {
+        const params = new URLSearchParams({
+          limit: '100',
+          page: String(page),
+        });
+
+        const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('No se pudo obtener el inventario');
         }
+
+        const data = await response.json();
+        const articles = data?.articulos || [];
+        totalPages = Number(data?.totalPages || 1);
+        fullList.push(...articles);
+        page += 1;
       }
-      const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error('No se pudo obtener el inventario');
-      }
-      const data = await response.json();
-      const articles = data?.articulos || [];
+
       this.products = this.selectedTipo
-        ? articles.filter((product: any) => this.matchesSelectedTipo(product, this.selectedTipo as string))
-        : articles;
+        ? fullList.filter((product: any) => this.matchesSelectedTipo(product, this.selectedTipo as string))
+        : fullList;
     } catch (error) {
       console.error('Error loading inventory', error);
       this.presentToast('No se pudo cargar el inventario', 'danger');
@@ -100,6 +107,9 @@ export class EmployersPage {
   async openCreateModal() {
     const modal = await this.modalCtrl.create({
       component: ProductModalComponent,
+      componentProps: {
+        showOferta: false,
+      },
       backdropDismiss: true,
     });
 
@@ -140,7 +150,6 @@ export class EmployersPage {
         imagen: imageUrl,
         idcategoria: this.resolveCategoria(normalizedTipo),
         tipo: normalizedTipo,
-        oferta: !!product.oferta,
       };
 
       const response = await fetch(`${this.API_HOST}/api/articulos`, {
@@ -173,6 +182,7 @@ export class EmployersPage {
       componentProps: {
         mode: 'edit',
         initialProduct: product,
+        showOferta: false,
       },
       backdropDismiss: true,
     });
@@ -209,9 +219,8 @@ export class EmployersPage {
         stock: Number(edited.stock),
         descripcion: edited.description,
         tipo: normalizedTipo,
-        idcategoria: this.resolveCategoria(normalizedTipo),
+        idcategoria: this.resolveCategoria(normalizedTipo, product),
         imagen: imageUrl,
-        oferta: !!edited.oferta,
       };
 
       const response = await fetch(`${this.API_HOST}/api/articulos/${product.idarticulo || product.id}`, {
@@ -268,8 +277,23 @@ export class EmployersPage {
     }
   }
 
-  private resolveCategoria(tipo: string) {
-    return this.tipoCategoriaMap[tipo] || 1;
+  private resolveCategoria(tipo: string, currentProduct?: any) {
+    const normalizedTipo = String(tipo || '').trim().toLowerCase();
+
+    const fromLoadedProducts = this.products.find((product) => {
+      const productTipo = String(product?.tipo || '').trim().toLowerCase();
+      return productTipo === normalizedTipo && Number(product?.idcategoria) > 0;
+    });
+
+    if (fromLoadedProducts?.idcategoria) {
+      return Number(fromLoadedProducts.idcategoria);
+    }
+
+    if (currentProduct?.idcategoria) {
+      return Number(currentProduct.idcategoria);
+    }
+
+    return this.tipoCategoriaMap[normalizedTipo] || 1;
   }
 
   private matchesSelectedTipo(product: any, tipo: string) {

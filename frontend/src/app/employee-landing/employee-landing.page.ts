@@ -40,4 +40,9 @@ export class EmployeeLandingPage {
   goToContable() {
     this.router.navigateByUrl('/contable');
   }
+
+  logout() {
+    this.auth.logout();
+    this.router.navigateByUrl('/login', { replaceUrl: true });
+  }
 }
