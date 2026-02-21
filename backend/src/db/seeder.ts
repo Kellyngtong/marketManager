@@ -1,118 +1,122 @@
-import path from 'path';
-import dotenv from 'dotenv';
+import path from "path";
+import dotenv from "dotenv";
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-import db, { initializeDatabase } from './index';
-import bcrypt from 'bcrypt';
+import db, { initializeDatabase } from "./index";
+import bcrypt from "bcrypt";
 
 async function seedDatabase(): Promise<void> {
   try {
-    console.log('🌱 Iniciando seeder de datos multitenant...');
+    console.log("🌱 Iniciando seeder de datos multitenant...");
 
     // Inicializar BD
     await initializeDatabase();
 
     // Crear tablas si no existen
     await db.sequelize.sync();
-    console.log('✅ Base de datos sincronizada');
+    console.log("✅ Base de datos sincronizada");
 
     // 1. ROLES
     await db.rol.bulkCreate(
       [
-        { idrol: 1, nombre: 'Cliente', descripcion: 'Cliente estándar' },
-        { idrol: 2, nombre: 'Premium', descripcion: 'Cliente premium' },
-        { idrol: 3, nombre: 'Empleado', descripcion: 'Personal del supermercado' },
-        { idrol: 4, nombre: 'Admin', descripcion: 'Administrador del sistema' },
+        { idrol: 1, nombre: "Cliente", descripcion: "Cliente estándar" },
+        { idrol: 2, nombre: "Premium", descripcion: "Cliente premium" },
+        {
+          idrol: 3,
+          nombre: "Empleado",
+          descripcion: "Personal del supermercado",
+        },
+        { idrol: 4, nombre: "Admin", descripcion: "Administrador del sistema" },
       ],
-      { ignoreDuplicates: true }
+      { ignoreDuplicates: true },
     );
-    console.log('✅ Roles creados');
+    console.log("✅ Roles creados");
 
     // 2. CATEGORÍAS
     await db.categoria.bulkCreate(
       [
         {
           idcategoria: 1,
-          nombre: 'Frutas',
-          descripcion: 'Frutas frescas variadas',
+          nombre: "Frutas",
+          descripcion: "Frutas frescas variadas",
         },
         {
           idcategoria: 2,
-          nombre: 'Verduras',
-          descripcion: 'Vegetales y hortalizas',
+          nombre: "Verduras",
+          descripcion: "Vegetales y hortalizas",
         },
         {
           idcategoria: 3,
-          nombre: 'Bebidas',
-          descripcion: 'Bebidas diversas',
+          nombre: "Bebidas",
+          descripcion: "Bebidas diversas",
         },
         {
           idcategoria: 4,
-          nombre: 'Panadería',
-          descripcion: 'Pan y productos horneados',
+          nombre: "Panadería",
+          descripcion: "Pan y productos horneados",
         },
         {
           idcategoria: 5,
-          nombre: 'Embutidos',
-          descripcion: 'Jamones y fiambres',
+          nombre: "Embutidos",
+          descripcion: "Jamones y fiambres",
         },
-        { idcategoria: 6, nombre: 'Carnes', descripcion: 'Carnes frescas' },
+        { idcategoria: 6, nombre: "Carnes", descripcion: "Carnes frescas" },
         {
           idcategoria: 7,
-          nombre: 'Pescados',
-          descripcion: 'Productos del mar',
+          nombre: "Pescados",
+          descripcion: "Productos del mar",
         },
         {
           idcategoria: 8,
-          nombre: 'Alcohólicas',
-          descripcion: 'Vinos y licores',
+          nombre: "Alcohólicas",
+          descripcion: "Vinos y licores",
         },
-        { idcategoria: 9, nombre: 'Lácteos', descripcion: 'Productos lácteos' },
+        { idcategoria: 9, nombre: "Lácteos", descripcion: "Productos lácteos" },
       ],
-      { ignoreDuplicates: true }
+      { ignoreDuplicates: true },
     );
-    console.log('✅ Categorías creadas');
+    console.log("✅ Categorías creadas");
 
     // 3. USUARIOS (ADMIN Y EMPLEADO POR TENANT)
-    const hashedAdminPass = await bcrypt.hash('admin123', 10);
-    const hashedEmpleadoPass = await bcrypt.hash('empleado123', 10);
+    const hashedAdminPass = await bcrypt.hash("admin123", 10);
+    const hashedEmpleadoPass = await bcrypt.hash("empleado123", 10);
 
     // Admin global
     await db.usuario.create(
       {
-        nombre: 'Admin Global',
-        email: 'admin@test.com',
+        nombre: "Admin Global",
+        email: "admin@test.com",
         clave: hashedAdminPass,
         idrol: 4,
         id_tenant: 1,
         id_store: 1,
         condicion: true,
       },
-      { ignoreDuplicates: true }
+      { ignoreDuplicates: true },
     );
 
     // Empleado tenant 2
     await db.usuario.create(
       {
-        nombre: 'Empleado García',
-        email: 'empleado@test.com',
+        nombre: "Empleado García",
+        email: "empleado@test.com",
         clave: hashedEmpleadoPass,
         idrol: 3,
         id_tenant: 2,
         id_store: 3,
         condicion: true,
       },
-      { ignoreDuplicates: true }
+      { ignoreDuplicates: true },
     );
 
-    console.log('✅ Usuarios creados');
+    console.log("✅ Usuarios creados");
 
     // 4. ARTÍCULOS (19 productos por tenant)
     const articuloData = [
       {
-        nombre: 'Manzana Roja',
-        codigo: 'ART001',
+        nombre: "Manzana Roja",
+        codigo: "ART001",
         idcategoria: 1,
         precio_venta: 2.5,
         stock: 100,
@@ -120,8 +124,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Plátano',
-        codigo: 'ART002',
+        nombre: "Plátano",
+        codigo: "ART002",
         idcategoria: 1,
         precio_venta: 1.5,
         stock: 150,
@@ -129,8 +133,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Naranja',
-        codigo: 'ART003',
+        nombre: "Naranja",
+        codigo: "ART003",
         idcategoria: 1,
         precio_venta: 2.0,
         stock: 120,
@@ -138,8 +142,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Tomate',
-        codigo: 'ART004',
+        nombre: "Tomate",
+        codigo: "ART004",
         idcategoria: 2,
         precio_venta: 3.0,
         stock: 80,
@@ -147,8 +151,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Lechuga',
-        codigo: 'ART005',
+        nombre: "Lechuga",
+        codigo: "ART005",
         idcategoria: 2,
         precio_venta: 2.5,
         stock: 90,
@@ -156,8 +160,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Coca Cola 330ml',
-        codigo: 'ART006',
+        nombre: "Coca Cola 330ml",
+        codigo: "ART006",
         idcategoria: 3,
         precio_venta: 1.8,
         stock: 200,
@@ -165,8 +169,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Agua Mineral 1L',
-        codigo: 'ART007',
+        nombre: "Agua Mineral 1L",
+        codigo: "ART007",
         idcategoria: 3,
         precio_venta: 1.0,
         stock: 300,
@@ -174,8 +178,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Pan Blanco',
-        codigo: 'ART008',
+        nombre: "Pan Blanco",
+        codigo: "ART008",
         idcategoria: 4,
         precio_venta: 2.0,
         stock: 50,
@@ -183,8 +187,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Jamón Serrano',
-        codigo: 'ART009',
+        nombre: "Jamón Serrano",
+        codigo: "ART009",
         idcategoria: 5,
         precio_venta: 12.0,
         stock: 20,
@@ -192,8 +196,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Queso Manchego',
-        codigo: 'ART010',
+        nombre: "Queso Manchego",
+        codigo: "ART010",
         idcategoria: 9,
         precio_venta: 10.0,
         stock: 15,
@@ -201,8 +205,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Filete de Ternera',
-        codigo: 'ART011',
+        nombre: "Filete de Ternera",
+        codigo: "ART011",
         idcategoria: 6,
         precio_venta: 15.0,
         stock: 30,
@@ -210,8 +214,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Salmón Fresco',
-        codigo: 'ART012',
+        nombre: "Salmón Fresco",
+        codigo: "ART012",
         idcategoria: 7,
         precio_venta: 18.0,
         stock: 10,
@@ -219,8 +223,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Vino Tinto Reserva',
-        codigo: 'ART013',
+        nombre: "Vino Tinto Reserva",
+        codigo: "ART013",
         idcategoria: 8,
         precio_venta: 25.0,
         stock: 25,
@@ -228,8 +232,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Yogur Natural',
-        codigo: 'ART014',
+        nombre: "Yogur Natural",
+        codigo: "ART014",
         idcategoria: 9,
         precio_venta: 2.5,
         stock: 100,
@@ -237,8 +241,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Leche Entera',
-        codigo: 'ART015',
+        nombre: "Leche Entera",
+        codigo: "ART015",
         idcategoria: 9,
         precio_venta: 1.5,
         stock: 150,
@@ -246,8 +250,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Huevos (docena)',
-        codigo: 'ART016',
+        nombre: "Huevos (docena)",
+        codigo: "ART016",
         idcategoria: 9,
         precio_venta: 3.5,
         stock: 80,
@@ -255,8 +259,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Aceite de Oliva',
-        codigo: 'ART017',
+        nombre: "Aceite de Oliva",
+        codigo: "ART017",
         idcategoria: 3,
         precio_venta: 8.0,
         stock: 40,
@@ -264,8 +268,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Arroz Blanco',
-        codigo: 'ART018',
+        nombre: "Arroz Blanco",
+        codigo: "ART018",
         idcategoria: 3,
         precio_venta: 2.0,
         stock: 120,
@@ -273,8 +277,8 @@ async function seedDatabase(): Promise<void> {
         id_store: 1,
       },
       {
-        nombre: 'Pasta Integral',
-        codigo: 'ART019',
+        nombre: "Pasta Integral",
+        codigo: "ART019",
         idcategoria: 3,
         precio_venta: 1.8,
         stock: 100,
@@ -289,44 +293,44 @@ async function seedDatabase(): Promise<void> {
     // Duplicar para tenant 2 (con mismo id_store=3)
     const articurosT2 = articuloData.map((art) => ({
       ...art,
-      codigo: art.codigo + '-T2',
+      codigo: art.codigo + "-T2",
       id_tenant: 2,
       id_store: 3,
     }));
     await db.articulo.bulkCreate(articurosT2, { ignoreDuplicates: true });
 
-    console.log('✅ Artículos creados (19 x 2 tenants = 38 total)');
+    console.log("✅ Artículos creados (19 x 2 tenants = 38 total)");
 
     // 8. CREAR USUARIOS PARA PRUEBAS
     const testUsers = [
       {
         idusuario: 100,
         idrol: 1,
-        nombre: 'Juan Pérez',
-        email: 'juan@test.com',
-        clave: await bcrypt.hash('juan123', 10),
+        nombre: "Juan Pérez",
+        email: "juan@test.com",
+        clave: await bcrypt.hash("juan123", 10),
         condicion: true,
       },
       {
         idusuario: 101,
         idrol: 1,
-        nombre: 'María García',
-        email: 'maria@test.com',
-        clave: await bcrypt.hash('maria123', 10),
+        nombre: "María García",
+        email: "maria@test.com",
+        clave: await bcrypt.hash("maria123", 10),
         condicion: true,
       },
       {
         idusuario: 102,
         idrol: 2,
-        nombre: 'Carlos López Premium',
-        email: 'carlos@test.com',
-        clave: await bcrypt.hash('carlos123', 10),
+        nombre: "Carlos López Premium",
+        email: "carlos@test.com",
+        clave: await bcrypt.hash("carlos123", 10),
         condicion: true,
       },
     ];
 
     await db.usuario.bulkCreate(testUsers, { ignoreDuplicates: true });
-    console.log('✅ Usuarios de prueba creados');
+    console.log("✅ Usuarios de prueba creados");
 
     // 9. CREAR VENTAS/PEDIDOS PARA PRUEBAS
     const testVentas = [
@@ -334,51 +338,53 @@ async function seedDatabase(): Promise<void> {
         idventa: 1000,
         idcliente: 100,
         idusuario: 100,
-        tipo_comprobante: 'FACTURA',
-        serie_comprobante: 'F001',
-        num_comprobante: '000001',
-        fecha_hora: new Date('2026-02-15'),
-        impuesto: 21.50,
-        total: 125.50,
-        estado: 'COMPLETADO',
+        tipo_comprobante: "FACTURA",
+        serie_comprobante: "F001",
+        num_comprobante: "000001",
+        fecha_hora: new Date("2026-02-15"),
+        impuesto: 21.5,
+        total: 125.5,
+        estado: "COMPLETADO",
       },
       {
         idventa: 1001,
         idcliente: 101,
         idusuario: 101,
-        tipo_comprobante: 'FACTURA',
-        serie_comprobante: 'F001',
-        num_comprobante: '000002',
-        fecha_hora: new Date('2026-02-16'),
-        impuesto: 18.90,
-        total: 95.50,
-        estado: 'COMPLETADO',
+        tipo_comprobante: "FACTURA",
+        serie_comprobante: "F001",
+        num_comprobante: "000002",
+        fecha_hora: new Date("2026-02-16"),
+        impuesto: 18.9,
+        total: 95.5,
+        estado: "COMPLETADO",
       },
       {
         idventa: 1002,
         idcliente: 102,
         idusuario: 102,
-        tipo_comprobante: 'FACTURA',
-        serie_comprobante: 'F001',
-        num_comprobante: '000003',
-        fecha_hora: new Date('2026-02-16'),
-        impuesto: 25.20,
-        total: 156.80,
-        estado: 'PENDIENTE',
+        tipo_comprobante: "FACTURA",
+        serie_comprobante: "F001",
+        num_comprobante: "000003",
+        fecha_hora: new Date("2026-02-16"),
+        impuesto: 25.2,
+        total: 156.8,
+        estado: "PENDIENTE",
       },
     ];
 
     await db.venta.bulkCreate(testVentas, { ignoreDuplicates: true });
-    console.log('✅ Pedidos de prueba creados');
+    console.log("✅ Pedidos de prueba creados");
 
-    console.log('\n✅ ¡Seeder completado exitosamente!');
-    console.log('\n📝 Credenciales para pruebas:');
-    console.log('   Admin: admin@test.com / admin123 (Tenant 1, Store 1)');
-    console.log('   Empleado: empleado@test.com / empleado123 (Tenant 2, Store 3)');
+    console.log("\n✅ ¡Seeder completado exitosamente!");
+    console.log("\n📝 Credenciales para pruebas:");
+    console.log("   Admin: admin@test.com / admin123 (Tenant 1, Store 1)");
+    console.log(
+      "   Empleado: empleado@test.com / empleado123 (Tenant 2, Store 3)",
+    );
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error en seeder:', error);
+    console.error("❌ Error en seeder:", error);
     process.exit(1);
   }
 }

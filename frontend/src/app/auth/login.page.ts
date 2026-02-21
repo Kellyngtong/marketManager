@@ -52,7 +52,11 @@ export class LoginPage {
     },
   ];
 
-  constructor(private auth: AuthService, public router: Router, private toastCtrl: ToastController) {}
+  constructor(
+    private auth: AuthService,
+    public router: Router,
+    private toastCtrl: ToastController,
+  ) {}
 
   selectTestAccount(account: TestAccount) {
     this.email = account.email;
@@ -61,21 +65,36 @@ export class LoginPage {
 
   async submit() {
     if (!this.email || !this.password) {
-      const t = await this.toastCtrl.create({ message: 'Completa email y contraseña', duration: 2000, color: 'warning' });
+      const t = await this.toastCtrl.create({
+        message: 'Completa email y contraseña',
+        duration: 2000,
+        color: 'warning',
+      });
       await t.present();
       return;
     }
 
     try {
-      const res: any = await firstValueFrom(this.auth.login({ email: this.email, password: this.password }));
+      const res: any = await firstValueFrom(
+        this.auth.login({ email: this.email, password: this.password }),
+      );
       if (res && res.accessToken) {
         const user = res?.usuario;
         const rolId = user?.idrol ?? user?.rol?.idrol;
-        const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+        const rolNombre = String(
+          user?.rol?.nombre || user?.rol || '',
+        ).toLowerCase();
         const isAdmin = rolId === 4 || rolNombre.includes('admin');
-        const isEmpleado = rolId === 3 || rolNombre.includes('empleado') || rolNombre.includes('staff');
+        const isEmpleado =
+          rolId === 3 ||
+          rolNombre.includes('empleado') ||
+          rolNombre.includes('staff');
 
-        const targetRoute = isAdmin ? '/admin/dashboard' : isEmpleado ? '/empleado' : '/home';
+        const targetRoute = isAdmin
+          ? '/admin/dashboard'
+          : isEmpleado
+            ? '/empleado'
+            : '/home';
         this.router.navigateByUrl(targetRoute, { replaceUrl: true });
       }
     } catch (err: any) {
@@ -84,10 +103,13 @@ export class LoginPage {
       else if (err?.message) msg = err.message;
       else if (err?.status) msg = `Error ${err.status} ${err.statusText || ''}`;
 
-      const t = await this.toastCtrl.create({ message: msg, duration: 3000, color: 'danger' });
+      const t = await this.toastCtrl.create({
+        message: msg,
+        duration: 3000,
+        color: 'danger',
+      });
       await t.present();
       console.error('Login error', err);
     }
   }
 }
-

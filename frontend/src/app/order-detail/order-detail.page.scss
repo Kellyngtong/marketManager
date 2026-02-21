@@ -1,0 +1,583 @@
+@use "../components/_colors" as colors;
+
+// Color shortcuts from the colors module
+$primary: colors.$primary;
+$secondary: colors.$secondary;
+$success: colors.$success;
+$warning: colors.$warning;
+$info: colors.$info;
+$error: colors.$error;
+$disabled: colors.$disabled;
+$background: colors.$background;
+$textPrimary: colors.$textPrimary;
+$textSecondary: colors.$textSecondary;
+
+.order-detail-page {
+  --background: #{$background};
+  --padding-start: 0;
+  --padding-end: 0;
+  background-color: $background;
+
+  .page-content {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+
+    @media (max-width: 1024px) {
+      padding: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      padding: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      padding: 0.75rem;
+    }
+  }
+}
+
+// Loading and Error States
+.loading-container,
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+  text-align: center;
+
+  p {
+    color: $textSecondary;
+    margin-top: 1rem;
+    font-size: 1rem;
+  }
+}
+
+.error-card {
+  max-width: 500px;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+// Header Styles
+ion-header {
+  ion-toolbar {
+    --background: #{$primary};
+    --color: #fff;
+
+    ion-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// Back Button
+.back-button {
+  margin-bottom: 1.5rem;
+
+  ion-button {
+    --color: #{$textSecondary};
+    padding: 0;
+
+    ion-icon {
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      --color: #{$primary};
+    }
+  }
+}
+
+// Order Header
+.order-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .order-title-section {
+    flex: 1;
+
+    .order-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $textPrimary;
+      margin: 0 0 0.5rem 0;
+
+      @media (max-width: 640px) {
+        font-size: 1.5rem;
+      }
+    }
+
+    .order-date {
+      font-size: 0.9rem;
+      color: $textSecondary;
+      margin: 0;
+    }
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+
+    ion-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    &.success {
+      background-color: rgba($success, 0.1);
+      color: $success;
+    }
+
+    &.info {
+      background-color: rgba($info, 0.1);
+      color: $info;
+    }
+
+    &.warning {
+      background-color: rgba($warning, 0.1);
+      color: $warning;
+    }
+
+    &.danger {
+      background-color: rgba($error, 0.1);
+      color: $error;
+    }
+  }
+}
+
+// Order Container
+.order-container {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}
+
+// Cards
+ion-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 0 0 1.75rem 0;
+  --padding-start: 2rem;
+  --padding-end: 2rem;
+  --padding-top: 2rem;
+  --padding-bottom: 2rem;
+  padding: 4%;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 1024px) {
+    --padding-start: 1.75rem;
+    --padding-end: 1.75rem;
+    --padding-top: 1.75rem;
+    --padding-bottom: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 640px) {
+    --padding-start: 1.5rem;
+    --padding-end: 1.5rem;
+    --padding-top: 1.5rem;
+    --padding-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  ion-card-header {
+    padding: 0 0 1.5rem 0;
+    margin: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    @media (max-width: 1024px) {
+      padding-bottom: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      padding-bottom: 1rem;
+    }
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $textPrimary;
+      margin: 0;
+      letter-spacing: -0.3px;
+
+      @media (max-width: 768px) {
+        font-size: 1.1rem;
+      }
+
+      ion-icon {
+        width: 24px;
+        height: 24px;
+        color: $primary;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 1.5rem 0 0 0;
+
+    @media (max-width: 1024px) {
+      padding-top: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      padding-top: 1rem;
+    }
+  }
+}
+
+// Timeline
+.timeline-card {
+  ion-card-content {
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+
+      .timeline-step {
+        display: flex;
+        gap: 1.5rem;
+        position: relative;
+        padding-bottom: 2rem;
+
+        @media (max-width: 640px) {
+          gap: 1rem;
+        }
+
+        &.completed {
+          .timeline-marker {
+            background-color: $success;
+            color: white;
+
+            ion-icon {
+              width: 20px;
+              height: 20px;
+            }
+          }
+
+          .timeline-line {
+            background-color: $success;
+          }
+
+          .timeline-status {
+            color: $textPrimary;
+            font-weight: 500;
+          }
+        }
+
+        .timeline-marker {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: $disabled;
+          color: white;
+          flex-shrink: 0;
+          position: relative;
+          z-index: 2;
+
+          ion-icon {
+            width: 24px;
+            height: 24px;
+          }
+        }
+
+        .timeline-line {
+          position: absolute;
+          left: 19px;
+          top: 40px;
+          width: 2px;
+          height: 60px;
+          background-color: $disabled;
+          transition: background-color 0.3s ease;
+        }
+
+        .timeline-content {
+          flex: 1;
+          padding-top: 0.25rem;
+
+          .timeline-status {
+            font-weight: 500;
+            color: $textSecondary;
+            margin: 0 0 0.25rem 0;
+            transition: color 0.3s ease;
+          }
+
+          .timeline-date {
+            font-size: 0.875rem;
+            color: $textSecondary;
+            margin: 0;
+          }
+        }
+
+        &:last-child {
+          padding-bottom: 0;
+
+          .timeline-line {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Items
+.items-card {
+  ion-card-content {
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+
+      .item-row {
+        display: grid;
+        grid-template-columns: 80px 1fr auto;
+        gap: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba($textSecondary, 0.1);
+
+        @media (max-width: 640px) {
+          grid-template-columns: 70px 1fr auto;
+          gap: 1rem;
+        }
+
+        &:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+
+        .item-image {
+          .product-image {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+
+            @media (max-width: 640px) {
+              height: 70px;
+            }
+          }
+        }
+
+        .item-details {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+
+          .item-name {
+            font-weight: 600;
+            color: $textPrimary;
+            margin: 0 0 0.5rem 0;
+            font-size: 0.95rem;
+          }
+
+          .item-quantity {
+            font-size: 0.875rem;
+            color: $textSecondary;
+            margin: 0 0 0.5rem 0;
+          }
+
+          .item-price {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            .price {
+              font-weight: 600;
+              color: $primary;
+              font-size: 0.95rem;
+            }
+
+            .original-price {
+              font-size: 0.8rem;
+              color: $textSecondary;
+              text-decoration: line-through;
+            }
+          }
+        }
+
+        .item-total {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          min-width: 100px;
+
+          .total {
+            font-weight: 700;
+            color: $textPrimary;
+            margin: 0;
+            font-size: 1rem;
+          }
+        }
+      }
+    }
+
+    .summary {
+      border-top: 1px solid rgba($textSecondary, 0.1);
+      padding-top: 1.5rem;
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+
+        &:last-of-type:not(.total) {
+          margin-bottom: 1.5rem;
+        }
+
+        span {
+          color: $textSecondary;
+
+          &:last-child {
+            color: $textPrimary;
+            font-weight: 500;
+
+            &.free {
+              color: $success;
+              font-weight: 600;
+            }
+          }
+        }
+
+        &.total {
+          margin: 0;
+          font-size: 1.1rem;
+          font-weight: 700;
+
+          span {
+            color: $textPrimary;
+
+            &:last-child {
+              color: $primary;
+              font-size: 1.3rem;
+            }
+          }
+        }
+      }
+
+      .summary-divider {
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba($primary, 0.3),
+          transparent
+        );
+        margin: 1rem 0;
+      }
+    }
+  }
+}
+
+// Info Cards (Sidebar)
+.info-card {
+  ion-card-header {
+    padding-bottom: 1rem;
+
+    ion-card-title {
+      font-size: 1.05rem;
+
+      ion-icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  ion-card-content {
+    .info-name {
+      font-weight: 600;
+      color: $textPrimary;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.95rem;
+    }
+
+    .info-email,
+    .info-phone,
+    .info-text {
+      font-size: 0.85rem;
+      color: $textSecondary;
+      margin: 0.25rem 0;
+    }
+
+    .info-text {
+      line-height: 1.5;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .status-badge {
+      align-self: flex-start;
+    }
+  }
+
+  ion-card {
+    border-radius: 6px;
+  }
+}

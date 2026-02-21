@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AdminService } from '../services/admin.service';
 import { ToastController, ModalController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
@@ -31,7 +32,8 @@ export class AdminDashboardComponent implements OnInit {
   constructor(
     private adminService: AdminService,
     private toastCtrl: ToastController,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -54,7 +56,9 @@ export class AdminDashboardComponent implements OnInit {
 
   async loadMetrics() {
     try {
-      const data: any = await firstValueFrom(this.adminService.getDashboardMetrics());
+      const data: any = await firstValueFrom(
+        this.adminService.getDashboardMetrics(),
+      );
       this.metrics = {
         totalUsers: data?.totalUsers || 0,
         totalOrders: data?.totalOrders || 0,
@@ -84,7 +88,9 @@ export class AdminDashboardComponent implements OnInit {
 
   async loadProducts() {
     try {
-      const data: any = await firstValueFrom(this.adminService.getAllProducts());
+      const data: any = await firstValueFrom(
+        this.adminService.getAllProducts(),
+      );
       this.products = Array.isArray(data) ? data : data.data || [];
     } catch (error) {
       console.error('Error loading products:', error);
@@ -107,7 +113,7 @@ export class AdminDashboardComponent implements OnInit {
   async deleteUser(userId: number) {
     const confirmed = await this.showConfirmationModal(
       'Eliminar Usuario',
-      '¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.'
+      '¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.',
     );
 
     if (!confirmed) {
@@ -116,7 +122,7 @@ export class AdminDashboardComponent implements OnInit {
 
     try {
       await firstValueFrom(this.adminService.deleteUser(userId));
-      this.users = this.users.filter(u => u.idusuario !== userId);
+      this.users = this.users.filter((u) => u.idusuario !== userId);
       await this.showSuccess('Usuario eliminado correctamente');
     } catch (error) {
       await this.showError('Error eliminando usuario');
@@ -126,7 +132,7 @@ export class AdminDashboardComponent implements OnInit {
   async deleteProduct(productId: number) {
     const confirmed = await this.showConfirmationModal(
       'Eliminar Producto',
-      '¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.'
+      '¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.',
     );
 
     if (!confirmed) {
@@ -135,7 +141,7 @@ export class AdminDashboardComponent implements OnInit {
 
     try {
       await firstValueFrom(this.adminService.deleteProduct(productId));
-      this.products = this.products.filter(p => p.idarticulo !== productId);
+      this.products = this.products.filter((p) => p.idarticulo !== productId);
       await this.showSuccess('Producto eliminado correctamente');
     } catch (error) {
       await this.showError('Error eliminando producto');
@@ -146,8 +152,8 @@ export class AdminDashboardComponent implements OnInit {
     const modal = await this.modalCtrl.create({
       component: EditUserModalComponent,
       componentProps: {
-        user: { ...user }
-      }
+        user: { ...user },
+      },
     });
 
     await modal.present();
@@ -155,9 +161,13 @@ export class AdminDashboardComponent implements OnInit {
 
     if (result.data && result.data.updated) {
       try {
-        await firstValueFrom(this.adminService.updateUser(user.idusuario, result.data.user));
+        await firstValueFrom(
+          this.adminService.updateUser(user.idusuario, result.data.user),
+        );
         // Actualizar el usuario en la lista
-        const index = this.users.findIndex(u => u.idusuario === user.idusuario);
+        const index = this.users.findIndex(
+          (u) => u.idusuario === user.idusuario,
+        );
         if (index > -1) {
           this.users[index] = result.data.user;
         }
@@ -174,8 +184,8 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   async editOrder(order: any) {
-    // TODO: Implementar modal de edición
-    console.log('Edit order:', order);
+    // Navegar a la vista de detalles del pedido
+    this.router.navigate(['/order', order.idventa]);
   }
 
   private async showSuccess(message: string) {
@@ -198,7 +208,10 @@ export class AdminDashboardComponent implements OnInit {
     await toast.present();
   }
 
-  private async showConfirmationModal(title: string, message: string): Promise<boolean> {
+  private async showConfirmationModal(
+    title: string,
+    message: string,
+  ): Promise<boolean> {
     const modal = await this.modalCtrl.create({
       component: ConfirmationModalComponent,
       cssClass: 'confirmation-modal',
