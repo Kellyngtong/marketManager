@@ -41,11 +41,17 @@ img {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: colors.$secondary;
-  color: colors.$textPrimary;
-  border: 1px solid colors.$surface;
+  background: #40a545;
+  border: 1px solid #ffffff;
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 1rem;
+  color: lemonchiffon;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30px;
+  width: 30px;
 }
 ion-button {
   margin-top: 0.5em;

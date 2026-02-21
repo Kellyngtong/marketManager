@@ -1,4 +1,4 @@
-@use '../components/_colors' as colors;
+@use "../components/_colors" as colors;
 
 // Estilos modernos para la cuadrícula de productos
 .home-toolbar {
@@ -173,7 +173,7 @@ ion-toolbar {
 .cart-badge {
   position: absolute;
   top: -6px;
-  right: -10px;
+  right: -9px;
   min-width: 18px;
   height: 18px;
   padding: 0 4px;
@@ -266,11 +266,6 @@ ion-toolbar {
 
   .cart-icon {
     font-size: 20px;
-  }
-
-  .cart-badge {
-    top: -5px;
-    right: -8px;
   }
 }
 

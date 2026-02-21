@@ -1,11 +1,18 @@
 <ion-card class="product-card">
-  <div class="image-wrapper" (click)="goToDetail.emit(product.idarticulo || product.id)">
+  <div
+    class="image-wrapper"
+    (click)="goToDetail.emit(product.idarticulo || product.id)"
+  >
     <img
-      [src]="product.imagen || product.image || 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&auto=format'"
+      [src]="
+        product.imagen ||
+        product.image ||
+        'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&auto=format'
+      "
       alt="{{ product.nombre || product.name }}"
     />
     <ion-badge class="item-cart-badge" *ngIf="cartCount > 0">
-      En carrito: {{ cartCount }}
+      {{ cartCount }}
     </ion-badge>
   </div>
   <ion-card-header
@@ -14,7 +21,12 @@
   >
     <ion-card-title>{{ product.nombre || product.name }}</ion-card-title>
     <ion-card-subtitle>
-      {{ (product.precio_venta !== undefined ? product.precio_venta : product.price) | currency : "EUR" }}
+      {{
+        (product.precio_venta !== undefined
+          ? product.precio_venta
+          : product.price
+        ) | currency: "EUR"
+      }}
       <span class="offer-label" *ngIf="product.oferta">OFERTA</span>
     </ion-card-subtitle>
   </ion-card-header>
@@ -22,13 +34,18 @@
     <p>{{ product.descripcion || product.description }}</p>
     <div class="product-meta">
       <ion-chip color="tertiary" mode="md">
-        {{ (product.tipo || 'general') | titlecase }}
+        {{ product.tipo || "general" | titlecase }}
       </ion-chip>
       <span class="stock">Stock: {{ product.stock ?? 0 }}</span>
     </div>
 
     <div class="quantity-picker">
-      <ion-button fill="clear" size="small" (click)="decreaseQuantity()" [disabled]="quantity <= 1">
+      <ion-button
+        fill="clear"
+        size="small"
+        (click)="decreaseQuantity()"
+        [disabled]="quantity <= 1"
+      >
         <ion-icon slot="icon-only" name="remove"></ion-icon>
       </ion-button>
       <ion-input
