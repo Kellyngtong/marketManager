@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 export class ProductModalComponent {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() initialProduct: any = null;
+  @Input() showOferta = true;
 
   product: any = {
     name: '',
@@ -25,6 +26,7 @@ export class ProductModalComponent {
   };
   selectedFile: File | null = null;
   previewUrl: string | null = null;
+  private initialSnapshot: any = null;
   readonly tipos = [
     { label: 'Fruta', value: 'fruta' },
     { label: 'Verdura', value: 'verdura' },
@@ -56,6 +58,8 @@ export class ProductModalComponent {
     if (this.product.image) {
       this.previewUrl = this.product.image;
     }
+
+    this.initialSnapshot = this.toComparable(this.product);
   }
 
   onFileSelected(event: any) {
@@ -72,15 +76,13 @@ export class ProductModalComponent {
   }
 
   submit() {
-    // Basic validation
-    if (
-      !this.product.name ||
-      !this.product.description ||
-      this.product.price == null ||
-      this.product.stock == null ||
-      !this.product.tipo
-    ) {
+    if (!this.hasRequiredFields()) {
       alert('Por favor completa todos los campos obligatorios.');
+      return;
+    }
+
+    if (this.mode === 'edit' && !this.hasChanges()) {
+      alert('Realiza al menos un cambio antes de guardar.');
       return;
     }
 
@@ -91,5 +93,48 @@ export class ProductModalComponent {
       file: this.selectedFile,
       previewUrl: this.previewUrl,
     });
+  }
+
+  canSubmit() {
+    if (!this.hasRequiredFields()) {
+      return false;
+    }
+
+    if (this.mode === 'edit') {
+      return this.hasChanges();
+    }
+
+    return true;
+  }
+
+  private hasRequiredFields() {
+    const name = String(this.product.name || '').trim();
+    const tipo = String(this.product.tipo || '').trim();
+    const price = Number(this.product.price);
+    const stock = Number(this.product.stock);
+
+    return !!name && !!tipo && !Number.isNaN(price) && !Number.isNaN(stock);
+  }
+
+  private hasChanges() {
+    if (this.selectedFile) {
+      return true;
+    }
+
+    const current = this.toComparable(this.product);
+    const baseline = this.initialSnapshot || this.toComparable(this.initialProduct || {});
+    return JSON.stringify(current) !== JSON.stringify(baseline);
+  }
+
+  private toComparable(product: any) {
+    return {
+      name: String(product?.name || product?.nombre || '').trim(),
+      description: String(product?.description || product?.descripcion || '').trim(),
+      price: Number(product?.price ?? product?.precio_venta ?? 0),
+      stock: Number(product?.stock ?? 0),
+      image: String(product?.image || product?.imagen || '').trim(),
+      tipo: String(product?.tipo || 'fruta').trim().toLowerCase(),
+      oferta: !!product?.oferta,
+    };
   }
 }

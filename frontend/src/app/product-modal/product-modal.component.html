@@ -8,7 +8,7 @@
 </ion-header>
 
 <ion-content>
-  <form (ngSubmit)="submit()" #formRef="ngForm" class="product-form">
+  <form (ngSubmit)="submit()" class="product-form">
     <ion-list>
       <ion-item>
         <ion-label position="floating">Nombre</ion-label>
@@ -17,7 +17,6 @@
       <ion-item>
         <ion-label position="floating">Descripción</ion-label>
         <ion-textarea
-          required
           [(ngModel)]="product.description"
           name="description"
         ></ion-textarea>
@@ -57,7 +56,7 @@
         <ion-label position="floating">Imagen (URL opcional)</ion-label>
         <ion-input [(ngModel)]="product.image" name="image"></ion-input>
       </ion-item>
-      <ion-item>
+      <ion-item *ngIf="showOferta">
         <ion-label>Producto en oferta</ion-label>
         <ion-toggle [(ngModel)]="product.oferta" name="oferta"></ion-toggle>
       </ion-item>
@@ -90,7 +89,7 @@
       <ion-button color="medium" type="button" (click)="cancel()"
         >Cancelar</ion-button
       >
-      <ion-button type="submit" [disabled]="!formRef.form.valid"
+      <ion-button type="submit" [disabled]="!canSubmit()"
         >{{ mode === 'edit' ? 'Guardar cambios' : 'Crear' }}</ion-button
       >
     </div>

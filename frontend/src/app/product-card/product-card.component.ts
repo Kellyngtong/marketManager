@@ -8,6 +8,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 })
 export class ProductCardComponent implements OnChanges {
   @Input() product: any;
+  @Input() cartCount = 0;
   @Output() addToCart = new EventEmitter<{ product: any; quantity: number }>();
   @Output() goToDetail = new EventEmitter<any>();
 

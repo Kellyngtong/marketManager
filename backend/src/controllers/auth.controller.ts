@@ -250,3 +250,28 @@ export const updateProfile = async (
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
+// List Users - Obtener todos los usuarios (solo Admin)
+export const listUsers = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const usuarios = await (db.usuario as typeof Usuario).findAll({
+      include: [
+        {
+          model: db.rol,
+          attributes: ['idrol', 'nombre', 'descripcion'],
+        },
+      ],
+      attributes: { exclude: ['clave'] },
+      order: [['idusuario', 'ASC']],
+    });
+
+    res.json({
+      message: 'Usuarios obtenidos exitosamente',
+      count: usuarios.length,
+      usuarios,
+    });
+  } catch (err) {
+    console.error('Error en listUsers:', err);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};

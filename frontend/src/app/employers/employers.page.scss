@@ -1,11 +1,33 @@
 @use '../components/_colors' as colors;
 
+:host {
+  display: block;
+  background: colors.$background;
+}
+
+ion-content {
+  --background: #{colors.$background};
+  --padding-bottom: 96px;
+}
+
+ion-toolbar {
+  --background: #{colors.$surface};
+  --color: #{colors.$textPrimary};
+  --border-color: #{colors.$border};
+}
+
+ion-title {
+  font-weight: 700;
+}
+
 .filter-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
   gap: 1rem;
+  background: colors.$surface;
+  border-bottom: 1px solid colors.$border;
 }
 
 .filter-label {
@@ -19,10 +41,17 @@
 .filter-bar h3 {
   margin: 0.2rem 0 0;
   font-size: 1.1rem;
+  color: colors.$textPrimary;
+}
+
+.filter-bar ion-button {
+  --border-color: #{colors.$primary};
+  --color: #{colors.$primary};
 }
 
 .tipo-popover ion-item {
   --min-height: 42px;
+  --color: #{colors.$textPrimary};
 }
 
 .loading-placeholder {
@@ -33,6 +62,33 @@
 
 .inventory-list ion-card {
   margin: 0 1em 1em;
+  border: 1px solid colors.$border;
+  border-radius: 12px;
+  background: colors.$surface;
+  box-shadow: 0 6px 16px colors.$shadowLight;
+}
+
+.inventory-list ion-item {
+  --background: #{colors.$surface};
+  --color: #{colors.$textPrimary};
+}
+
+.inventory-list ion-label h2 {
+  color: colors.$textPrimary;
+  font-weight: 700;
+}
+
+.inventory-list ion-label p {
+  color: colors.$textSecondary;
+}
+
+.inventory-list ion-chip {
+  --background: #{colors.$secondaryLight};
+  --color: #{colors.$textPrimary};
+}
+
+.inventory-list ion-card-content {
+  color: colors.$textPrimary;
 }
 
 .inventory-meta {
@@ -56,7 +112,7 @@
 }
 
 .offer-label {
-  color: colors.$error;
+  color: colors.$secondary;
   font-size: 0.75rem;
   margin-left: 0.35rem;
   font-weight: 700;
@@ -67,8 +123,44 @@
   gap: 0.5em;
 }
 
+.inventory-actions ion-button {
+  --border-color: #{colors.$primary};
+  --color: #{colors.$primary};
+}
+
+.inventory-actions .edit-button {
+  --background: #{colors.$primary};
+  --background-activated: #{colors.$primaryDark};
+  --background-focused: #{colors.$primaryDark};
+  --border-color: #{colors.$primary};
+  --color: #{colors.$surface};
+}
+
+.inventory-actions ion-button[color='danger'] {
+  --border-color: #{colors.$error};
+  --color: #{colors.$error};
+}
+
 .empty-state {
   text-align: center;
   color: colors.$textSecondary;
   padding: 2em 1em;
+  background: colors.$surface;
+  border: 1px dashed colors.$border;
+  border-radius: 12px;
+  margin: 1rem;
+}
+
+ion-fab-button {
+  --background: #{colors.$primary};
+  --background-activated: #{colors.$primaryDark};
+  --background-focused: #{colors.$primaryDark};
+  --box-shadow: 0 8px 20px #{colors.$shadowMedium};
+}
+
+.fixed-add-fab {
+  position: fixed;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 40;
 }

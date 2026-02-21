@@ -1,0 +1,44 @@
+@use '../components/_colors' as colors;
+
+:host {
+  display: block;
+  background: colors.$background;
+}
+
+ion-content {
+  --background: #{colors.$background};
+}
+
+ion-toolbar {
+  --background: #{colors.$surface};
+  --color: #{colors.$textPrimary};
+  --border-color: #{colors.$border};
+}
+
+.employee-landing {
+  max-width: 560px;
+  margin: 2rem auto;
+  padding: 1.25rem;
+  border: 1px solid colors.$border;
+  border-radius: 12px;
+  background: colors.$surface;
+  box-shadow: 0 8px 20px colors.$shadowLight;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    color: colors.$textPrimary;
+  }
+
+  p {
+    margin: 0 0 1rem;
+    color: colors.$textSecondary;
+  }
+
+  ion-button {
+    --background: #{colors.$primary};
+    --background-activated: #{colors.$primaryDark};
+    --background-focused: #{colors.$primaryDark};
+    --color: #{colors.$surface};
+    margin-top: 0.6rem;
+  }
+}

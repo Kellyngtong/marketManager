@@ -105,10 +105,11 @@
   color: colors.$primary;
 }
 
-.item-original-price {
-  font-size: 0.9rem;
-  color: colors.$textSecondary;
-  text-decoration: line-through;
+.offer-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: colors.$secondary;
+  margin-left: 0.45rem;
 }
 
 .item-actions {
@@ -127,9 +128,21 @@
 
 .delete-btn {
   --color: #{colors.$error};
+  --background: transparent;
+  --border-radius: 6px;
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+  --min-height: auto;
+  --min-width: auto;
+  padding: 0.5rem;
 
-  &::part(native) {
-    padding: 0;
+  &:hover {
+    --color: #{colors.$error};
+    --background: rgba(colors.$error, 0.1);
+  }
+
+  ion-icon {
+    font-size: 1.2rem;
   }
 }
 
@@ -137,19 +150,32 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid colors.$border;
+  border: none;
   border-radius: 6px;
-  padding: 0.25rem;
-  background: colors.$background;
+  padding: 0;
+  background: transparent;
 
   .qty-btn {
-    --padding-start: 0.5rem;
-    --padding-end: 0.5rem;
+    --padding-start: 0;
+    --padding-end: 0;
     --min-height: 32px;
-    --color: #{colors.$textPrimary};
+    --min-width: 32px;
+    --color: #fff;
+    --border-color: #{colors.$border};
+    --border-width: 1px;
+    --border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      --border-color: #{colors.$primary};
+    }
 
     ion-icon {
-      font-size: 1.1rem;
+      font-size: 0.9rem;
     }
   }
 

@@ -32,5 +32,11 @@ export default (app: Express): void => {
    */
   router.put('/profile', authJwt.verifyToken, authController.updateProfile);
 
+  /**
+   * GET /api/auth/users
+   * Listar usuarios del sistema (solo Admin)
+   */
+  router.get('/users', authJwt.verifyToken, authJwt.isAdmin, authController.listUsers);
+
   app.use('/api/auth', router);
 };

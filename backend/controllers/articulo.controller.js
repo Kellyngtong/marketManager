@@ -21,9 +21,15 @@ exports.getAllArticulos = async (req, res) => {
     // MULTITENANT: Agregar filtro por tenant_id y store_id
     let whereCondition = {
       condicion: 1,
-      id_tenant: req.tenant?.id_tenant || null,
-      id_store: req.tenant?.id_store || null,
     };
+
+    if (req.tenant?.id_tenant) {
+      whereCondition.id_tenant = req.tenant.id_tenant;
+    }
+
+    if (req.tenant?.id_store) {
+      whereCondition.id_store = req.tenant.id_store;
+    }
 
     if (idcategoria) {
       whereCondition.idcategoria = idcategoria;
@@ -94,8 +100,8 @@ exports.getArticuloById = async (req, res) => {
       where: {
         idarticulo: id,
         condicion: 1,
-        id_tenant: req.tenant?.id_tenant || null,
-        id_store: req.tenant?.id_store || null,
+        ...(req.tenant?.id_tenant ? { id_tenant: req.tenant.id_tenant } : {}),
+        ...(req.tenant?.id_store ? { id_store: req.tenant.id_store } : {}),
       },
       include: [
         {

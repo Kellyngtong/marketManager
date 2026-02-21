@@ -1,6 +1,12 @@
-<input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelected($event)" />
+<input
+  #avatarInput
+  type="file"
+  accept="image/*"
+  hidden
+  (change)="onAvatarSelected($event)"
+/>
 
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar class="home-toolbar">
     <div class="identity-block">
       <button
@@ -10,7 +16,12 @@
         [disabled]="isUploadingAvatar"
       >
         <ion-avatar>
-          <img *ngIf="clientAvatar; else defaultAvatar" [src]="clientAvatar" alt="Avatar del cliente" />
+          <img
+            *ngIf="clientAvatar; else defaultAvatar"
+            [src]="clientAvatar"
+            alt="Avatar del cliente"
+            (error)="onAvatarImageError()"
+          />
           <ng-template #defaultAvatar>
             <ion-icon name="person-circle-outline"></ion-icon>
           </ng-template>
@@ -25,16 +36,38 @@
       <div class="identity-info">
         <p class="client-label">Cliente</p>
         <h2>
-          <button type="button" class="client-name-button" routerLink="/profile">
+          <button
+            type="button"
+            class="client-name-button"
+            routerLink="/profile"
+          >
             {{ clientName }}
           </button>
         </h2>
       </div>
     </div>
 
-    <ion-buttons slot="end">
-      <ion-button routerLink="/cart" fill="clear">
-        <ion-icon slot="icon-only" name="cart-outline"></ion-icon>
+    <ion-buttons slot="end" class="header-actions">
+      <ion-button
+        class="offers-button"
+        fill="outline"
+        size="small"
+        [class.active]="showOnlyOffers"
+        (click)="toggleOffersOnly()"
+      >
+        <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+        <span class="offer-text">Ofertas</span>
+      </ion-button>
+      <ion-button
+        class="cart-button"
+        routerLink="/cart"
+        fill="clear"
+        aria-label="Carrito"
+      >
+        <ion-icon class="cart-icon" name="cart-outline"></ion-icon>
+        <ion-badge class="cart-badge" *ngIf="cartItemsCount > 0">
+          {{ cartBadgeLabel }}
+        </ion-badge>
       </ion-button>
       <ion-button routerLink="/historial" fill="clear">
         <ion-icon slot="icon-only" name="time-outline"></ion-icon>
@@ -52,13 +85,22 @@
       <p class="filter-label">Tipo seleccionado</p>
       <h3>{{ getTipoLabel(selectedTipo) }}</h3>
     </div>
-    <ion-button id="tipoFilterTrigger" fill="outline" color="primary" size="small">
+    <ion-button
+      id="tipoFilterTrigger"
+      fill="outline"
+      color="primary"
+      size="small"
+    >
       <ion-icon slot="start" name="funnel-outline"></ion-icon>
       {{ getTipoLabel(selectedTipo) }}
     </ion-button>
   </section>
 
-  <ion-popover trigger="tipoFilterTrigger" triggerAction="click" [dismissOnSelect]="true">
+  <ion-popover
+    trigger="tipoFilterTrigger"
+    triggerAction="click"
+    [dismissOnSelect]="true"
+  >
     <ng-template>
       <ion-content class="tipo-popover">
         <ion-list>
@@ -84,6 +126,7 @@
     <app-product-card
       *ngFor="let product of products"
       [product]="product"
+      [cartCount]="getProductCartCount(product)"
       (addToCart)="addToCart($event)"
       (goToDetail)="goToDetail($event)"
     ></app-product-card>

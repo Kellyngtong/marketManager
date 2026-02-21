@@ -1,0 +1,204 @@
+@use '../components/_colors' as colors;
+
+ion-content {
+  --background: #{colors.$background};
+}
+
+ion-toolbar {
+  --background: #{colors.$surface};
+  --color: #{colors.$textPrimary};
+  --border-color: #{colors.$border};
+}
+
+.panel {
+  max-width: 760px;
+  margin: 1rem auto;
+  padding: 1rem;
+  border: 1px solid colors.$border;
+  border-radius: 12px;
+  background: colors.$surface;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    color: colors.$textPrimary;
+  }
+
+  p {
+    margin: 0;
+    color: colors.$textSecondary;
+    line-height: 1.25;
+  }
+}
+
+.refresh-button {
+  --background: #{colors.$primary};
+  --color: #{colors.$surface};
+  --background-hover: #{colors.$primaryDark};
+  --border-radius: 10px;
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
+.filter-bar {
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: colors.$textPrimary;
+  }
+}
+
+.filter-label {
+  margin: 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: colors.$textSecondary;
+}
+
+.tipo-popover {
+  --background: #{colors.$surface};
+
+  ion-item {
+    --color: #{colors.$textPrimary};
+  }
+}
+
+.loading {
+  display: block;
+  margin: 1rem auto;
+}
+
+.empty {
+  margin-top: 1rem;
+  color: colors.$textSecondary;
+  text-align: center;
+}
+
+.product-card {
+  margin-top: 0.75rem;
+  border: 1px solid colors.$border;
+  border-radius: 10px;
+  padding: 0.7rem;
+  background: colors.$surface;
+}
+
+.main-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 0.6rem;
+  align-items: start;
+}
+
+.thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid colors.$border;
+}
+
+.info {
+  h3 {
+    margin: 0;
+    color: colors.$textPrimary;
+    font-size: 0.98rem;
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 0.1rem 0 0.2rem;
+    color: colors.$textSecondary;
+    font-size: 0.8rem;
+  }
+}
+
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  strong {
+    color: colors.$textPrimary;
+  }
+}
+
+.offer-label {
+  color: colors.$secondary;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.toggle-item {
+  --background: #{colors.$surface};
+  --color: #{colors.$textPrimary};
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  margin: 0;
+
+  ion-label {
+    font-size: 0.92rem;
+    white-space: normal;
+  }
+}
+
+.offer-editor {
+  margin-top: 0.5rem;
+  border-top: 1px solid colors.$border;
+  padding-top: 0.5rem;
+
+  ion-item {
+    --background: #{colors.$surface};
+    --color: #{colors.$textPrimary};
+    border: 1px solid colors.$border;
+    border-radius: 8px;
+    margin-bottom: 0.45rem;
+  }
+
+  ion-button {
+    --background: #{colors.$primary};
+    --color: #{colors.$surface};
+    --background-hover: #{colors.$primaryDark};
+    --border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 640px) {
+  .panel {
+    margin: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .main-row {
+    grid-template-columns: 52px 1fr;
+    gap: 0.5rem;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .thumb {
+    width: 52px;
+    height: 52px;
+  }
+
+  .toggle-item {
+    grid-column: 1 / -1;
+    margin-top: 0.15rem;
+  }
+
+  .offer-editor {
+    padding-top: 0.45rem;
+  }
+}
