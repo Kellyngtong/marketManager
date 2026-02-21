@@ -15,6 +15,7 @@ import authRoutes from './routes/auth.routes';
 import articulosRoutes from './routes/articulos.routes';
 import carritoRoutes from './routes/carrito.routes';
 import pagosRoutes from './routes/pagos.routes';
+import adminRoutes from './routes/admin.routes';
 
 const app: Express = express();
 
@@ -119,6 +120,7 @@ const startServer = (): void => {
       articulosRoutes(app);
       carritoRoutes(app);
       pagosRoutes(app);
+      adminRoutes(app);
 
       // Health check
       app.get('/api/health', (req, res) => {

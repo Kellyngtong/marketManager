@@ -297,6 +297,80 @@ async function seedDatabase(): Promise<void> {
 
     console.log('✅ Artículos creados (19 x 2 tenants = 38 total)');
 
+    // 8. CREAR USUARIOS PARA PRUEBAS
+    const testUsers = [
+      {
+        idusuario: 100,
+        idrol: 1,
+        nombre: 'Juan Pérez',
+        email: 'juan@test.com',
+        clave: await bcrypt.hash('juan123', 10),
+        condicion: true,
+      },
+      {
+        idusuario: 101,
+        idrol: 1,
+        nombre: 'María García',
+        email: 'maria@test.com',
+        clave: await bcrypt.hash('maria123', 10),
+        condicion: true,
+      },
+      {
+        idusuario: 102,
+        idrol: 2,
+        nombre: 'Carlos López Premium',
+        email: 'carlos@test.com',
+        clave: await bcrypt.hash('carlos123', 10),
+        condicion: true,
+      },
+    ];
+
+    await db.usuario.bulkCreate(testUsers, { ignoreDuplicates: true });
+    console.log('✅ Usuarios de prueba creados');
+
+    // 9. CREAR VENTAS/PEDIDOS PARA PRUEBAS
+    const testVentas = [
+      {
+        idventa: 1000,
+        idcliente: 100,
+        idusuario: 100,
+        tipo_comprobante: 'FACTURA',
+        serie_comprobante: 'F001',
+        num_comprobante: '000001',
+        fecha_hora: new Date('2026-02-15'),
+        impuesto: 21.50,
+        total: 125.50,
+        estado: 'COMPLETADO',
+      },
+      {
+        idventa: 1001,
+        idcliente: 101,
+        idusuario: 101,
+        tipo_comprobante: 'FACTURA',
+        serie_comprobante: 'F001',
+        num_comprobante: '000002',
+        fecha_hora: new Date('2026-02-16'),
+        impuesto: 18.90,
+        total: 95.50,
+        estado: 'COMPLETADO',
+      },
+      {
+        idventa: 1002,
+        idcliente: 102,
+        idusuario: 102,
+        tipo_comprobante: 'FACTURA',
+        serie_comprobante: 'F001',
+        num_comprobante: '000003',
+        fecha_hora: new Date('2026-02-16'),
+        impuesto: 25.20,
+        total: 156.80,
+        estado: 'PENDIENTE',
+      },
+    ];
+
+    await db.venta.bulkCreate(testVentas, { ignoreDuplicates: true });
+    console.log('✅ Pedidos de prueba creados');
+
     console.log('\n✅ ¡Seeder completado exitosamente!');
     console.log('\n📝 Credenciales para pruebas:');
     console.log('   Admin: admin@test.com / admin123 (Tenant 1, Store 1)');

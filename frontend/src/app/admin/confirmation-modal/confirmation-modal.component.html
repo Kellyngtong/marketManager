@@ -1,0 +1,27 @@
+<div class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>{{ title }}</h2>
+    </div>
+
+    <div class="modal-body">
+      <p>{{ message }}</p>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn btn-cancel"
+        (click)="dismiss()"
+      >
+        {{ cancelText }}
+      </button>
+      <button
+        class="btn btn-confirm"
+        [class.btn-danger]="isDangerous"
+        (click)="confirm()"
+      >
+        {{ confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

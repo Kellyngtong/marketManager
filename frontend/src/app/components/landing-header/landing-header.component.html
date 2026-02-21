@@ -3,7 +3,9 @@
     <div class="navbar-wrapper">
       <!-- LOGO -->
       <div class="navbar-logo">
-        <span class="logo-text" routerLink="/home" class="logo-link">Mercachona</span>
+        <span class="logo-text" routerLink="/home" class="logo-link"
+          >Mercachona</span
+        >
       </div>
 
       <!-- MENU DESKTOP (only show when no user) -->
@@ -49,20 +51,10 @@
         </ng-container>
 
         <ng-template #logoutButton>
-          <ion-button
-            fill="clear"
-            (click)="logout()"
-            class="logout-btn"
-          >
+          <ion-button fill="clear" (click)="logout()" class="logout-btn">
             <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
           </ion-button>
         </ng-template>
-
-        <!-- MENU MOBILE -->
-        <ion-menu-button
-          menu="menu-principal"
-          class="menu-mobile-btn"
-        ></ion-menu-button>
       </div>
     </div>
   </ion-toolbar>

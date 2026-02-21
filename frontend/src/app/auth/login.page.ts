@@ -75,7 +75,7 @@ export class LoginPage {
         const isAdmin = rolId === 4 || rolNombre.includes('admin');
         const isEmpleado = rolId === 3 || rolNombre.includes('empleado') || rolNombre.includes('staff');
 
-        const targetRoute = isAdmin ? '/admin' : isEmpleado ? '/empleado' : '/home';
+        const targetRoute = isAdmin ? '/admin/dashboard' : isEmpleado ? '/empleado' : '/home';
         this.router.navigateByUrl(targetRoute, { replaceUrl: true });
       }
     } catch (err: any) {
