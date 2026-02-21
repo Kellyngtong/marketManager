@@ -1,11 +1,15 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { AdminPageRoutingModule } from './admin-routing.module';
-import { AdminPage } from './admin.page';
+import { AdminDashboardComponent } from './admin-dashboard.component';
+import { EditUserModalComponent } from './edit-user-modal/edit-user-modal.component';
+import { ConfirmationModalComponent } from './confirmation-modal/confirmation-modal.component';
 
 @NgModule({
-  imports: [CommonModule, IonicModule, AdminPageRoutingModule, AdminPage],
+  declarations: [AdminDashboardComponent, EditUserModalComponent, ConfirmationModalComponent],
+  imports: [CommonModule, IonicModule, AdminPageRoutingModule, ReactiveFormsModule],
 })
 export class AdminPageModule {}

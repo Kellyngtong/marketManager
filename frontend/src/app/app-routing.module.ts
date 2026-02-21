@@ -20,6 +20,13 @@ const routes: Routes = [
       ),
   },
   {
+    path: 'order/:id',
+    loadChildren: () =>
+      import('./order-detail/order-detail.module').then(
+        (m) => m.OrderDetailPageModule,
+      ),
+  },
+  {
     path: 'cart',
     loadChildren: () =>
       import('./cart/cart.module').then((m) => m.CartPageModule),

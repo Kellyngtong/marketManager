@@ -1,29 +1,145 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
+      <ion-back-button defaultHref="/productos"></ion-back-button>
     </ion-buttons>
-    <ion-title>Detalle del Producto</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content *ngIf="product">
-  <ion-card>
-    <img *ngIf="product.imagen || product.image" [src]="product.imagen || product.image" alt="{{product.nombre || product.name}}" />
-    <ion-card-header>
-      <ion-card-title>{{product.nombre || product.name}}</ion-card-title>
-      <ion-card-subtitle>
-        {{(product.precio_venta !== undefined ? product.precio_venta : product.price) | currency:'EUR'}}
-        <span class="offer-label" *ngIf="product.oferta">OFERTA</span>
-      </ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      <p>{{product.descripcion || product.description}}</p>
-      <p><strong>Stock:</strong> {{product.stock}}</p>
-      <ion-button expand="block" color="primary" (click)="addToCart()">
-        <ion-icon slot="start" name="cart"></ion-icon>
+<ion-content class="ion-padding" *ngIf="product; else notFound">
+
+  <!-- Product Details Grid -->
+  <div class="product-grid">
+    <!-- Product Image -->
+    <div class="product-image-container">
+      <div class="product-image-card">
+        <img 
+          [src]="product.imagen || product.image" 
+          [alt]="product.nombre"
+          class="product-image"
+        />
+        
+        <!-- Discount Badge -->
+        <div *ngIf="product.descuento && product.descuento > 0" class="badge discount-badge">
+          -{{ product.descuento }}%
+        </div>
+
+        <!-- Premium Badge -->
+        <div *ngIf="product.premium" class="badge premium-badge">
+          <ion-icon name="crown"></ion-icon>
+          Premium
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="product-info">
+      <!-- Category -->
+      <p class="product-category">{{ product.categoria }}</p>
+      
+      <!-- Title -->
+      <h1 class="product-title">{{ product.nombre }}</h1>
+
+      <!-- Price Section -->
+      <div class="price-section">
+        <div *ngIf="product.descuento && product.descuento > 0; else noDiscount">
+          <div class="price-with-discount">
+            <span class="current-price">€{{ finalPrice.toFixed(2) }}</span>
+            <span class="original-price">€{{ product.precio_venta.toFixed(2) }}</span>
+            <span class="savings-badge">Ahorra €{{ (product.precio_venta - finalPrice).toFixed(2) }}</span>
+          </div>
+        </div>
+        <ng-template #noDiscount>
+          <span class="price">€{{ product.precio_venta.toFixed(2) }}</span>
+        </ng-template>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- Description -->
+      <div class="description-section">
+        <h3>Descripción</h3>
+        <p>{{ product.descripcion || 'Producto de la mejor calidad. Seleccionado cuidadosamente para garantizar tu satisfacción. Ideal para toda la familia.' }}</p>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- Quantity Selector -->
+      <div class="quantity-section">
+        <label>Cantidad</label>
+        <div class="quantity-control">
+          <div class="quantity-input">
+            <button (click)="decrementQuantity()" class="qty-btn">
+              <ion-icon name="remove"></ion-icon>
+            </button>
+            <span class="quantity-value">{{ quantity }}</span>
+            <button (click)="incrementQuantity()" class="qty-btn">
+              <ion-icon name="add"></ion-icon>
+            </button>
+          </div>
+          <div class="subtotal">
+            <span class="label">Subtotal:</span>
+            <span class="amount">€{{ totalPrice.toFixed(2) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add to Cart Button -->
+      <button 
+        (click)="addToCart()" 
+        class="add-to-cart-btn"
+      >
+        <ion-icon name="cart"></ion-icon>
         Añadir al carrito
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+      </button>
+
+      <div class="separator"></div>
+
+      <!-- Features -->
+      <div class="features-section">
+        <div class="feature">
+          <ion-icon name="gift"></ion-icon>
+          <span>Envío gratis en pedidos +50€</span>
+        </div>
+        <div class="feature">
+          <ion-icon name="shield-checkmark"></ion-icon>
+          <span>Garantía de calidad</span>
+        </div>
+        <div class="feature">
+          <ion-icon name="star"></ion-icon>
+          <span>Productos frescos diarios</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  <div *ngIf="relatedProducts && relatedProducts.length > 0" class="related-products-section">
+    <h2>Productos relacionados</h2>
+    <div class="related-products-grid">
+      <div *ngFor="let relProduct of relatedProducts" class="related-product-card">
+        <a [href]="'/producto/' + relProduct.idarticulo">
+          <img 
+            [src]="relProduct.imagen || relProduct.image" 
+            [alt]="relProduct.nombre"
+            class="related-product-image"
+          />
+          <h4>{{ relProduct.nombre }}</h4>
+          <div class="related-product-price">
+            <span>€{{ relProduct.precio_venta.toFixed(2) }}</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
 </ion-content>
+
+<ng-template #notFound>
+  <ion-content class="ion-padding">
+    <div class="not-found">
+      <h2>Producto no encontrado</h2>
+      <p>El producto que buscas no existe o ha sido eliminado</p>
+      <button (click)="goBack()" class="back-btn">Ver todos los productos</button>
+    </div>
+  </ion-content>
+</ng-template>

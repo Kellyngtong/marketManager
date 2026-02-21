@@ -10,8 +10,6 @@ export class Venta extends Model {
   public fecha_hora!: Date;
   public impuesto!: number;
   public total!: number;
-  public metodo_pago?: string;
-  public direccion_envio?: string;
   public estado!: string;
 }
 
@@ -54,14 +52,6 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
       total: {
         type: dataTypes.DECIMAL(11, 2),
         allowNull: false,
-      },
-      metodo_pago: {
-        type: dataTypes.STRING(30),
-        allowNull: true,
-      },
-      direccion_envio: {
-        type: dataTypes.STRING(200),
-        allowNull: true,
       },
       estado: {
         type: dataTypes.STRING(20),
