@@ -1,7 +1,7 @@
 @use "../_colors" as colors;
 
 .btn-start-shopping {
-  background: colors.$secondary;
+  background: colors.$secondary !important;
   color: colors.$textPrimary;
   border: none;
   padding: 14px 48px;

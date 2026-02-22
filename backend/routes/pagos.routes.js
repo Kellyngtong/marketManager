@@ -1,7 +1,7 @@
 module.exports = (app) => {
   const express = require("express");
   const router = express.Router();
-  const pagoController = require("../controllers/stripe.payment.controller");
+  const pagoController = require("../src/controllers/stripe.payment.controller");
   const authJwt = require("../middlewares/authJwt");
 
   /**

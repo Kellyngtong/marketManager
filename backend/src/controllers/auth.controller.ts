@@ -1,11 +1,11 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { Usuario } from '@models/usuario.model';
-import { Rol } from '@models/rol.model';
-import db from '@db/index';
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { Usuario } from "@models/usuario.model";
+import { Rol } from "@models/rol.model";
+import db from "@db/index";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
+const JWT_SECRET = process.env.JWT_SECRET || "secretkey";
 
 export interface JWTPayload {
   idusuario: number;
@@ -27,7 +27,10 @@ export interface AuthRequest extends Request {
 }
 
 // Register - Crear nuevo usuario
-export const register = async (req: AuthRequest, res: Response): Promise<void> => {
+export const register = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
   try {
     const {
       nombre,
@@ -45,7 +48,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
     // Validar campos requeridos
     if (!nombre || !email || !clave) {
       res.status(400).json({
-        message: 'nombre, email y clave son requeridos',
+        message: "nombre, email y clave son requeridos",
       });
       return;
     }
@@ -56,7 +59,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
     });
     if (existing) {
       res.status(400).json({
-        message: 'El email ya está registrado',
+        message: "El email ya está registrado",
       });
       return;
     }
@@ -66,7 +69,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
     const rolExists = await (db.rol as typeof Rol).findByPk(rol);
     if (!rolExists) {
       res.status(400).json({
-        message: 'Rol inválido',
+        message: "Rol inválido",
       });
       return;
     }
@@ -94,19 +97,19 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
       usuario.idusuario,
       {
         include: [
-          { model: db.rol, attributes: ['idrol', 'nombre', 'descripcion'] },
+          { model: db.rol, attributes: ["idrol", "nombre", "descripcion"] },
         ],
-        attributes: { exclude: ['clave'] },
-      }
+        attributes: { exclude: ["clave"] },
+      },
     );
 
     res.status(201).json({
-      message: 'Usuario creado exitosamente',
+      message: "Usuario creado exitosamente",
       usuario: usuarioWithRol,
     });
   } catch (err) {
-    console.error('Error en register:', err);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    console.error("Error en register:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -117,7 +120,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
 
     if (!email || !clave) {
       res.status(400).json({
-        message: 'email y clave son requeridos',
+        message: "email y clave son requeridos",
       });
       return;
     }
@@ -125,12 +128,12 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
     // Buscar usuario con su rol
     const usuario = await (db.usuario as typeof Usuario).findOne({
       where: { email },
-      include: [{ model: db.rol, attributes: ['idrol', 'nombre'] }],
+      include: [{ model: db.rol, attributes: ["idrol", "nombre"] }],
     });
 
     if (!usuario) {
       res.status(401).json({
-        message: 'Credenciales inválidas',
+        message: "Credenciales inválidas",
       });
       return;
     }
@@ -139,7 +142,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
     const match = await bcrypt.compare(clave, usuario.clave);
     if (!match) {
       res.status(401).json({
-        message: 'Credenciales inválidas',
+        message: "Credenciales inválidas",
       });
       return;
     }
@@ -147,7 +150,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
     // Verificar que el usuario esté activo
     if (!usuario.condicion) {
       res.status(401).json({
-        message: 'Usuario desactivado',
+        message: "Usuario desactivado",
       });
       return;
     }
@@ -157,47 +160,53 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
       idusuario: usuario.idusuario,
       email: usuario.email,
       idrol: usuario.idrol,
-      rolNombre: ((usuario as any).rol as any)?.nombre || 'Usuario',
-      id_tenant: usuario.id_tenant || undefined,
-      id_store: usuario.id_store || undefined,
+      rolNombre: ((usuario as any).rol as any)?.nombre || "Usuario",
+      id_tenant: usuario.id_tenant || 1,
+      id_store: usuario.id_store || 1,
     };
 
-    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "24h" });
 
     res.json({
-      message: 'Login exitoso',
+      message: "Login exitoso",
       accessToken: token,
       usuario: {
         idusuario: usuario.idusuario,
         nombre: usuario.nombre,
         email: usuario.email,
+        avatar: usuario.avatar,
+        telefono: usuario.telefono,
+        direccion: usuario.direccion,
         id_tenant: usuario.id_tenant,
         id_store: usuario.id_store,
-        rol: ((usuario as any).rol as any)?.nombre || 'Usuario',
+        rol: ((usuario as any).rol as any)?.nombre || "Usuario",
         idrol: usuario.idrol,
       },
     });
   } catch (err) {
-    console.error('Error en login:', err);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    console.error("Error en login:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
 // Get Profile - Obtener perfil del usuario autenticado
-export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getProfile = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
   try {
     const idusuario = req.idusuario;
 
     const usuario = await (db.usuario as typeof Usuario).findByPk(idusuario, {
       include: [
-        { model: db.rol, attributes: ['idrol', 'nombre', 'descripcion'] },
+        { model: db.rol, attributes: ["idrol", "nombre", "descripcion"] },
       ],
-      attributes: { exclude: ['clave'] },
+      attributes: { exclude: ["clave"] },
     });
 
     if (!usuario) {
       res.status(404).json({
-        message: 'Usuario no encontrado',
+        message: "Usuario no encontrado",
       });
       return;
     }
@@ -206,72 +215,77 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
       usuario,
     });
   } catch (err) {
-    console.error('Error en getProfile:', err);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    console.error("Error en getProfile:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
 // Update Profile - Actualizar perfil del usuario
 export const updateProfile = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const idusuario = req.idusuario;
-    const { nombre, telefono, direccion } = req.body;
+    const { nombre, telefono, direccion, avatar } = req.body;
 
     const usuario = await (db.usuario as typeof Usuario).findByPk(idusuario);
     if (!usuario) {
       res.status(404).json({
-        message: 'Usuario no encontrado',
+        message: "Usuario no encontrado",
       });
       return;
     }
 
     // Actualizar solo los campos permitidos
-    if (nombre) usuario.nombre = nombre;
-    if (telefono) usuario.telefono = telefono;
-    if (direccion) usuario.direccion = direccion;
+    if (nombre !== undefined) usuario.nombre = nombre;
+    if (telefono !== undefined) usuario.telefono = telefono;
+    if (direccion !== undefined) usuario.direccion = direccion;
+    if (avatar !== undefined) usuario.avatar = avatar;
 
     await usuario.save();
 
     res.json({
-      message: 'Perfil actualizado exitosamente',
+      message: "Perfil actualizado exitosamente",
       usuario: {
         idusuario: usuario.idusuario,
         nombre: usuario.nombre,
         email: usuario.email,
+        avatar: usuario.avatar,
         telefono: usuario.telefono,
         direccion: usuario.direccion,
       },
     });
   } catch (err) {
-    console.error('Error en updateProfile:', err);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    console.error("Error en updateProfile:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
 // List Users - Obtener todos los usuarios (solo Admin)
-export const listUsers = async (req: AuthRequest, res: Response): Promise<void> => {
+export const listUsers = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
   try {
     const usuarios = await (db.usuario as typeof Usuario).findAll({
       include: [
         {
           model: db.rol,
-          attributes: ['idrol', 'nombre', 'descripcion'],
+          attributes: ["idrol", "nombre", "descripcion"],
         },
       ],
-      attributes: { exclude: ['clave'] },
-      order: [['idusuario', 'ASC']],
+      attributes: { exclude: ["clave"] },
+      order: [["idusuario", "ASC"]],
     });
 
     res.json({
-      message: 'Usuarios obtenidos exitosamente',
+      message: "Usuarios obtenidos exitosamente",
       count: usuarios.length,
       usuarios,
     });
   } catch (err) {
-    console.error('Error en listUsers:', err);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    console.error("Error en listUsers:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

@@ -92,7 +92,7 @@ exports.crearSesionPago = async (req, res) => {
     // Preparar line items para Stripe
     const lineItems = items.map((item) => ({
       price_data: {
-        currency: "usd",
+        currency: "eur",
         product_data: {
           name: item.articulo.nombre,
           description: item.articulo.descripcion,
@@ -106,7 +106,7 @@ exports.crearSesionPago = async (req, res) => {
     // Agregar impuesto como line item separado
     lineItems.push({
       price_data: {
-        currency: "usd",
+        currency: "eur",
         product_data: {
           name: "Impuesto (IVA 18%)",
         },

@@ -1,0 +1,103 @@
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0 1rem 0;
+
+  ion-button {
+    flex: 1;
+  }
+
+  // Botón verde personalizado
+  ion-button.btn-save {
+    --background: #10b981;
+    --background-hover: #059669;
+    --background-activated: #047857;
+    --color: #fff;
+    --box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+
+    &:hover {
+      --background: #059669;
+      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    &:active {
+      --background: #047857;
+    }
+
+    &:disabled {
+      --background: #d1d5db;
+      --color: #9ca3af;
+      opacity: 0.6;
+    }
+
+    ::ng-deep .button-native {
+      color: #fff !important;
+    }
+
+    ::ng-deep .button-inner {
+      color: #fff !important;
+    }
+
+    ion-icon {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+ion-item {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 1rem;
+
+  &:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+
+  ion-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+}
+
+ion-input,
+ion-select,
+ion-textarea {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  margin-top: 0.5rem;
+}
+
+ion-text {
+  display: block;
+  margin-top: 0.25rem;
+
+  small {
+    font-size: 0.8rem;
+    padding-left: 0.25rem;
+  }
+}
+
+ion-header {
+  ion-toolbar {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+
+    ion-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+  }
+}
+
+ion-content {
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+}

@@ -1,47 +1,174 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Iniciar sesión</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mercachona</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- CUENTAS DE PRUEBA (DESARROLLO) -->
-  <ion-card *ngIf="testAccounts.length > 0" class="dev-accounts-card">
-    <ion-card-header>
-      <ion-card-title>
-        <ion-icon name="beaker-outline"></ion-icon> Cuentas de Prueba (Dev)
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-list>
-        <ion-item *ngFor="let account of testAccounts" button (click)="selectTestAccount(account)">
-          <ion-label>
-            <h2>{{ account.name }}</h2>
-            <p>{{ account.email }}</p>
-            <p class="role-badge">{{ account.role }}</p>
-          </ion-label>
-          <ion-icon name="chevron-forward" slot="end"></ion-icon>
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
+  <div class="login-container">
+    <!-- Título -->
+    <div class="login-header">
+      <h1 class="app-title">Mercachona</h1>
+      <p class="subtitle">Accede a tu cuenta o regístrate</p>
+    </div>
 
-  <!-- FORMULARIO DE LOGIN -->
-  <form (ngSubmit)="submit()">
-    <ion-item>
-      <ion-label position="stacked">Email</ion-label>
-      <ion-input type="email" [(ngModel)]="email" name="email" required></ion-input>
-    </ion-item>
+    <!-- Tabs -->
+    <div class="tabs-list">
+      <button
+        class="tab-trigger"
+        [class.active]="activeTab === 'login'"
+        (click)="activeTab = 'login'"
+      >
+        Iniciar Sesión
+      </button>
+      <button
+        class="tab-trigger"
+        [class.active]="activeTab === 'register'"
+        (click)="activeTab = 'register'"
+      >
+        Registrarse
+      </button>
+    </div>
 
-    <ion-item>
-      <ion-label position="stacked">Contraseña</ion-label>
-      <ion-input type="password" [(ngModel)]="password" name="password" required></ion-input>
-    </ion-item>
+    <!-- TAB: LOGIN -->
+    <div *ngIf="activeTab === 'login'" class="tab-content">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Iniciar Sesión</ion-card-title>
+          <ion-card-subtitle
+            >Ingresa tus credenciales para acceder</ion-card-subtitle
+          >
+        </ion-card-header>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top">Entrar</ion-button>
-  </form>
+        <form (ngSubmit)="submit()">
+          <ion-card-content>
+            <ion-item>
+              <ion-label position="stacked">Email</ion-label>
+              <ion-input
+                type="email"
+                [(ngModel)]="email"
+                name="email"
+                placeholder="tu@email.com"
+                required
+              ></ion-input>
+            </ion-item>
 
-  <div class="ion-text-center ion-margin-top">
-    <ion-button fill="clear" (click)="router.navigateByUrl('/register')">¿No tienes cuenta? Regístrate</ion-button>
+            <ion-item>
+              <ion-label position="stacked">Contraseña</ion-label>
+              <ion-input
+                type="password"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="••••••••"
+                required
+              ></ion-input>
+            </ion-item>
+
+            <!-- CUENTAS DE PRUEBA -->
+            <div class="test-accounts">
+              <p class="test-accounts-title">Cuentas de prueba:</p>
+              <p>Admin: admin@test.com / admin123</p>
+              <p>Premium: premium@test.com / pre123</p>
+              <p>Cliente: cliente@test.com / cli123</p>
+              <p>Empleado: empleado@test.com / emp123</p>
+            </div>
+          </ion-card-content>
+
+          <ion-card-content>
+            <ion-button
+              expand="block"
+              type="submit"
+              [disabled]="loading"
+              class="login-button"
+            >
+              <ion-icon name="log-in" slot="start"></ion-icon>
+              {{ loading ? 'Ingresando...' : 'Iniciar Sesión' }}
+            </ion-button>
+          </ion-card-content>
+        </form>
+      </ion-card>
+    </div>
+
+    <!-- TAB: REGISTER -->
+    <div *ngIf="activeTab === 'register'" class="tab-content">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Crear Cuenta</ion-card-title>
+          <ion-card-subtitle
+            >Regístrate para empezar a comprar</ion-card-subtitle
+          >
+        </ion-card-header>
+
+        <form (ngSubmit)="submitRegister()">
+          <ion-card-content>
+            <ion-item>
+              <ion-label position="stacked">Nombre</ion-label>
+              <ion-input
+                type="text"
+                [(ngModel)]="registerName"
+                name="registerName"
+                placeholder="Tu nombre"
+                required
+              ></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Email</ion-label>
+              <ion-input
+                type="email"
+                [(ngModel)]="registerEmail"
+                name="registerEmail"
+                placeholder="tu@email.com"
+                required
+              ></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Contraseña</ion-label>
+              <ion-input
+                type="password"
+                [(ngModel)]="registerPassword"
+                name="registerPassword"
+                placeholder="••••••••"
+                required
+              ></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Confirmar Contraseña</ion-label>
+              <ion-input
+                type="password"
+                [(ngModel)]="registerPasswordConfirm"
+                name="registerPasswordConfirm"
+                placeholder="••••••••"
+                required
+              ></ion-input>
+            </ion-item>
+          </ion-card-content>
+
+          <ion-card-content>
+            <ion-button
+              expand="block"
+              type="submit"
+              [disabled]="loading"
+              class="login-button"
+            >
+              <ion-icon name="person-add" slot="start"></ion-icon>
+              {{ loading ? 'Creando cuenta...' : 'Registrarse' }}
+            </ion-button>
+          </ion-card-content>
+        </form>
+      </ion-card>
+    </div>
+
+    <!-- Link Volver -->
+    <div class="back-link-container">
+      <ion-button fill="clear" (click)="router.navigateByUrl('/')">
+        Volver al inicio
+      </ion-button>
+    </div>
   </div>
 </ion-content>

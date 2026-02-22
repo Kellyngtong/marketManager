@@ -111,8 +111,8 @@ export class LandingPage implements OnInit, OnDestroy {
     this.router.navigate(['/home']);
   }
 
-  goToWelcome() {
-    this.router.navigate(['/welcome']);
+  goToLogin() {
+    this.router.navigate(['/login']);
   }
 
   toggleLanguage() {

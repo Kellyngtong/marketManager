@@ -1,4 +1,4 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import { DataTypes, Model, Sequelize } from "sequelize";
 
 export class Venta extends Model {
   public idventa!: number;
@@ -10,8 +10,6 @@ export class Venta extends Model {
   public fecha_hora!: Date;
   public impuesto!: number;
   public total!: number;
-  public metodo_pago?: string;
-  public direccion_envio?: string;
   public estado!: string;
 }
 
@@ -55,14 +53,6 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
         type: dataTypes.DECIMAL(11, 2),
         allowNull: false,
       },
-      metodo_pago: {
-        type: dataTypes.STRING(30),
-        allowNull: true,
-      },
-      direccion_envio: {
-        type: dataTypes.STRING(200),
-        allowNull: true,
-      },
       estado: {
         type: dataTypes.STRING(20),
         allowNull: false,
@@ -71,9 +61,9 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
     {
       sequelize,
       timestamps: false,
-      tableName: 'venta',
-      modelName: 'Venta',
-    }
+      tableName: "venta",
+      modelName: "Venta",
+    },
   );
 
   return Venta;

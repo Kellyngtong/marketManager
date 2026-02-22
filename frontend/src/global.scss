@@ -248,3 +248,23 @@ ion-item-divider {
   --background: #{colors.$background};
   --color: #{colors.$textSecondary};
 }
+/* List styling */
+ion-list {
+  --background: #{colors.$background};
+  background: #{colors.$background};
+}
+
+ion-list.list-ios {
+  background: #{colors.$background};
+  --ion-item-background: #{colors.$surface};
+}
+
+ion-list.list-md {
+  background: #{colors.$background};
+  --ion-item-background: #{colors.$surface};
+}
+
+ion-list.list-wp {
+  background: #{colors.$background};
+  --ion-item-background: #{colors.$surface};
+}

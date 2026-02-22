@@ -20,7 +20,7 @@ export class CartPage {
     private carritoService: CarritoService,
     private toastCtrl: ToastController,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ionViewWillEnter() {
@@ -52,7 +52,10 @@ export class CartPage {
 
   async updateItem(item: CartItem, cantidad: number) {
     try {
-      await firstValueFrom(this.carritoService.updateItem(item.idcarrito_item, cantidad));
+      // Si hay idcarrito_item (usuario autenticado, carrito del servidor), usar eso
+      // Si no, usar idarticulo (carrito local)
+      const itemId = item.idcarrito_item ?? item.idarticulo;
+      await firstValueFrom(this.carritoService.updateItem(itemId, cantidad));
     } catch (error) {
       await this.presentError(error);
     }
@@ -60,11 +63,14 @@ export class CartPage {
 
   async removeItem(item: CartItem) {
     try {
-      await firstValueFrom(this.carritoService.removeItem(item.idcarrito_item));
-      const t = await this.toastCtrl.create({ 
-        message: 'Producto eliminado del carrito', 
-        duration: 1500, 
-        color: 'success' 
+      // Si hay idcarrito_item (usuario autenticado, carrito del servidor), usar eso
+      // Si no, usar idarticulo (carrito local)
+      const itemId = item.idcarrito_item ?? item.idarticulo;
+      await firstValueFrom(this.carritoService.removeItem(itemId));
+      const t = await this.toastCtrl.create({
+        message: 'Producto eliminado del carrito',
+        duration: 1500,
+        color: 'success',
       });
       await t.present();
     } catch (error) {
@@ -79,7 +85,11 @@ export class CartPage {
 
     try {
       await firstValueFrom(this.carritoService.clearCart());
-      const t = await this.toastCtrl.create({ message: 'Carrito vaciado', duration: 1500, color: 'medium' });
+      const t = await this.toastCtrl.create({
+        message: 'Carrito vaciado',
+        duration: 1500,
+        color: 'medium',
+      });
       await t.present();
     } catch (error) {
       await this.presentError(error);
@@ -87,14 +97,16 @@ export class CartPage {
   }
 
   async handleCheckout() {
-    const t = await this.toastCtrl.create({
-      message: '¡Pedido realizado con éxito!',
-      duration: 2000,
-      color: 'success'
-    });
-    await t.present();
-    await firstValueFrom(this.carritoService.clearCart());
-    this.router.navigateByUrl('/home');
+    // Verificar si el usuario está autenticado
+    const user = this.auth.getProfile();
+    if (!user) {
+      // Redirigir a login si no hay usuario
+      this.router.navigateByUrl('/login');
+      return;
+    }
+
+    // Si está autenticado, ir a checkout
+    this.router.navigateByUrl('/checkout');
   }
 
   trackByItem(_: number, item: CartItem) {
@@ -107,7 +119,11 @@ export class CartPage {
       error?.error?.error ||
       error?.message ||
       'Ocurrió un error con el carrito';
-    const t = await this.toastCtrl.create({ message, duration: 2500, color: 'danger' });
+    const t = await this.toastCtrl.create({
+      message,
+      duration: 2500,
+      color: 'danger',
+    });
     await t.present();
   }
 }

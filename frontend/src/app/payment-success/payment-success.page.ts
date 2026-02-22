@@ -28,20 +28,39 @@ export class PaymentSuccessPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.subscribe(async (params) => {
       this.sessionId =
         params['session_id'] || localStorage.getItem('stripe_session_id');
+
       if (this.sessionId) {
-        // Directamente marcar como pago exitoso sin verificar
-        this.paymentStatus = 'success';
-        // Limpiar carrito
-        this.carritoService.clearCart().subscribe();
-        // Limpiar sessionId
-        localStorage.removeItem('stripe_session_id');
+        const loading = await this.loadingCtrl.create({
+          message: 'Procesando pago...',
+        });
+        await loading.present();
+
+        try {
+          // Confirmar pago en el servidor
+          const response = await this.pagosService
+            .confirmarPago(this.sessionId)
+            .toPromise();
+
+          this.paymentStatus = 'success';
+          this.orderNumber = response?.venta?.num_comprobante || this.sessionId;
+
+          // Limpiar carrito y sesión
+          this.carritoService.clearCart().subscribe();
+          localStorage.removeItem('stripe_session_id');
+        } catch (error: any) {
+          console.error('Error confirmando pago:', error);
+          this.paymentStatus = 'error';
+        } finally {
+          await loading.dismiss();
+          this.isLoading = false;
+        }
       } else {
         this.paymentStatus = 'error';
+        this.isLoading = false;
       }
-      this.isLoading = false;
     });
   }
 
