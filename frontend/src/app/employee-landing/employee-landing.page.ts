@@ -22,8 +22,13 @@ export class EmployeeLandingPage {
   ionViewWillEnter() {
     const user = this.auth.currentUserValue;
     const rolId = user?.idrol ?? user?.rol?.idrol;
-    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
-    const isEmpleado = rolId === 3 || rolNombre.includes('empleado') || rolNombre.includes('staff');
+    const rolNombre = String(
+      user?.rol?.nombre || user?.rol || '',
+    ).toLowerCase();
+    const isEmpleado =
+      rolId === 3 ||
+      rolNombre.includes('empleado') ||
+      rolNombre.includes('staff');
 
     if (!isEmpleado) {
       this.router.navigateByUrl('/home', { replaceUrl: true });

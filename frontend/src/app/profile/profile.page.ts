@@ -130,9 +130,7 @@ export class ProfilePage implements OnDestroy {
       }
 
       try {
-        await firstValueFrom(
-          this.auth.updateProfile({ avatar: avatarUrl }),
-        );
+        await firstValueFrom(this.auth.updateProfile({ avatar: avatarUrl }));
       } catch (profileError) {
         this.auth.updateLocalUser({ avatar: avatarUrl });
       }
@@ -173,7 +171,7 @@ export class ProfilePage implements OnDestroy {
       reader.readAsDataURL(file);
     });
   }
-async confirmLogout() {
+  async confirmLogout() {
     const modal = await this.modalCtrl.create({
       component: ConfirmationModalComponent,
       cssClass: 'confirmation-modal',
@@ -193,7 +191,6 @@ async confirmLogout() {
     }
   }
 
-  
   logout() {
     this.auth.logout();
     this.router.navigateByUrl('/', { replaceUrl: true });

@@ -1,7 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, LoadingController, ModalController, ToastController } from '@ionic/angular';
+import {
+  IonicModule,
+  LoadingController,
+  ModalController,
+  ToastController,
+} from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { AuthService } from '../auth/auth.service';
@@ -90,7 +95,9 @@ export class EmployersPage {
           page: String(page),
         });
 
-        const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
+        const response = await fetch(
+          `${this.API_HOST}/api/articulos?${params.toString()}`,
+        );
         if (!response.ok) {
           throw new Error('No se pudo obtener el inventario');
         }
@@ -103,7 +110,9 @@ export class EmployersPage {
       }
 
       this.products = this.selectedTipo
-        ? fullList.filter((product: any) => this.matchesSelectedTipo(product, this.selectedTipo as string))
+        ? fullList.filter((product: any) =>
+            this.matchesSelectedTipo(product, this.selectedTipo as string),
+          )
         : fullList;
     } catch (error) {
       console.error('Error loading inventory', error);
@@ -142,7 +151,9 @@ export class EmployersPage {
     }
 
     const product = data.product;
-    const loading = await this.loadingCtrl.create({ message: 'Creando producto...' });
+    const loading = await this.loadingCtrl.create({
+      message: 'Creando producto...',
+    });
     await loading.present();
 
     try {
@@ -161,7 +172,9 @@ export class EmployersPage {
         imageUrl = data.previewUrl;
       }
 
-      const normalizedTipo = String(product.tipo || '').trim().toLowerCase();
+      const normalizedTipo = String(product.tipo || '')
+        .trim()
+        .toLowerCase();
       const payload = {
         codigo: `SKU-${Date.now()}`,
         nombre: product.name,
@@ -191,7 +204,10 @@ export class EmployersPage {
       this.loadProducts();
     } catch (error: any) {
       console.error('Error creating article', error);
-      this.presentToast(error?.message || 'No se pudo crear el artículo', 'danger');
+      this.presentToast(
+        error?.message || 'No se pudo crear el artículo',
+        'danger',
+      );
     } finally {
       await loading.dismiss();
     }
@@ -232,7 +248,9 @@ export class EmployersPage {
         imageUrl = data.previewUrl;
       }
 
-      const normalizedTipo = String(edited.tipo || '').trim().toLowerCase();
+      const normalizedTipo = String(edited.tipo || '')
+        .trim()
+        .toLowerCase();
 
       const payload = {
         nombre: edited.name,
@@ -244,14 +262,17 @@ export class EmployersPage {
         imagen: imageUrl,
       };
 
-      const response = await fetch(`${this.API_HOST}/api/articulos/${product.idarticulo || product.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${this.API_HOST}/api/articulos/${product.idarticulo || product.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -262,7 +283,10 @@ export class EmployersPage {
       this.loadProducts();
     } catch (error: any) {
       console.error('Error updating article', error);
-      this.presentToast(error?.message || 'No se pudo actualizar el artículo', 'danger');
+      this.presentToast(
+        error?.message || 'No se pudo actualizar el artículo',
+        'danger',
+      );
     }
   }
 
@@ -294,15 +318,22 @@ export class EmployersPage {
       this.loadProducts();
     } catch (error: any) {
       console.error('Error deleting article', error);
-      this.presentToast(error?.message || 'No se pudo eliminar el artículo', 'danger');
+      this.presentToast(
+        error?.message || 'No se pudo eliminar el artículo',
+        'danger',
+      );
     }
   }
 
   private resolveCategoria(tipo: string, currentProduct?: any) {
-    const normalizedTipo = String(tipo || '').trim().toLowerCase();
+    const normalizedTipo = String(tipo || '')
+      .trim()
+      .toLowerCase();
 
     const fromLoadedProducts = this.products.find((product) => {
-      const productTipo = String(product?.tipo || '').trim().toLowerCase();
+      const productTipo = String(product?.tipo || '')
+        .trim()
+        .toLowerCase();
       return productTipo === normalizedTipo && Number(product?.idcategoria) > 0;
     });
 
@@ -318,7 +349,9 @@ export class EmployersPage {
   }
 
   private matchesSelectedTipo(product: any, tipo: string) {
-    const normalizedTipo = String(product?.tipo || '').trim().toLowerCase();
+    const normalizedTipo = String(product?.tipo || '')
+      .trim()
+      .toLowerCase();
     if (normalizedTipo === tipo) {
       return true;
     }
@@ -350,8 +383,15 @@ export class EmployersPage {
     }
   }
 
-  private async presentToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
-    const toast = await this.toastCtrl.create({ message, duration: 2000, color });
+  private async presentToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning' = 'success',
+  ) {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      color,
+    });
     await toast.present();
   }
 }

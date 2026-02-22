@@ -10,7 +10,12 @@ import { ConfirmationModalComponent } from '../../admin/confirmation-modal/confi
   templateUrl: './landing-header.component.html',
   styleUrls: ['./landing-header.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterModule, ConfirmationModalComponent],
+  imports: [
+    CommonModule,
+    IonicModule,
+    RouterModule,
+    ConfirmationModalComponent,
+  ],
 })
 export class LandingHeaderComponent {
   currentLanguage: string = 'es';
@@ -32,7 +37,7 @@ export class LandingHeaderComponent {
   goToLogin() {
     this.router.navigate(['/login']);
   }
-async confirmLogout() {
+  async confirmLogout() {
     const modal = await this.modalCtrl.create({
       component: ConfirmationModalComponent,
       cssClass: 'confirmation-modal',
@@ -52,7 +57,6 @@ async confirmLogout() {
     }
   }
 
-  
   logout() {
     this.auth.logout();
     this.router.navigate(['/']);
