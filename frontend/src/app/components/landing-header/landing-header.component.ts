@@ -24,12 +24,12 @@ export class LandingHeaderComponent {
     console.log('Idioma cambiado a:', this.currentLanguage);
   }
 
-  goToWelcome() {
-    this.router.navigate(['/welcome']);
+  goToLogin() {
+    this.router.navigate(['/login']);
   }
 
   logout() {
     this.auth.logout();
-    this.router.navigate(['/welcome']);
+    this.router.navigate(['/']);
   }
 }

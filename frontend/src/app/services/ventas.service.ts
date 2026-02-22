@@ -63,11 +63,18 @@ export class VentasService {
   }
 
   getHistorial(): Observable<{ historial: VentaResumen[] }> {
+    const token = this.auth.getToken();
+    console.log('🔍 VentasService.getHistorial() - Token:', token ? 'EXISTE' : 'NO EXISTE');
+    console.log('🔍 localStorage.accessToken:', localStorage.getItem('accessToken'));
+    console.log('🔍 localStorage.currentUser:', localStorage.getItem('currentUser'));
+    
     const cfg = this.authHeaders();
     if (!cfg) {
+      console.error('❌ Sin headers de autenticación en getHistorial()');
       return throwError(() => new Error('Debes iniciar sesión para ver tus compras'));
     }
 
+    console.log('✅ Headers configurados correctamente:', cfg);
     return this.http.get<{ historial: VentaResumen[] }>(this.historyUrl, cfg);
   }
 

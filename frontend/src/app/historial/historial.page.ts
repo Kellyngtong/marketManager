@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { VentasService, VentaResumen } from '../services/ventas.service';
@@ -11,16 +12,16 @@ import { VentasService, VentaResumen } from '../services/ventas.service';
 })
 export class HistorialPage {
   historial: VentaResumen[] = [];
-  selectedVenta: VentaResumen | null = null;
-  detailOpen = false;
   isLoading = false;
 
   constructor(
     private ventasService: VentasService,
+    private router: Router,
     private toastCtrl: ToastController
   ) {}
 
   ionViewWillEnter() {
+    console.log('📄 HistorialPage.ionViewWillEnter() - Cargando historial...');
     this.loadHistorial();
   }
 
@@ -29,9 +30,12 @@ export class HistorialPage {
       this.isLoading = true;
     }
     try {
+      console.log('⏳ loadHistorial() - Iniciando carga del historial...');
       const res = await firstValueFrom(this.ventasService.getHistorial());
+      console.log('✅ loadHistorial() - Datos recibidos:', res);
       this.historial = res?.historial || [];
     } catch (error) {
+      console.error('❌ loadHistorial() - Error:', error);
       await this.presentError(error);
     } finally {
       this.isLoading = false;
@@ -39,19 +43,8 @@ export class HistorialPage {
     }
   }
 
-  async verDetalle(venta: VentaResumen) {
-    try {
-      const res = await firstValueFrom(this.ventasService.getDetalleVenta(venta.idventa));
-      this.selectedVenta = res?.venta || venta;
-      this.detailOpen = true;
-    } catch (error) {
-      await this.presentError(error);
-    }
-  }
-
-  closeDetalle() {
-    this.detailOpen = false;
-    this.selectedVenta = null;
+  verDetalle(venta: VentaResumen) {
+    this.router.navigate(['/order', venta.idventa]);
   }
 
   trackByVenta(_: number, venta: VentaResumen) {

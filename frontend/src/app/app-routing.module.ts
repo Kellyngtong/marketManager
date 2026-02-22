@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { LandingPage } from './landing/landing.page';
+import { AuthGuard } from './auth/auth.guard';
+import { RoleGuard } from './auth/role.guard';
 
 const routes: Routes = [
   {
@@ -33,6 +35,7 @@ const routes: Routes = [
   },
   {
     path: 'checkout',
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import('./checkout/checkout.module').then((m) => m.CheckoutPageModule),
   },
@@ -52,6 +55,7 @@ const routes: Routes = [
   },
   {
     path: 'historial',
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import('./historial/historial.module').then((m) => m.HistorialPageModule),
   },
@@ -62,38 +66,44 @@ const routes: Routes = [
   },
   {
     path: 'empleado',
+    canActivate: [RoleGuard],
+    data: { roles: [3] }, // Solo Empleado (rol 3)
     loadChildren: () =>
       import('./employee-landing/employee-landing.module').then((m) => m.EmployeeLandingPageModule),
   },
   {
     path: 'adminPedidos',
+    canActivate: [RoleGuard],
+    data: { roles: [4] }, // Solo Admin (rol 4)
     loadChildren: () =>
       import('./admin-pedidos/admin-pedidos.module').then((m) => m.AdminPedidosPageModule),
   },
   {
     path: 'adminMarketing',
+    canActivate: [RoleGuard],
+    data: { roles: [4] }, // Solo Admin (rol 4)
     loadChildren: () =>
       import('./admin-marketing/admin-marketing.module').then((m) => m.AdminMarketingPageModule),
   },
   {
     path: 'contable',
+    canActivate: [RoleGuard],
+    data: { roles: [4] }, // Solo Admin (rol 4)
     loadChildren: () =>
       import('./contable/contable.module').then((m) => m.ContablePageModule),
   },
   {
     path: 'admin',
+    canActivate: [RoleGuard],
+    data: { roles: [4] }, // Solo Admin (rol 4)
     loadChildren: () =>
       import('./admin/admin.module').then((m) => m.AdminPageModule),
   },
   {
     path: 'profile',
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import('./profile/profile.module').then((m) => m.ProfilePageModule),
-  },
-  {
-    path: 'welcome',
-    loadChildren: () =>
-      import('./auth/welcome.module').then((m) => m.WelcomePageModule),
   },
   {
     path: 'login',

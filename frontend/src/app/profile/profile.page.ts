@@ -82,7 +82,7 @@ export class ProfilePage implements OnDestroy {
 
   logout() {
     this.auth.logout();
-    this.router.navigateByUrl('/welcome', { replaceUrl: true });
+    this.router.navigateByUrl('/', { replaceUrl: true });
   }
 
   ngOnDestroy(): void {

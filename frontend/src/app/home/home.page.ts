@@ -138,7 +138,16 @@ export class HomePage implements OnDestroy {
     }
 
     try {
-      await firstValueFrom(this.carritoService.addItem(articuloId, cantidad));
+      const articulo = {
+        idarticulo: articuloId,
+        nombre: producto?.nombre,
+        precio_venta: producto?.precio_venta,
+        stock: producto?.stock,
+        oferta: producto?.oferta,
+        imagen: producto?.imagen,
+        descripcion: producto?.descripcion
+      };
+      await firstValueFrom(this.carritoService.addItem(articuloId, cantidad, articulo));
       const t = await this.toastCtrl.create({ message: 'Producto añadido al carrito', duration: 1500, color: 'success' });
       await t.present();
     } catch (error: any) {

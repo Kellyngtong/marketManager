@@ -40,7 +40,8 @@ db.ingreso = require("./ingreso.model.js")(sequelize, Sequelize);
 db.detalle_ingreso = require("./detalle_ingreso.model.js")(sequelize, Sequelize);
 
 // Modelos de venta (ventas a clientes)
-db.venta = require("./venta.model.js")(sequelize, Sequelize);
+const ventaModule = require("./venta.model.ts");
+db.venta = ventaModule.default(sequelize);
 db.detalle_venta = require("./detalle_venta.model.js")(sequelize, Sequelize);
 db.carrito_item = require("./carrito_item.model.js")(sequelize, Sequelize);
 

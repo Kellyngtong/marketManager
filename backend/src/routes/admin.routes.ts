@@ -241,14 +241,44 @@ export default (app: Express): void => {
    */
   router.put("/products/:id", async (req: Request, res: Response) => {
     try {
-      const productId = req.params.id;
+      const productId = parseInt(req.params.id as string, 10);
+      
+      if (!productId || isNaN(productId)) {
+        console.log('❌ Invalid product ID:', req.params.id);
+        res.status(400).json({ message: 'ID de producto inválido' });
+        return;
+      }
+
+      console.log('📝 Updating product with ID:', productId);
+      
+      const product = await db.articulo.findByPk(productId);
+      
+      if (!product) {
+        console.log('❌ Product not found for ID:', productId);
+        res.status(404).json({ message: 'Producto no encontrado' });
+        return;
+      }
+
       const [updated] = await db.articulo.update(req.body, {
         where: { idarticulo: productId },
       });
-      res.json({ success: updated > 0 });
+
+      if (updated > 0) {
+        console.log('✅ Product updated successfully:', productId);
+        const updatedProduct = await db.articulo.findByPk(productId);
+        res.json({ success: true, product: updatedProduct });
+      } else {
+        console.log('⚠️ No changes made to product:', productId);
+        res.json({ success: false, message: 'No se realizaron cambios' });
+      }
     } catch (error) {
-      console.error("Error updating product:", error);
-      res.status(500).json({ success: false });
+      console.error("❌ Error updating product:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error actualizando producto',
+        error: errorMessage
+      });
     }
   });
 

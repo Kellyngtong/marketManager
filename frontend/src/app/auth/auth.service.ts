@@ -37,7 +37,17 @@ export class AuthService {
   public user$ = this.userSubject.asObservable();
 
   constructor(private http: HttpClient) {
+    console.log('🔧 AuthService constructor - Inicializando...');
     const token = this.getToken();
+    console.log('🔧 AuthService constructor - Token al iniciar:', token ? 'EXISTE' : 'NO EXISTE');
+    
+    // Monitor localStorage changes
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'accessToken') {
+        console.log('⚠️ localStorage "accessToken" cambió externamente:', event.newValue ? 'EXISTE' : 'ELIMINADO');
+      }
+    });
+    
     if (token && !this.userSubject.value) {
       this.getProfile().subscribe({ next: () => {}, error: () => {} });
     }
@@ -63,8 +73,12 @@ export class AuthService {
       clave: payload.clave || payload.password,
     };
 
+    console.log('🔐 AuthService.login() - Intentando login con email:', payload.email);
     return this.http.post(`${this.base}/login`, body).pipe(
-      tap((res: any) => this.persistSession(res))
+      tap((res: any) => {
+        console.log('✅ Login exitoso - Response:', res);
+        this.persistSession(res);
+      })
     );
   }
 
@@ -142,11 +156,15 @@ export class AuthService {
   }
 
   getToken() {
-    return localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
+    console.log('🔑 getToken() - Token recuperado:', token ? token.substring(0, 20) + '...' : 'NO EXISTE');
+    return token;
   }
 
   isLogged() {
-    return !!this.getToken();
+    const logged = !!this.getToken();
+    console.log('📊 isLogged():', logged);
+    return logged;
   }
 
   get currentUserValue() {
@@ -154,12 +172,24 @@ export class AuthService {
   }
 
   private persistSession(res: any) {
+    console.log('💾 persistSession() LLAMADO - Response:', res);
+    
     if (res && res.accessToken) {
+      console.log('💾 persistSession() - accessToken recibido:', res.accessToken.substring(0, 20) + '...');
+      console.log('💾 persistSession() - localStorage antes:', localStorage.getItem('accessToken') ? 'EXISTE' : 'VACÍO');
+      
       localStorage.setItem('accessToken', res.accessToken);
+      console.log('💾 persistSession() - Token guardado ✅');
+      console.log('💾 persistSession() - localStorage después:', localStorage.getItem('accessToken') ? 'EXISTE' : 'VACÍO');
+      
       const user = this.normalizeUser(res.usuario || res.user);
       if (user) {
+        console.log('💾 persistSession() - Guardando usuario:', user.idusuario, user.email);
         this.persistUser(user);
       }
+    } else {
+      console.error('❌ persistSession() - No hay accessToken en la respuesta:', res);
+      console.error('❌ Propiedades de res:', Object.keys(res || {}));
     }
   }
 
@@ -187,8 +217,13 @@ export class AuthService {
   }
 
   private persistUser(user: any) {
-    if (!user) return;
+    if (!user) {
+      console.error('❌ persistUser() - Usuario es null/undefined');
+      return;
+    }
+    console.log('💾 persistUser() - Guardando usuario en localStorage:', user.idusuario);
     localStorage.setItem('currentUser', JSON.stringify(user));
+    console.log('💾 persistUser() - Verificando guardado:', localStorage.getItem('currentUser') ? 'OK' : 'FALLO');
     this.userSubject.next(user);
   }
 

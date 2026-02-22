@@ -5,7 +5,6 @@ import db from "@db/index";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
-const { CarritoItem, Articulo } = db.sequelize.models;
 
 /**
  * POST /api/pagos/crear-sesion
@@ -24,11 +23,11 @@ export const crearSesionCheckout = async (
     }
 
     // Obtener items del carrito
-    const items = await CarritoItem.findAll({
+    const items = await db.carrito_item.findAll({
       where: { idusuario },
       include: [
         {
-          model: Articulo,
+          model: db.articulo,
           attributes: ["idarticulo", "nombre", "precio_venta", "imagen"],
         },
       ],
@@ -42,7 +41,7 @@ export const crearSesionCheckout = async (
     // Crear line items para Stripe
     const lineItems = items.map((item: any) => ({
       price_data: {
-        currency: "usd",
+        currency: "eur",
         product_data: {
           name: item.Articulo.nombre,
           images: item.Articulo.imagen ? [item.Articulo.imagen] : [],
@@ -61,8 +60,11 @@ export const crearSesionCheckout = async (
       line_items: lineItems,
       mode: "payment",
       customer_email: req.email,
-      success_url: process.env.STRIPE_SUCCESS_URL || "http://localhost:8100/payment-success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: process.env.STRIPE_CANCEL_URL || "http://localhost:8100/payment-cancel",
+      success_url:
+        process.env.STRIPE_SUCCESS_URL ||
+        "http://localhost:8100/payment-success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url:
+        process.env.STRIPE_CANCEL_URL || "http://localhost:8100/payment-cancel",
       metadata: {
         idusuario: idusuario.toString(),
         id_tenant: req.tenant?.id_tenant?.toString() || "1",
@@ -131,6 +133,143 @@ export const obtenerSesion = async (
 };
 
 /**
+ * GET /api/pagos/confirmar-pago
+ * Verificar y procesar pago exitoso (sin webhook)
+ * Query: sessionId
+ */
+export const confirmarPago = async (
+  req: TenantRequest & AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { sessionId } = req.query;
+    const idusuario = req.idusuario;
+
+    if (!sessionId || !idusuario) {
+      res.status(400).json({ message: "sessionId e idusuario requeridos" });
+      return;
+    }
+
+    // Obtener sesión de Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId as string);
+
+    if (!session) {
+      res.status(404).json({ message: "Sesión no encontrada" });
+      return;
+    }
+
+    // Verificar si el pago fue exitoso
+    if (session.payment_status !== "paid") {
+      res.status(400).json({ 
+        message: "Pago no confirmado",
+        status: session.payment_status 
+      });
+      return;
+    }
+
+    // Obtener items del carrito del usuario
+    const items: any[] = await db.carrito_item.findAll({
+      where: { idusuario },
+      include: [{ model: db.articulo }],
+    });
+
+    if (!items.length) {
+      res.status(400).json({ message: "Carrito vacío" });
+      return;
+    }
+
+    // Obtener usuario
+    const usuario = await db.usuario.findByPk(idusuario);
+    if (!usuario) {
+      res.status(404).json({ message: "Usuario no encontrado" });
+      return;
+    }
+
+    // Crear o actualizar cliente
+    let cliente = await db.cliente.findOne({
+      where: { email: usuario.email },
+    });
+
+    if (!cliente) {
+      cliente = await db.cliente.create({
+        nombre: usuario.nombre,
+        email: usuario.email,
+        telefono: usuario.telefono || null,
+        direccion: usuario.direccion || null,
+        tipo_documento: usuario.tipo_documento || null,
+        num_documento: usuario.num_documento || null,
+      });
+    }
+
+    // Calcular totales
+    const subtotal = items.reduce((sum: number, item: any) => {
+      const price = Number(item.articulo?.precio_venta || item.Articulo?.precio_venta || 0);
+      return sum + price * item.cantidad;
+    }, 0);
+
+    const impuesto = +(subtotal * 0.18).toFixed(2);
+    const total = +(subtotal + impuesto).toFixed(2);
+
+    // Crear venta
+    const venta = await db.venta.create({
+      idcliente: cliente.idcliente,
+      idusuario,
+      tipo_comprobante: "BOL",
+      serie_comprobante: "MM01",
+      num_comprobante: `MM${Date.now().toString().slice(-8)}`,
+      fecha_hora: new Date(),
+      impuesto,
+      total,
+      estado: "Completada",
+      metodo_pago: "stripe",
+      stripe_session_id: session.id,
+    });
+
+    // Crear detalles de venta y actualizar stock
+    for (const item of items) {
+      const precio = item.articulo?.precio_venta || item.Articulo?.precio_venta;
+      
+      await db.detalle_venta.create({
+        idventa: venta.idventa,
+        idarticulo: item.idarticulo,
+        cantidad: item.cantidad,
+        precio,
+        descuento: 0,
+      });
+
+      // Actualizar stock
+      const articulo = item.articulo || item.Articulo;
+      if (articulo) {
+        articulo.stock -= item.cantidad;
+        await articulo.save();
+      }
+    }
+
+    // Limpiar carrito
+    await db.carrito_item.destroy({ where: { idusuario } });
+
+    res.json({
+      message: "Pago confirmado y venta creada",
+      venta: {
+        idventa: venta.idventa,
+        num_comprobante: venta.num_comprobante,
+        total: venta.total,
+        estado: venta.estado,
+      },
+    });
+  } catch (error) {
+    console.error("Error confirmando pago:", error);
+    res.status(500).json({
+      message: "Error confirmando pago",
+      error:
+        process.env.NODE_ENV === "development"
+          ? (error as any).message
+          : undefined,
+    });
+  }
+};
+
+/**
  * POST /api/pagos/webhook
  * Webhook de Stripe para confirmar pagos
  */
@@ -153,12 +292,9 @@ export const handleWebhook = async (req: any, res: Response): Promise<void> => {
     // Manejar eventos de Stripe
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as any;
-      console.log("✅ Pago completado:", session.id);
-      // Aquí se puede crear la orden en la BD
 
       res.json({ received: true });
     } else if (event.type === "payment_intent.succeeded") {
-      console.log("✅ Payment intent succeeded");
       res.json({ received: true });
     } else {
       res.json({ received: true });

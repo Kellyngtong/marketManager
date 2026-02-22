@@ -4,6 +4,7 @@ import { AdminService } from '../services/admin.service';
 import { ToastController, ModalController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { EditUserModalComponent } from './edit-user-modal/edit-user-modal.component';
+import { EditProductModalComponent } from './edit-product-modal/edit-product-modal.component';
 import { ConfirmationModalComponent } from './confirmation-modal/confirmation-modal.component';
 
 @Component({
@@ -179,8 +180,37 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   async editProduct(product: any) {
-    // TODO: Implementar modal de edición
-    console.log('Edit product:', product);
+    const modal = await this.modalCtrl.create({
+      component: EditProductModalComponent,
+      componentProps: {
+        product: { ...product },
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+
+    if (result.data && result.data.updated) {
+      try {
+        await firstValueFrom(
+          this.adminService.updateProduct(
+            product.idarticulo,
+            result.data.product,
+          ),
+        );
+        // Actualizar el producto en la lista
+        const index = this.products.findIndex(
+          (p) => p.idarticulo === product.idarticulo,
+        );
+        if (index > -1) {
+          this.products[index] = result.data.product;
+        }
+        await this.showSuccess('Producto actualizado correctamente');
+      } catch (error) {
+        await this.showError('Error actualizando producto');
+        console.error('Error updating product:', error);
+      }
+    }
   }
 
   async editOrder(order: any) {

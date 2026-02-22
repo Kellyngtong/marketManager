@@ -1,5 +1,8 @@
-const db = require("../models");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+import { Request, Response } from 'express';
+import db from '@db/index';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const CarritoItem = db.carrito_item;
 const Articulo = db.articulo;
@@ -10,12 +13,22 @@ const Cliente = db.cliente;
 
 const TAX_RATE = 0.18;
 
-const buildNumeroComprobante = () => {
+interface DatosEnvio {
+  direccion?: string;
+  telefono?: string;
+}
+
+interface AuthRequest extends Request {
+  idusuario?: number;
+  user?: any;
+}
+
+const buildNumeroComprobante = (): string => {
   const timestamp = Date.now().toString().slice(-8);
   return `MM${timestamp}`;
 };
 
-const ensureCliente = async (usuario, datosEnvio, transaction) => {
+const ensureCliente = async (usuario: any, datosEnvio: DatosEnvio, transaction: any) => {
   const email = usuario.email;
   let cliente = await Cliente.findOne({
     where: { email },
@@ -45,14 +58,14 @@ const ensureCliente = async (usuario, datosEnvio, transaction) => {
  * POST /api/pagos/crear-sesion
  * Body: { datosEnvio: { direccion, telefono } }
  */
-exports.crearSesionPago = async (req, res) => {
+export const crearSesionPago = async (req: AuthRequest, res: Response) => {
   const transaction = await db.sequelize.transaction();
   try {
     const idusuario = req.idusuario;
     const { datosEnvio = {} } = req.body;
 
     // Obtener items del carrito
-    const items = await CarritoItem.findAll({
+    const items: any[] = await CarritoItem.findAll({
       where: { idusuario },
       include: [{ model: Articulo }],
       transaction,
@@ -61,16 +74,14 @@ exports.crearSesionPago = async (req, res) => {
 
     if (!items.length) {
       await transaction.rollback();
-      return res.status(400).json({ message: "El carrito está vacío" });
+      return res.status(400).json({ message: 'El carrito está vacío' });
     }
 
     // Validar disponibilidad
     for (const item of items) {
       if (!item.articulo || !item.articulo.condicion) {
         await transaction.rollback();
-        return res
-          .status(400)
-          .json({ message: "Uno de los artículos no está disponible" });
+        return res.status(400).json({ message: 'Uno de los artículos no está disponible' });
       }
       if (item.articulo.stock < item.cantidad) {
         await transaction.rollback();
@@ -81,7 +92,7 @@ exports.crearSesionPago = async (req, res) => {
     }
 
     // Calcular montos
-    const subtotal = items.reduce((sum, item) => {
+    const subtotal = items.reduce((sum: number, item: any) => {
       const price = Number(item.articulo.precio_venta) || 0;
       return sum + price * item.cantidad;
     }, 0);
@@ -90,9 +101,9 @@ exports.crearSesionPago = async (req, res) => {
     const total = +(subtotal + impuesto).toFixed(2);
 
     // Preparar line items para Stripe
-    const lineItems = items.map((item) => ({
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item: any) => ({
       price_data: {
-        currency: "usd",
+        currency: 'eur',
         product_data: {
           name: item.articulo.nombre,
           description: item.articulo.descripcion,
@@ -106,9 +117,9 @@ exports.crearSesionPago = async (req, res) => {
     // Agregar impuesto como line item separado
     lineItems.push({
       price_data: {
-        currency: "usd",
+        currency: 'eur',
         product_data: {
-          name: "Impuesto (IVA 18%)",
+          name: 'Impuesto (IVA 18%)',
         },
         unit_amount: Math.round(impuesto * 100),
       },
@@ -117,16 +128,16 @@ exports.crearSesionPago = async (req, res) => {
 
     // Crear sesión de Stripe
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+      payment_method_types: ['card'],
       line_items: lineItems,
-      mode: "payment",
+      mode: 'payment',
       customer_email: req.user?.email || undefined,
       success_url: `${process.env.STRIPE_SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: process.env.STRIPE_CANCEL_URL,
       metadata: {
-        idusuario,
-        direccion_envio: datosEnvio?.direccion || "",
-        telefono: datosEnvio?.telefono || "",
+        idusuario: idusuario!.toString(),
+        direccion_envio: datosEnvio?.direccion || '',
+        telefono: datosEnvio?.telefono || '',
         impuesto: impuesto.toString(),
         subtotal: subtotal.toString(),
       },
@@ -143,8 +154,8 @@ exports.crearSesionPago = async (req, res) => {
     });
   } catch (err) {
     await transaction.rollback();
-    console.error("Error creando sesión Stripe:", err);
-    return res.status(500).json({ message: "Error al crear sesión de pago" });
+    console.error('Error creando sesión Stripe:', err);
+    return res.status(500).json({ message: 'Error al crear sesión de pago' });
   }
 };
 
@@ -152,53 +163,49 @@ exports.crearSesionPago = async (req, res) => {
  * Webhook de Stripe para confirmar pago
  * POST /api/pagos/webhook
  */
-exports.stripeWebhook = async (req, res) => {
+export const stripeWebhook = async (req: Request, res: Response) => {
   const transaction = await db.sequelize.transaction();
   try {
-    const sig = req.headers["stripe-signature"];
-    let event;
+    const sig = req.headers['stripe-signature'] as string;
+    let event: Stripe.Event;
 
     try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET,
-      );
-    } catch (err) {
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+    } catch (err: any) {
       await transaction.rollback();
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
     // Manejar evento de pago exitoso
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
       await procesarPagoExitoso(session, transaction);
     }
 
     // Manejar evento de pago expirado/cancelado
-    if (event.type === "checkout.session.expired") {
-      console.log("Sesión de pago expirada:", event.data.object.id);
+    if (event.type === 'checkout.session.expired') {
+      console.log('Sesión de pago expirada:', (event.data.object as Stripe.Checkout.Session).id);
     }
 
     await transaction.commit();
     res.json({ received: true });
   } catch (err) {
     await transaction.rollback();
-    console.error("Error procesando webhook:", err);
-    return res.status(500).json({ message: "Error procesando webhook" });
+    console.error('Error procesando webhook:', err);
+    return res.status(500).json({ message: 'Error procesando webhook' });
   }
 };
 
 /**
  * Procesar pago exitoso desde webhook
  */
-const procesarPagoExitoso = async (session, transaction) => {
+const procesarPagoExitoso = async (session: Stripe.Checkout.Session, transaction: any) => {
   try {
-    const metadata = session.metadata;
+    const metadata = session.metadata as Record<string, string>;
     const idusuario = parseInt(metadata.idusuario, 10);
 
     // Obtener carrito del usuario
-    const items = await CarritoItem.findAll({
+    const items: any[] = await CarritoItem.findAll({
       where: { idusuario },
       include: [{ model: Articulo }],
       transaction,
@@ -206,24 +213,24 @@ const procesarPagoExitoso = async (session, transaction) => {
     });
 
     if (!items.length) {
-      throw new Error("Carrito vacío para procesar");
+      throw new Error('Carrito vacío para procesar');
     }
 
     // Obtener usuario
     const usuario = await Usuario.findByPk(idusuario, { transaction });
     if (!usuario) {
-      throw new Error("Usuario no encontrado");
+      throw new Error('Usuario no encontrado');
     }
 
     // Asegurar cliente
-    const datosEnvio = {
+    const datosEnvio: DatosEnvio = {
       direccion: metadata.direccion_envio,
       telefono: metadata.telefono,
     };
     const cliente = await ensureCliente(usuario, datosEnvio, transaction);
 
     // Calcular montos
-    const subtotal = items.reduce((sum, item) => {
+    const subtotal = items.reduce((sum: number, item: any) => {
       const price = Number(item.articulo.precio_venta) || 0;
       return sum + price * item.cantidad;
     }, 0);
@@ -236,14 +243,14 @@ const procesarPagoExitoso = async (session, transaction) => {
       {
         idcliente: cliente.idcliente,
         idusuario,
-        tipo_comprobante: "BOL",
-        serie_comprobante: "MM01",
+        tipo_comprobante: 'BOL',
+        serie_comprobante: 'MM01',
         num_comprobante: buildNumeroComprobante(),
         fecha_hora: new Date(),
         impuesto,
         total,
-        estado: "Completada",
-        metodo_pago: "stripe",
+        estado: 'Completada',
+        metodo_pago: 'stripe',
         direccion_envio: datosEnvio.direccion || usuario.direccion || null,
         stripe_session_id: session.id,
       },
@@ -273,7 +280,7 @@ const procesarPagoExitoso = async (session, transaction) => {
     console.log(`Venta creada exitosamente: ${venta.idventa}`);
     return venta;
   } catch (err) {
-    console.error("Error procesando pago exitoso:", err);
+    console.error('Error procesando pago exitoso:', err);
     throw err;
   }
 };
@@ -282,9 +289,9 @@ const procesarPagoExitoso = async (session, transaction) => {
  * Obtener estado de sesión de pago
  * GET /api/pagos/sesion/:sessionId
  */
-exports.obtenerEstadoSesion = async (req, res) => {
+export const obtenerEstadoSesion = async (req: Request, res: Response) => {
   try {
-    const { sessionId } = req.params;
+    const sessionId = req.params.sessionId as string;
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     return res.json({
@@ -294,10 +301,8 @@ exports.obtenerEstadoSesion = async (req, res) => {
       metadata: session.metadata,
     });
   } catch (err) {
-    console.error("Error obteniendo estado sesión:", err);
-    return res
-      .status(500)
-      .json({ message: "Error obteniendo estado de sesión" });
+    console.error('Error obteniendo estado sesión:', err);
+    return res.status(500).json({ message: 'Error obteniendo estado de sesión' });
   }
 };
 
@@ -305,16 +310,16 @@ exports.obtenerEstadoSesion = async (req, res) => {
  * Cancelar sesión (no es necesario - Stripe lo maneja, pero útil para UI)
  * POST /api/pagos/cancelar-sesion/:sessionId
  */
-exports.cancelarSesion = async (req, res) => {
+export const cancelarSesion = async (req: Request, res: Response) => {
   try {
-    const { sessionId } = req.params;
+    const sessionId = req.params.sessionId as string;
     // Stripe no permite cancelar sesiones, pero podemos marcar como cancelada localmente
     // Para propósitos de auditoría, solo logueamos
     console.log(`Sesión cancelada por usuario: ${sessionId}`);
 
-    return res.json({ message: "Sesión cancelada" });
+    return res.json({ message: 'Sesión cancelada' });
   } catch (err) {
-    console.error("Error cancelando sesión:", err);
-    return res.status(500).json({ message: "Error cancelando sesión" });
+    console.error('Error cancelando sesión:', err);
+    return res.status(500).json({ message: 'Error cancelando sesión' });
   }
 };

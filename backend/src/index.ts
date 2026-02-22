@@ -16,6 +16,7 @@ import articulosRoutes from "./routes/articulos.routes";
 import carritoRoutes from "./routes/carrito.routes";
 import pagosRoutes from "./routes/pagos.routes";
 import adminRoutes from "./routes/admin.routes";
+import ventasRoutes from "./routes/ventas.routes";
 
 const app: Express = express();
 
@@ -142,6 +143,7 @@ const startServer = async (): Promise<void> => {
       carritoRoutes(app);
       pagosRoutes(app);
       adminRoutes(app);
+      ventasRoutes(app);
     } catch (routeError) {
       console.error("❌ Error al registrar rutas:", routeError);
     }

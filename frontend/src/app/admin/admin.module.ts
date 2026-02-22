@@ -6,10 +6,16 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AdminPageRoutingModule } from './admin-routing.module';
 import { AdminDashboardComponent } from './admin-dashboard.component';
 import { EditUserModalComponent } from './edit-user-modal/edit-user-modal.component';
+import { EditProductModalComponent } from './edit-product-modal/edit-product-modal.component';
 import { ConfirmationModalComponent } from './confirmation-modal/confirmation-modal.component';
 
 @NgModule({
-  declarations: [AdminDashboardComponent, EditUserModalComponent, ConfirmationModalComponent],
+  declarations: [
+    AdminDashboardComponent,
+    EditUserModalComponent,
+    EditProductModalComponent,
+    ConfirmationModalComponent,
+  ],
   imports: [CommonModule, IonicModule, AdminPageRoutingModule, ReactiveFormsModule],
 })
 export class AdminPageModule {}

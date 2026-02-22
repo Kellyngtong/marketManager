@@ -1,7 +1,8 @@
 .button-group {
   display: flex;
   gap: 1rem;
-  margin: 2rem 0 1rem 0;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
 
   ion-button {
     flex: 1;
@@ -51,53 +52,19 @@ ion-item {
   --padding-end: 0;
   --inner-padding-start: 0;
   --inner-padding-end: 0;
-  margin-bottom: 1rem;
 
   &:not(:last-child) {
-    margin-bottom: 1rem;
-  }
-
-  ion-label {
-    font-weight: 500;
     margin-bottom: 0.5rem;
   }
 }
 
-ion-input,
-ion-select,
 ion-textarea {
   --padding-start: 0;
   --padding-end: 0;
   --inner-padding-start: 0;
   --inner-padding-end: 0;
-  margin-top: 0.5rem;
 }
 
-ion-text {
-  display: block;
-  margin-top: 0.25rem;
-
-  small {
-    font-size: 0.8rem;
-    padding-left: 0.25rem;
-  }
-}
-
-ion-header {
-  ion-toolbar {
-    --padding-start: 1rem;
-    --padding-end: 1rem;
-
-    ion-title {
-      font-weight: 600;
-      font-size: 1.25rem;
-    }
-  }
-}
-
-ion-content {
-  form {
-    display: flex;
-    flex-direction: column;
-  }
+ion-select {
+  margin-top: 2%;
 }

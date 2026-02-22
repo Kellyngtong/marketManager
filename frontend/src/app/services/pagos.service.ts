@@ -98,6 +98,21 @@ export class PagosService {
   }
 
   /**
+   * Confirmar pago y crear venta en la BD (sin webhook)
+   */
+  confirmarPago(sessionId: string): Observable<any> {
+    const cfg = this.authHeaders();
+    if (!cfg) {
+      return throwError(() => new Error('Debes iniciar sesión'));
+    }
+
+    return this.http.get<any>(
+      `${this.baseUrl}/confirmar-pago?sessionId=${sessionId}`,
+      cfg,
+    );
+  }
+
+  /**
    * Cargar Stripe.js dinamicamente
    */
   cargarStripeJs(): Promise<any> {

@@ -1,15 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '../services/admin.service';
+import { VentasService } from '../services/ventas.service';
 import { ToastController } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
 
 interface OrderItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  discount: number;
-  image: string;
+  id?: number;
+  idarticulo?: number;
+  name?: string;
+  nombre?: string;
+  quantity?: number;
+  cantidad?: number;
+  price?: number;
+  precio?: number;
+  discount?: number;
+  descuento?: number;
+  image?: string;
+  imagen?: string;
+  articulo?: {
+    nombre?: string;
+    imagen?: string;
+  };
 }
 
 interface TimelineStep {
@@ -19,28 +31,35 @@ interface TimelineStep {
 }
 
 interface Order {
-  id: number;
-  orderNumber: string;
-  date: string;
-  status: string;
-  customer: {
+  id?: number;
+  idventa?: number;
+  orderNumber?: string;
+  numero?: string;
+  date?: string;
+  fecha?: string;
+  status?: string;
+  estado?: string;
+  customer?: {
     name: string;
     email: string;
     phone: string;
   };
-  shippingAddress: {
+  shippingAddress?: {
     street: string;
     city: string;
     postalCode: string;
     country: string;
   };
-  paymentMethod: string;
-  items: OrderItem[];
-  subtotal: number;
-  shipping: number;
-  tax: number;
-  total: number;
-  timeline: TimelineStep[];
+  paymentMethod?: string;
+  metodo_pago?: string;
+  items?: OrderItem[];
+  subtotal?: number;
+  shipping?: number;
+  tax?: number;
+  impuesto?: number;
+  total?: number;
+  timeline?: TimelineStep[];
+  direccion_envio?: string;
 }
 
 @Component({
@@ -53,11 +72,13 @@ export class OrderDetailPage implements OnInit {
   order: Order | null = null;
   loading = true;
   error: string | null = null;
+  isUserView = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private adminService: AdminService,
+    private ventasService: VentasService,
     private toastCtrl: ToastController,
   ) {}
 
@@ -65,7 +86,7 @@ export class OrderDetailPage implements OnInit {
     this.loadOrder();
   }
 
-  loadOrder() {
+  async loadOrder() {
     const id = this.route.snapshot.paramMap.get('id');
     console.log('🔍 Order ID from route:', id);
     if (!id) {
@@ -74,23 +95,77 @@ export class OrderDetailPage implements OnInit {
       return;
     }
 
-    console.log('📦 Calling getOrderDetails with ID:', id);
-    this.adminService.getOrderDetails(parseInt(id, 10)).subscribe({
-      next: (data) => {
-        console.log('✅ Order data loaded:', data);
-        this.order = data;
+    try {
+      // Primero intentar cargar desde ventas (usuario autenticado)
+      const ventaId = parseInt(id, 10);
+      const detalleRes = await firstValueFrom(this.ventasService.getDetalleVenta(ventaId));
+      const venta = detalleRes?.venta;
+      
+      if (venta) {
+        this.isUserView = true;
+        this.order = this.transformVentaToOrder(venta);
+        console.log('✅ Order data loaded (user view):', this.order);
         this.loading = false;
-      },
-      error: (err) => {
-        console.error('❌ Error loading order:', err);
-        this.error = 'No se pudo cargar el pedido';
-        this.loading = false;
-      },
-    });
+        return;
+      }
+    } catch (err) {
+      console.log('⚠️ No se encontró en ventas, intentando con admin...');
+    }
+
+    // Si falla, intentar con admin
+    try {
+      const adminData = await firstValueFrom(this.adminService.getOrderDetails(parseInt(id, 10)));
+      console.log('✅ Order data loaded (admin view):', adminData);
+      this.order = adminData;
+      this.isUserView = false;
+      this.loading = false;
+    } catch (err) {
+      console.error('❌ Error loading order:', err);
+      this.error = 'No se pudo cargar el pedido';
+      this.loading = false;
+    }
+  }
+
+  transformVentaToOrder(venta: any): Order {
+    const subtotal = venta.total - venta.impuesto;
+    return {
+      idventa: venta.idventa,
+      numero: venta.numero,
+      orderNumber: venta.numero,
+      fecha: venta.fecha,
+      date: venta.fecha,
+      estado: venta.estado,
+      status: venta.estado,
+      metodo_pago: venta.metodo_pago,
+      paymentMethod: venta.metodo_pago,
+      items: venta.items || [],
+      impuesto: venta.impuesto || 0,
+      tax: venta.impuesto || 0,
+      total: venta.total || 0,
+      subtotal: subtotal || 0,
+      shipping: 0, // Usuario no tiene información de envío
+      direccion_envio: venta.direccion_envio,
+      timeline: this.buildTimeline(venta.estado),
+    };
+  }
+
+  buildTimeline(status: string): TimelineStep[] {
+    const steps: TimelineStep[] = [
+      { status: 'Pedido Confirmado', date: '', completed: true },
+      { status: 'Procesando', date: '', completed: status !== 'Completada' ? false : true },
+      { status: 'Enviado', date: '', completed: status === 'Enviado' || status === 'Entregado' },
+      { status: 'Entregado', date: '', completed: status === 'Entregado' },
+    ];
+    return steps;
   }
 
   getStatusConfig(status: string) {
     const configs: any = {
+      completada: {
+        label: 'Completada',
+        color: 'success',
+        icon: 'checkmark-circle',
+      },
       delivered: {
         label: 'Entregado',
         color: 'success',
@@ -123,20 +198,28 @@ export class OrderDetailPage implements OnInit {
   }
 
   getItemPrice(item: OrderItem): number {
-    return item.discount ? item.price * (1 - item.discount / 100) : item.price;
+    const price = item.price || item.precio || 0;
+    const discount = item.discount || item.descuento || 0;
+    return discount ? price * (1 - discount / 100) : price;
   }
 
   getItemTotal(item: OrderItem): number {
-    return this.getItemPrice(item) * item.quantity;
+    const quantity = item.quantity || item.cantidad || 1;
+    return this.getItemPrice(item) * quantity;
   }
 
   goBack() {
-    this.router.navigate(['/admin']);
+    if (this.isUserView) {
+      this.router.navigate(['/historial']);
+    } else {
+      this.router.navigate(['/admin']);
+    }
   }
 
   async copyOrderNumber() {
-    if (this.order?.orderNumber) {
-      await navigator.clipboard.writeText(this.order.orderNumber);
+    const orderNumber = this.order?.orderNumber || this.order?.numero;
+    if (orderNumber) {
+      await navigator.clipboard.writeText(orderNumber);
       const toast = await this.toastCtrl.create({
         message: 'Número de pedido copiado',
         duration: 2000,

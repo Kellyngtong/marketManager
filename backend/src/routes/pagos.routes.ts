@@ -29,6 +29,17 @@ export default (app: Express): void => {
   );
 
   /**
+   * GET /api/pagos/confirmar-pago
+   * Confirmar pago y crear venta (sin webhook)
+   */
+  router.get(
+    '/confirmar-pago',
+    authJwt.verifyToken,
+    extractTenant,
+    pagosController.confirmarPago
+  );
+
+  /**
    * POST /api/pagos/webhook
    * Webhook de Stripe (sin autenticación)
    */

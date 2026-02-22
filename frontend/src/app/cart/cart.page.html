@@ -14,9 +14,7 @@
 
   <!-- Empty Cart State -->
   <ng-container *ngIf="(cartItems$ | async) as items">
-    <ng-container
-      *ngIf="!items.length && (user$ | async) as user; else cartContainer"
-    >
+    <ng-container *ngIf="!items.length; else cartContainer">
       <div class="empty-state">
         <ion-icon name="cart"></ion-icon>
         <h2>Tu carrito está vacío</h2>
@@ -31,18 +29,6 @@
         </ion-button>
       </div>
     </ng-container>
-  </ng-container>
-
-  <!-- No User State -->
-  <ng-container *ngIf="!(user$ | async) as user">
-    <div class="empty-state">
-      <ion-icon name="lock-closed"></ion-icon>
-      <h2>Inicia sesión</h2>
-      <p>Necesitas estar conectado para ver tu carrito</p>
-      <ion-button routerLink="/login" color="primary" fill="solid" size="large">
-        Ir a Login
-      </ion-button>
-    </div>
   </ng-container>
 
   <!-- Cart Container -->
@@ -157,7 +143,7 @@
                 (click)="handleCheckout()"
                 class="checkout-btn"
               >
-                Realizar Pedido
+                Comprar
               </ion-button>
               <ion-button
                 expand="block"

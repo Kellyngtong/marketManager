@@ -84,8 +84,17 @@ export class ProductDetailPage implements OnInit {
     }
 
     try {
+      const articulo = {
+        idarticulo: this.product.idarticulo,
+        nombre: this.product.nombre,
+        precio_venta: this.product.precio_venta,
+        stock: this.product.stock,
+        oferta: this.product.oferta,
+        imagen: this.product.imagen,
+        descripcion: this.product.descripcion
+      };
       for (let i = 0; i < this.quantity; i++) {
-        await firstValueFrom(this.carritoService.addItem(this.product.idarticulo, 1));
+        await firstValueFrom(this.carritoService.addItem(this.product.idarticulo, 1, articulo));
       }
       const t = await this.toastCtrl.create({ 
         message: `${this.quantity} x ${this.product.nombre} añadido al carrito`, 

@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/admin"></ion-back-button>
+      <ion-back-button (click)="goBack()"></ion-back-button>
     </ion-buttons>
     <ion-title>Detalle de Pedido</ion-title>
   </ion-toolbar>
@@ -34,28 +34,27 @@
     </ion-card>
   </div>
 
-  <div class="page-content">
-    <ng-container *ngIf="order && !loading">
+  <div class="page-content" *ngIf="order && !loading">
     <!-- Order Header -->
     <div class="order-header">
       <div class="order-title-section">
-        <h1 class="order-title">Pedido {{ order!.orderNumber }}</h1>
+        <h1 class="order-title">Pedido {{ order!.orderNumber || order!.numero }}</h1>
         <p class="order-date">
           Realizado el
-          {{ order!.date | date : 'dd \'de\' MMMM \'de\' yyyy' : '' : 'es-ES' }}
+          {{ (order!.date || order!.fecha) | date : 'dd \'de\' MMMM \'de\' yyyy' : '' : 'es-ES' }}
         </p>
       </div>
-      <div class="status-badge" [ngClass]="getStatusConfig(order!.status).color">
-        <ion-icon [name]="getStatusConfig(order!.status).icon"></ion-icon>
-        {{ getStatusConfig(order!.status).label }}
+      <div class="status-badge" [ngClass]="getStatusConfig((order!.status || order!.estado) || '').color">
+        <ion-icon [name]="getStatusConfig((order!.status || order!.estado) || '').icon"></ion-icon>
+        {{ getStatusConfig((order!.status || order!.estado) || '').label }}
       </div>
     </div>
 
     <div class="order-container">
       <!-- Main Content -->
       <div class="main-content">
-        <!-- Order Timeline -->
-        <ion-card class="timeline-card">
+        <!-- Order Timeline (solo para vista de usuario) -->
+        <ion-card *ngIf="isUserView" class="timeline-card">
           <ion-card-header>
             <ion-card-title>
               <ion-icon name="cube"></ion-icon>
@@ -93,21 +92,21 @@
           </ion-card-header>
           <ion-card-content>
             <div class="items-list">
-              <div *ngFor="let item of order!.items" class="item-row">
+              <div *ngFor="let item of (order!.items || [])" class="item-row">
                 <div class="item-image">
                   <img
-                    [src]="item.image"
-                    [alt]="item.name"
+                    [src]="item.image || item.imagen || item.articulo?.imagen"
+                    [alt]="item.name || item.nombre || item.articulo?.nombre"
                     class="product-image"
                   />
                 </div>
                 <div class="item-details">
-                  <h4 class="item-name">{{ item.name }}</h4>
-                  <p class="item-quantity">Cantidad: {{ item.quantity }}</p>
+                  <h4 class="item-name">{{ item.name || item.nombre || item.articulo?.nombre }}</h4>
+                  <p class="item-quantity">Cantidad: {{ item.quantity || item.cantidad }}</p>
                   <div class="item-price">
                     <span class="price">€{{ getItemPrice(item).toFixed(2) }}</span>
-                    <span *ngIf="item.discount > 0" class="original-price">
-                      €{{ item.price.toFixed(2) }}
+                    <span *ngIf="(item.discount || item.descuento || 0) > 0" class="original-price">
+                      €{{ ((item.price || item.precio) || 0).toFixed(2) }}
                     </span>
                   </div>
                 </div>
@@ -120,22 +119,22 @@
             <div class="summary">
               <div class="summary-row">
                 <span>Subtotal</span>
-                <span>€{{ order!.subtotal.toFixed(2) }}</span>
+                <span>€{{ (order!.subtotal || 0).toFixed(2) }}</span>
               </div>
               <div class="summary-row">
-                <span>IVA ({{ ((order!.tax / order!.subtotal) * 100).toFixed(0) }}%)</span>
-                <span>€{{ order!.tax.toFixed(2) }}</span>
+                <span>IVA ({{ ((order!.tax || order!.impuesto || 0) / (order!.subtotal || 1) * 100).toFixed(0) }}%)</span>
+                <span>€{{ (order!.tax || order!.impuesto || 0).toFixed(2) }}</span>
               </div>
-              <div class="summary-row">
+              <div class="summary-row" *ngIf="(order!.shipping || 0) !== 0">
                 <span>Envío</span>
-                <span [class.free]="order!.shipping === 0">
-                  {{ order!.shipping === 0 ? 'Gratis' : '€' + order!.shipping.toFixed(2) }}
+                <span [class.free]="(order!.shipping || 0) === 0">
+                  {{ (order!.shipping || 0) === 0 ? 'Gratis' : '€' + (order!.shipping || 0).toFixed(2) }}
                 </span>
               </div>
               <div class="summary-divider"></div>
               <div class="summary-row total">
                 <span>Total</span>
-                <span>€{{ order!.total.toFixed(2) }}</span>
+                <span>€{{ (order!.total || 0).toFixed(2) }}</span>
               </div>
             </div>
           </ion-card-content>
@@ -144,8 +143,29 @@
 
       <!-- Sidebar -->
       <div class="sidebar">
-        <!-- Customer Info -->
-        <ion-card class="info-card">
+        <!-- Order Info (User View) -->
+        <ion-card *ngIf="isUserView" class="info-card">
+          <ion-card-header>
+            <ion-card-title>Información del Pedido</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="info-row">
+              <span class="info-label">Número:</span>
+              <span class="info-value">{{ order!.numero }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Método de pago:</span>
+              <span class="info-value">{{ order!.metodo_pago }}</span>
+            </div>
+            <div *ngIf="order!.direccion_envio" class="info-row">
+              <span class="info-label">Dirección de envío:</span>
+              <span class="info-value">{{ order!.direccion_envio }}</span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Customer Info (Admin View) -->
+        <ion-card *ngIf="!isUserView && order!.customer" class="info-card">
           <ion-card-header>
             <ion-card-title>Cliente</ion-card-title>
           </ion-card-header>
@@ -156,8 +176,8 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- Shipping Address -->
-        <ion-card class="info-card">
+        <!-- Shipping Address (Admin View) -->
+        <ion-card *ngIf="!isUserView && order!.shippingAddress" class="info-card">
           <ion-card-header>
             <ion-card-title>
               <ion-icon name="location"></ion-icon>
@@ -174,8 +194,8 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- Payment Method -->
-        <ion-card class="info-card">
+        <!-- Payment Method (Admin View) -->
+        <ion-card *ngIf="!isUserView && order!.paymentMethod" class="info-card">
           <ion-card-header>
             <ion-card-title>
               <ion-icon name="card"></ion-icon>
@@ -188,6 +208,5 @@
         </ion-card>
       </div>
     </div>
-    </ng-container>
   </div>
 </ion-content>
