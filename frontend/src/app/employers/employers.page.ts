@@ -5,6 +5,7 @@ import { IonicModule, LoadingController, ModalController, ToastController } from
 import { Router } from '@angular/router';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { AuthService } from '../auth/auth.service';
+import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-employers',
@@ -46,9 +47,29 @@ export class EmployersPage {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {
     this.loadProducts();
+  }
+
+  async confirmLogout() {
+    const modal = await this.modalCtrl.create({
+      component: ConfirmationModalComponent,
+      cssClass: 'confirmation-modal',
+      componentProps: {
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que quieres cerrar sesión?',
+        isDangerous: true,
+        cancelText: 'Cancelar',
+        confirmText: 'Cerrar sesión',
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+    if (result.data?.confirmed === true) {
+      this.logout();
+    }
   }
 
   logout() {

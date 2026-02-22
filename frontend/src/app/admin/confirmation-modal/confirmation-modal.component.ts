@@ -1,11 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { ModalController, IonicModule } from '@ionic/angular';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-confirmation-modal',
   templateUrl: './confirmation-modal.component.html',
   styleUrls: ['./confirmation-modal.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, IonicModule],
 })
 export class ConfirmationModalComponent {
   @Input() title: string = 'Confirmación';
