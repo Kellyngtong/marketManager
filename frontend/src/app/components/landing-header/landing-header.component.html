@@ -3,7 +3,10 @@
     <div class="navbar-wrapper">
       <!-- LOGO -->
       <div class="navbar-logo">
-        <span class="logo-text" routerLink="/home" class="logo-link">Mercachona</span>
+        <a routerLink="/home" class="logo-link">
+          <!-- #####CÓDIGO MODIFICADO --- Aparece el logo -->
+          <img src="assets/icon/miniLogo.png" alt="Mercachona" class="logo-img">
+        </a>
       </div>
 
       <!-- MENU DESKTOP (only show when no user) -->
@@ -39,7 +42,7 @@
         <ng-container *ngIf="!(user$ | async); else logoutButton">
           <ion-button
             (click)="goToWelcome()"
-            color="primary"
+            
             fill="solid"
             size="small"
             class="auth-btn"
@@ -59,17 +62,19 @@
         </ng-template>
 
         <!-- MENU MOBILE -->
-        <ion-menu-button
-          menu="menu-principal"
-          class="menu-mobile-btn"
-        ></ion-menu-button>
+        <ion-buttons slot="end">
+          <ion-menu-button menu="menu-principal" class="menu-mobile-btn"  ></ion-menu-button>
+        </ion-buttons>
+
+        
+
       </div>
     </div>
   </ion-toolbar>
 </ion-header>
 
 <!-- MOBILE MENU -->
-<ion-menu side="end" menuId="menu-principal">
+<ion-menu side="end" menuId="menu-principal" contentId="main-content">
   <ion-header>
     <ion-toolbar>
       <ion-title>Menú</ion-title>
@@ -101,11 +106,13 @@
           <ion-label>Atención al cliente</ion-label>
         </ion-item>
       </ion-menu-toggle>
+      <!-- ###### CÓDIGO MODIFICADO --- Se ha quitado este item del menú  delmóvil.
       <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item>
           <ion-label>Idioma</ion-label>
         </ion-item>
       </ion-menu-toggle>
+      -->
       <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button (click)="goToWelcome()" class="menu-mobile-item">
           <ion-icon name="log-in" slot="start"></ion-icon>
@@ -127,3 +134,6 @@
     </ion-list>
   </ion-content>
 </ion-menu>
+
+<!-- No sé qué hace, pero una vez puesto se puede acceder al menú del móvil -->
+<ion-router-outlet id="main-content"></ion-router-outlet>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
+import { MenuController } from '@ionic/angular';
 
 @Component({
   selector: 'app-landing-header',

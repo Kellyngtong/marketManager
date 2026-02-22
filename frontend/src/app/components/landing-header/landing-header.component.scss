@@ -128,6 +128,7 @@ ion-header.landing-header {
         --padding-end: 16px;
         --border-radius: 6px;
         font-weight: 600;
+        --background-hover: var(--primary-dark);
 
         @media (max-width: 768px) {
           --padding-start: 12px;
@@ -137,9 +138,11 @@ ion-header.landing-header {
 
       .menu-mobile-btn {
         display: none;
+        color: #254e2f;
 
         @media (max-width: 768px) {
-          display: block;
+          display: block!important;
+          pointer-events: auto; 
         }
       }
     }
