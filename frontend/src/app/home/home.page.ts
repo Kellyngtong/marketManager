@@ -31,28 +31,29 @@ export class HomePage implements OnDestroy {
   cartItemsCount = 0;
   private cartCountByArticulo: Record<number, number> = {};
   selectedTipo: string | null = null;
+  searchQuery: string = '';
   showOnlyOffers = false;
   isUploadingAvatar = false;
   readonly tipos = [
     { label: 'Todos', value: null },
     { label: 'Fruta', value: 'fruta' },
     { label: 'Verdura', value: 'verdura' },
-    { label: 'Embutidos', value: 'embutidos' },
     { label: 'Carne', value: 'carne' },
     { label: 'Pescado', value: 'pescado' },
+    { label: 'Lácteos', value: 'lacteos' },
     { label: 'Bebidas', value: 'bebidas' },
-    { label: 'Bebidas alcohólicas', value: 'bebidas alcoholicas' },
-    { label: 'Trigo', value: 'trigo' },
+    { label: 'Congelados', value: 'congelados' },
+    { label: 'Panadería', value: 'panaderia' },
   ];
   private readonly tipoCategoriaMap: Record<string, number> = {
     fruta: 1,
     verdura: 2,
-    bebidas: 3,
-    embutidos: 5,
-    carne: 6,
-    pescado: 7,
-    'bebidas alcoholicas': 8,
-    trigo: 9,
+    carne: 3,
+    pescado: 4,
+    lacteos: 5,
+    bebidas: 6,
+    congelados: 7,
+    panaderia: 8,
   };
   private subscriptions = new Subscription();
 
@@ -126,7 +127,13 @@ export class HomePage implements OnDestroy {
 
         const matchesOferta = this.showOnlyOffers ? !!product?.oferta : true;
 
-        return matchesTipo && matchesOferta;
+        const matchesSearch = this.searchQuery
+          ? (product?.nombre || '')
+              .toLowerCase()
+              .includes(this.searchQuery.toLowerCase())
+          : true;
+
+        return matchesTipo && matchesOferta && matchesSearch;
       });
     } catch (error) {
       console.error('Error loading products:', error);
@@ -189,6 +196,11 @@ export class HomePage implements OnDestroy {
       return;
     }
     this.selectedTipo = value;
+    this.loadProducts();
+  }
+
+  onSearchChange(query: string) {
+    this.searchQuery = query;
     this.loadProducts();
   }
 
@@ -322,13 +334,6 @@ export class HomePage implements OnDestroy {
   }
 
   private matchesSelectedTipo(product: any, tipo: string) {
-    const normalizedTipo = String(product?.tipo || '')
-      .trim()
-      .toLowerCase();
-    if (normalizedTipo === tipo) {
-      return true;
-    }
-
     const expectedCategory = this.tipoCategoriaMap[tipo];
     if (!expectedCategory) {
       return false;
