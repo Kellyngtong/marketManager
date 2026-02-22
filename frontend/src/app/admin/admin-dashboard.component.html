@@ -94,6 +94,10 @@
               <h2>Gestión de Usuarios</h2>
               <p>Administra los usuarios registrados</p>
             </div>
+            <ion-button color="primary" fill="solid" size="small" (click)="createUser()">
+              <ion-icon slot="start" name="add-outline"></ion-icon>
+              Nuevo Usuario
+            </ion-button>
           </div>
           <div class="card-content">
             <div class="table-wrapper" *ngIf="users.length > 0; else noUsers">
@@ -169,7 +173,7 @@
                 <tbody>
                   <tr *ngFor="let product of products">
                     <td class="font-medium">{{ product.nombre }}</td>
-                    <td>{{ product.categoria || 'N/A' }}</td>
+                    <td>{{ product.categoria_nombre || product.categoria?.nombre || product.categoria || 'N/A' }}</td>
                     <td>€{{ product.precio_venta | number:'1.2-2' }}</td>
                     <td>
                       <span class="badge" [ngClass]="product.oferta ? 'badge-secondary' : 'badge-outline'">

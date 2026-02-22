@@ -34,6 +34,10 @@ export class AdminService {
     return this.http.put(`${this.base}/admin/users/${userId}`, userData, { headers: this.getHeaders() });
   }
 
+  createUser(userData: any): Observable<any> {
+    return this.http.post(`${this.base}/admin/users`, userData, { headers: this.getHeaders() });
+  }
+
   deleteUser(userId: number): Observable<any> {
     return this.http.delete(`${this.base}/admin/users/${userId}`, { headers: this.getHeaders() });
   }
