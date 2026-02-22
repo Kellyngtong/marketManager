@@ -7,20 +7,22 @@
 </ion-header>
 
 <ion-content class="ion-padding" *ngIf="product; else notFound">
-
   <!-- Product Details Grid -->
   <div class="product-grid">
     <!-- Product Image -->
     <div class="product-image-container">
       <div class="product-image-card">
-        <img 
-          [src]="product.imagen || product.image" 
+        <img
+          [src]="product.imagen || product.image"
           [alt]="product.nombre"
           class="product-image"
         />
-        
+
         <!-- Discount Badge -->
-        <div *ngIf="product.descuento && product.descuento > 0" class="badge discount-badge">
+        <div
+          *ngIf="product.descuento && product.descuento > 0"
+          class="badge discount-badge"
+        >
           -{{ product.descuento }}%
         </div>
 
@@ -36,17 +38,24 @@
     <div class="product-info">
       <!-- Category -->
       <p class="product-category">{{ product.categoria }}</p>
-      
+
       <!-- Title -->
       <h1 class="product-title">{{ product.nombre }}</h1>
 
       <!-- Price Section -->
       <div class="price-section">
-        <div *ngIf="product.descuento && product.descuento > 0; else noDiscount">
+        <div
+          *ngIf="product.descuento && product.descuento > 0; else noDiscount"
+        >
           <div class="price-with-discount">
             <span class="current-price">€{{ finalPrice.toFixed(2) }}</span>
-            <span class="original-price">€{{ product.precio_venta.toFixed(2) }}</span>
-            <span class="savings-badge">Ahorra €{{ (product.precio_venta - finalPrice).toFixed(2) }}</span>
+            <span class="original-price"
+              >€{{ product.precio_venta.toFixed(2) }}</span
+            >
+            <span class="savings-badge"
+              >Ahorra €{{ (product.precio_venta - finalPrice).toFixed(2)
+              }}</span
+            >
           </div>
         </div>
         <ng-template #noDiscount>
@@ -59,7 +68,11 @@
       <!-- Description -->
       <div class="description-section">
         <h3>Descripción</h3>
-        <p>{{ product.descripcion || 'Producto de la mejor calidad. Seleccionado cuidadosamente para garantizar tu satisfacción. Ideal para toda la familia.' }}</p>
+        <p>
+          {{ product.descripcion || 'Producto de la mejor calidad. Seleccionado
+          cuidadosamente para garantizar tu satisfacción. Ideal para toda la
+          familia.' }}
+        </p>
       </div>
 
       <div class="separator"></div>
@@ -85,10 +98,7 @@
       </div>
 
       <!-- Add to Cart Button -->
-      <button 
-        (click)="addToCart()" 
-        class="add-to-cart-btn"
-      >
+      <button (click)="addToCart()" class="add-to-cart-btn">
         <ion-icon name="cart"></ion-icon>
         Añadir al carrito
       </button>
@@ -114,13 +124,19 @@
   </div>
 
   <!-- Related Products -->
-  <div *ngIf="relatedProducts && relatedProducts.length > 0" class="related-products-section">
+  <div
+    *ngIf="relatedProducts && relatedProducts.length > 0"
+    class="related-products-section"
+  >
     <h2>Productos relacionados</h2>
     <div class="related-products-grid">
-      <div *ngFor="let relProduct of relatedProducts" class="related-product-card">
+      <div
+        *ngFor="let relProduct of relatedProducts"
+        class="related-product-card"
+      >
         <a [href]="'/producto/' + relProduct.idarticulo">
-          <img 
-            [src]="relProduct.imagen || relProduct.image" 
+          <img
+            [src]="relProduct.imagen || relProduct.image"
             [alt]="relProduct.nombre"
             class="related-product-image"
           />
@@ -139,7 +155,9 @@
     <div class="not-found">
       <h2>Producto no encontrado</h2>
       <p>El producto que buscas no existe o ha sido eliminado</p>
-      <button (click)="goBack()" class="back-btn">Ver todos los productos</button>
+      <button (click)="goBack()" class="back-btn">
+        Ver todos los productos
+      </button>
     </div>
   </ion-content>
 </ng-template>
