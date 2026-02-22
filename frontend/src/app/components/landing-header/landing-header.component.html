@@ -12,10 +12,10 @@
       <!-- MENU DESKTOP (only show when no user) -->
       <ng-container *ngIf="!(user$ | async)">
         <nav class="navbar-menu-desktop">
-          <a href="#" class="menu-item">Conócenos</a>
-          <a href="#" class="menu-item">Supermercados</a>
-          <a href="#" class="menu-item">Trabaja con nosotros</a>
-          <a href="#" class="menu-item">Atención al cliente</a>
+          <a routerLink="/conocenos" class="menu-item">{{ translations[currentLanguage]['conocenos'] }}</a>
+          <a routerLink="/supermercados" class="menu-item">{{ translations[currentLanguage]['supermercados'] }}</a>
+          <a routerLink="/trabaja" class="menu-item">{{ translations[currentLanguage]['trabaja'] }}</a>
+          <a routerLink="/atencion" class="menu-item">{{ translations[currentLanguage]['atencion'] }}</a>
         </nav>
       </ng-container>
 
@@ -28,26 +28,25 @@
           </ion-button>
         </ng-container>
 
-        <!-- LANGUAGE SELECTOR (only show when no user) -->
+        <!-- LANGUAGE SELECTOR (desktop) -->
         <ng-container *ngIf="!(user$ | async)">
-          <div class="language-selector">
-            <button class="lang-btn" (click)="toggleLanguage()">
-              <ion-icon name="globe"></ion-icon>
-              <span class="lang-label">{{ currentLanguage | uppercase }}</span>
-            </button>
-          </div>
+            <div class="language-selector">
+              <button class="lang-btn" (click)="toggleLanguage()">
+                <ion-icon name="globe"></ion-icon>
+                <span class="lang-label">{{ currentLanguage | uppercase }}</span>
+              </button>
+            </div>
         </ng-container>
 
         <!-- LOGIN / LOGOUT BUTTONS -->
         <ng-container *ngIf="!(user$ | async); else logoutButton">
           <ion-button
             (click)="goToWelcome()"
-            
             fill="solid"
             size="small"
             class="auth-btn"
           >
-            Acceder
+            {{ translations[currentLanguage]['acceder'] }}
           </ion-button>
         </ng-container>
 
@@ -77,33 +76,43 @@
 <ion-menu side="end" menuId="menu-principal" contentId="main-content">
   <ion-header>
     <ion-toolbar>
-      <ion-title>Menú</ion-title>
+      <ion-title>{{ translations[currentLanguage]['menu'] }}</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content>
     <ion-list>
       <ion-menu-toggle *ngIf="!(user$ | async)">
-        <ion-item button href="#" class="menu-mobile-item">
+        <ion-item button routerLink="/conocenos" class="menu-mobile-item">
           <ion-icon name="information-circle" slot="start"></ion-icon>
-          <ion-label>Conócenos</ion-label>
+          <ion-label>{{ translations[currentLanguage]['conocenos'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
       <ion-menu-toggle *ngIf="!(user$ | async)">
-        <ion-item button href="#" class="menu-mobile-item">
+        <ion-item class="menu-mobile-item">
+          <ion-icon name="globe" slot="start"></ion-icon>
+          <ion-label>Idioma</ion-label>
+          <ion-buttons slot="end">
+            <ion-button fill="clear" (click)="toggleLanguage()">{{ currentLanguage | uppercase }}</ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-menu-toggle>
+
+      <ion-menu-toggle *ngIf="!(user$ | async)">
+        <ion-item button routerLink="/supermercados" class="menu-mobile-item">
           <ion-icon name="storefront" slot="start"></ion-icon>
-          <ion-label>Supermercados</ion-label>
+          <ion-label>{{ translations[currentLanguage]['supermercados'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
       <ion-menu-toggle *ngIf="!(user$ | async)">
-        <ion-item button href="#" class="menu-mobile-item">
+        <ion-item button routerLink="/trabaja" class="menu-mobile-item">
           <ion-icon name="briefcase" slot="start"></ion-icon>
-          <ion-label>Trabaja con nosotros</ion-label>
+          <ion-label>{{ translations[currentLanguage]['trabaja'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
       <ion-menu-toggle *ngIf="!(user$ | async)">
-        <ion-item button href="#" class="menu-mobile-item">
+        <ion-item button routerLink="/atencion" class="menu-mobile-item">
           <ion-icon name="help-circle" slot="start"></ion-icon>
-          <ion-label>Atención al cliente</ion-label>
+          <ion-label>{{ translations[currentLanguage]['atencion'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
       <!-- ###### CÓDIGO MODIFICADO --- Se ha quitado este item del menú  delmóvil.
@@ -116,19 +125,19 @@
       <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button (click)="goToWelcome()" class="menu-mobile-item">
           <ion-icon name="log-in" slot="start"></ion-icon>
-          <ion-label>Acceder</ion-label>
+          <ion-label>{{ translations[currentLanguage]['acceder'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
       <ion-menu-toggle *ngIf="user$ | async">
         <ion-item button routerLink="/cart" class="menu-mobile-item">
           <ion-icon name="cart" slot="start"></ion-icon>
-          <ion-label>Carrito</ion-label>
+          <ion-label>{{ translations[currentLanguage]['carrito'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
       <ion-menu-toggle *ngIf="user$ | async">
         <ion-item button (click)="logout()" class="menu-mobile-item">
           <ion-icon name="log-out" slot="start"></ion-icon>
-          <ion-label>Cerrar sesión</ion-label>
+          <ion-label>{{ translations[currentLanguage]['cerrar'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
     </ion-list>

@@ -70,6 +70,8 @@ ion-header.landing-header {
         border-radius: 4px;
         transition: all 0.3s ease;
         white-space: nowrap;
+        min-width: 140px;
+        text-align: center;
 
         &:hover {
           background: #{$background};

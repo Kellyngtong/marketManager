@@ -6,21 +6,66 @@
 
 // HERO SECTION
 .hero-section {
-  background: #c9c7c6;
+  background: url("/assets/landing/heroSection.jpg") center/cover no-repeat;
   color: white;
   padding: 60px 20px;
 
-  .hero-content {
-    max-width: 900px;
-    margin: 0 auto;
-    text-align: center;
+  position: relative;
+
+&::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(221, 220, 218, 0); // desktop: sin overlay
+  transition: background-color 0.3s ease;
+
+  @media (max-width: 1024px) {
+    background-color: rgba(221, 220, 218, 0.15);
   }
 
+  @media (max-width: 900px) {
+    background-color: rgba(221, 220, 218, 0.30);
+  }
+
+  @media (max-width: 768px) {
+    background-color: rgba(221, 220, 218, 0.45);
+  }
+
+  @media (max-width: 600px) {
+    background-color: rgba(221, 220, 218, 0.60);
+  }
+
+  @media (max-width: 400px) {
+    background-color: rgba(221, 220, 218, 0.70);
+  }
+}
+
+  .hero-content {
+    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    position: relative; // ← esto ancla el ::before a este div
+    z-index: 1;
+
+  }
+
+  .hero-cta-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 450px;
+    width: min(90%, 600px);
+    text-align: center;
+    gap: 10px;
+  }
+  
+
   .hero-title {
-    font-size: 42px;
+    font-size: clamp(30px, 3vw, 40px)!important; /* responsive real */
     font-weight: 700;
     line-height: 1.3;
-    margin: 0 0 16px 0;
+    margin-bottom: 16px;
 
     @media (max-width: 768px) {
       font-size: 28px;
@@ -28,6 +73,7 @@
   }
 
   .hero-subtitle {
+    max-width: 40%;
     font-size: 20px;
     font-weight: 300;
     opacity: 0.95;
@@ -144,7 +190,8 @@
     }
   }
 
-  .btn-notify {
+
+/*   .btn-notify {
     align-self: flex-start;
     background: #{colors.$primary};
     color: white;
@@ -162,7 +209,7 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(63, 166, 70, 0.3);
     }
-  }
+  } */
 }
 
 // INVERTED SECTION
