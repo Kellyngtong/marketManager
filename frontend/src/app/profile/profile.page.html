@@ -1,3 +1,11 @@
+<input
+  #avatarInput
+  type="file"
+  accept="image/*"
+  hidden
+  (change)="onAvatarSelected($event)"
+/>
+
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -10,15 +18,31 @@
 <ion-content>
   <ion-card>
     <ion-card-content class="profile-header" *ngIf="user as current">
-      <ion-avatar>
-        <img [src]="current.avatar || 'https://www.gravatar.com/avatar?d=mp&s=160'" alt="avatar" />
-      </ion-avatar>
+      <button
+        type="button"
+        class="avatar-button"
+        (click)="triggerAvatarPicker()"
+        [disabled]="isUploadingAvatar"
+      >
+        <ion-avatar>
+          <img
+            [src]="current.avatar || 'https://www.gravatar.com/avatar?d=mp&s=160'"
+            alt="avatar"
+            (error)="onAvatarImageError()"
+          />
+        </ion-avatar>
+        <ion-icon class="camera-icon" name="camera-outline"></ion-icon>
+        <ion-spinner
+          *ngIf="isUploadingAvatar"
+          class="avatar-spinner"
+          name="crescent"
+        ></ion-spinner>
+      </button>
       <div>
         <h2>{{ current.nombre || current.username }}</h2>
         <ion-chip color="primary">
           <ion-label>{{ current.rol?.nombre || 'Cliente' }}</ion-label>
         </ion-chip>
-        <p class="hint">Puedes actualizar tu avatar desde la barra superior.</p>
       </div>
     </ion-card-content>
   </ion-card>
@@ -28,7 +52,10 @@
       <ion-label position="stacked">Nombre</ion-label>
       <ion-input formControlName="nombre"></ion-input>
     </ion-item>
-    <ion-note color="danger" *ngIf="profileForm.get('nombre')?.touched && profileForm.get('nombre')?.invalid">
+    <ion-note
+      color="danger"
+      *ngIf="profileForm.get('nombre')?.touched && profileForm.get('nombre')?.invalid"
+    >
       El nombre es obligatorio.
     </ion-note>
 
@@ -36,7 +63,10 @@
       <ion-label position="stacked">Email</ion-label>
       <ion-input formControlName="email" type="email"></ion-input>
     </ion-item>
-    <ion-note color="danger" *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.invalid">
+    <ion-note
+      color="danger"
+      *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.invalid"
+    >
       Ingresa un email válido.
     </ion-note>
 
@@ -60,7 +90,11 @@
     <ion-button expand="block" color="success" (click)="saveProfile()"
       >Guardar cambios</ion-button
     >
-    <ion-button expand="block" fill="clear" color="medium" (click)="logout()"
+    <ion-button
+      expand="block"
+      fill="clear"
+      color="medium"
+      (click)="confirmLogout()"
       >Cerrar sesión</ion-button
     >
   </div>

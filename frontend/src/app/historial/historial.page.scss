@@ -109,3 +109,10 @@ ion-badge {
   font-size: 1rem;
   margin: 0;
 }
+
+@media (min-width: 1024px) {
+  ion-list {
+    max-width: 50%;
+    margin: 0 auto;
+  }
+}

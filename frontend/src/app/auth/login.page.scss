@@ -31,23 +31,16 @@ ion-content {
   margin: 0 auto;
 }
 
-// Tabs styling
-ion-segment {
-  margin-bottom: 24px;
-  background: #f3f4f6;
-  border-radius: 8px;
-  padding: 4px;
-  --indicator-color: colors.$primary;
-  --indicator-height: 3px;
-  --indicator-transform: scale(0.95);
+.login-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 3%;
+}
 
-  ion-segment-button {
-    font-weight: 500;
-    --color-checked: colors.$primary;
-    --color: #6b7280;
-    --border-radius: 6px;
-    padding: 12px 16px;
-  }
+h1 {
+  color: green;
 }
 
 // Form card styling
@@ -96,58 +89,11 @@ ion-segment {
 }
 
 // Test accounts card
-.dev-accounts-card {
-  background: #dcfce7;
-  border: 2px solid #22c55e;
+.test-accounts {
+  padding: 2%;
+  margin-top: 2%;
+  background: #40a6467d;
   border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.dev-accounts-card ion-card-header {
-  background: #22c55e;
-  padding: 12px 16px;
-
-  ion-card-title {
-    color: white;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-
-    ion-icon {
-      font-size: 18px;
-    }
-  }
-}
-
-.dev-accounts-card ion-item {
-  cursor: pointer;
-  border-bottom: 1px solid #86efac;
-  background: #f0fdf4;
-  transition: background-color 0.2s;
-  --padding-start: 12px;
-
-  &:hover {
-    background-color: #dcfce7;
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  h2 {
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: #166534;
-    font-size: 13px;
-  }
-
-  p {
-    color: #15803d;
-    font-size: 12px;
-  }
 }
 
 // Back to home link
@@ -181,4 +127,55 @@ ion-button:disabled {
   font-size: 12px;
   margin-top: 4px;
   display: block;
+}
+
+// Tabs styling (copied from admin dashboard)
+.tabs-list {
+  display: flex;
+  gap: 8px;
+  background: #f3f4f6;
+  border-radius: 25px;
+  padding: 6px;
+  margin-bottom: 24px;
+}
+
+.tab-trigger {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent !important;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666 !important;
+  transition: all 0.3s ease;
+  position: relative;
+  text-align: center;
+  border-radius: 10px;
+  white-space: nowrap;
+
+  &:hover {
+    color: colors.$primary;
+  }
+
+  &.active {
+    color: black !important;
+    background: white !important;
+    border-radius: 25px;
+    font-size: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Responsive layout for desktop
+.login-container {
+  margin-top: 5% !important;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .login-container {
+    max-width: 50%;
+    margin: 0 auto;
+  }
 }

@@ -14,13 +14,13 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
     AdminDashboardComponent,
     EditUserModalComponent,
     EditProductModalComponent,
-    ConfirmationModalComponent,
   ],
   imports: [
     CommonModule,
     IonicModule,
     AdminPageRoutingModule,
     ReactiveFormsModule,
+    ConfirmationModalComponent,
   ],
 })
 export class AdminPageModule {}
