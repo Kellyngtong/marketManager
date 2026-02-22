@@ -98,6 +98,7 @@ export class LoginPage {
           user?.rol?.nombre || user?.rol || '',
         ).toLowerCase();
         const isAdmin = rolId === 4 || rolNombre.includes('admin');
+        const isPremium = rolId === 2 || rolNombre.includes('premium');
         const isEmpleado =
           rolId === 3 ||
           rolNombre.includes('empleado') ||
@@ -105,6 +106,8 @@ export class LoginPage {
 
         const targetRoute = isAdmin
           ? '/admin/dashboard'
+          : isPremium
+            ? '/cliente-premium'
           : isEmpleado
             ? '/empleado'
             : '/home';

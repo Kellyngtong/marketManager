@@ -1,25 +1,22 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastController, ModalController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { CarritoService } from '../services/carrito.service';
 import { AuthService } from '../auth/auth.service';
-import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: 'app-offers',
+  templateUrl: 'offers.page.html',
+  styleUrls: ['offers.page.scss'],
   standalone: false,
 })
-export class HomePage implements OnDestroy {
+export class OffersPage implements OnDestroy {
   @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
   private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
   goToDetail(payload: any) {
     const targetId =
-      typeof payload === 'object'
-        ? payload?.idarticulo || payload?.id
-        : payload;
+      typeof payload === 'object' ? payload?.idarticulo || payload?.id : payload;
     if (targetId) {
       window.location.href = `/product/${targetId}`;
     }
@@ -31,35 +28,48 @@ export class HomePage implements OnDestroy {
   cartItemsCount = 0;
   private cartCountByArticulo: Record<number, number> = {};
   selectedTipo: string | null = null;
-  searchQuery: string = '';
-  showOnlyOffers = false;
+  showOnlyOffers = true;
   isUploadingAvatar = false;
   readonly tipos = [
     { label: 'Todos', value: null },
     { label: 'Fruta', value: 'fruta' },
     { label: 'Verdura', value: 'verdura' },
+    { label: 'Embutidos', value: 'embutidos' },
     { label: 'Carne', value: 'carne' },
     { label: 'Pescado', value: 'pescado' },
-    { label: 'Lácteos', value: 'lacteos' },
     { label: 'Bebidas', value: 'bebidas' },
-    { label: 'Congelados', value: 'congelados' },
-    { label: 'Panadería', value: 'panaderia' },
+    { label: 'Bebidas alcohólicas', value: 'bebidas alcoholicas' },
+    { label: 'Trigo', value: 'trigo' },
   ];
   private readonly tipoCategoriaMap: Record<string, number> = {
     fruta: 1,
     verdura: 2,
-    carne: 3,
-    pescado: 4,
-    lacteos: 5,
-    bebidas: 6,
-    congelados: 7,
-    panaderia: 8,
+    bebidas: 3,
+    embutidos: 5,
+    carne: 6,
+    pescado: 7,
+    'bebidas alcoholicas': 8,
+    trigo: 9,
+  };
+  private readonly tipoAliasesMap: Record<string, string[]> = {
+    fruta: ['fruta', 'frutas'],
+    verdura: ['verdura', 'verduras'],
+    embutidos: ['embutido', 'embutidos'],
+    carne: ['carne', 'carnes'],
+    pescado: ['pescado', 'pescados'],
+    bebidas: ['bebida', 'bebidas'],
+    'bebidas alcoholicas': [
+      'bebida alcoholica',
+      'bebidas alcoholicas',
+      'bebida-alcoholica',
+      'bebidas-alcoholicas',
+    ],
+    trigo: ['trigo', 'trigos'],
   };
   private subscriptions = new Subscription();
 
   constructor(
     private toastCtrl: ToastController,
-    private modalCtrl: ModalController,
     private carritoService: CarritoService,
     private authService: AuthService,
     private router: Router,
@@ -77,8 +87,7 @@ export class HomePage implements OnDestroy {
         (items || []).forEach((item) => {
           const id = Number(item?.idarticulo);
           if (!Number.isNaN(id) && id > 0) {
-            byArticulo[id] =
-              (byArticulo[id] || 0) + (Number(item?.cantidad) || 0);
+            byArticulo[id] = (byArticulo[id] || 0) + (Number(item?.cantidad) || 0);
           }
         });
 
@@ -108,9 +117,7 @@ export class HomePage implements OnDestroy {
           limit: '100',
           page: String(page),
         });
-        const response = await fetch(
-          `${this.API_HOST}/api/articulos?${params.toString()}`,
-        );
+        const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
         if (!response.ok) {
           throw new Error('No se pudo obtener la lista de artículos');
         }
@@ -125,17 +132,9 @@ export class HomePage implements OnDestroy {
           ? this.matchesSelectedTipo(product, this.selectedTipo as string)
           : true;
 
-        const matchesOferta = this.showOnlyOffers
-          ? this.isOfferEnabled(product?.oferta)
-          : true;
+        const matchesOferta = this.isOfferEnabled(product?.oferta);
 
-        const matchesSearch = this.searchQuery
-          ? (product?.nombre || '')
-              .toLowerCase()
-              .includes(this.searchQuery.toLowerCase())
-          : true;
-
-        return matchesTipo && matchesOferta && matchesSearch;
+        return matchesTipo && matchesOferta;
       });
     } catch (error) {
       console.error('Error loading products:', error);
@@ -172,9 +171,7 @@ export class HomePage implements OnDestroy {
         imagen: producto?.imagen,
         descripcion: producto?.descripcion,
       };
-      await firstValueFrom(
-        this.carritoService.addItem(articuloId, cantidad, articulo),
-      );
+      await firstValueFrom(this.carritoService.addItem(articuloId, cantidad, articulo));
       const t = await this.toastCtrl.create({
         message: 'Producto añadido al carrito',
         duration: 1500,
@@ -182,8 +179,7 @@ export class HomePage implements OnDestroy {
       });
       await t.present();
     } catch (error: any) {
-      const message =
-        this.resolveError(error) || 'No se pudo añadir al carrito';
+      const message = this.resolveError(error) || 'No se pudo añadir al carrito';
       const t = await this.toastCtrl.create({
         message,
         duration: 2500,
@@ -201,18 +197,8 @@ export class HomePage implements OnDestroy {
     this.loadProducts();
   }
 
-  onSearchChange(query: string) {
-    this.searchQuery = query;
-    this.loadProducts();
-  }
-
   getTipoLabel(value: string | null) {
     return this.tipos.find((tipo) => tipo.value === value)?.label || 'Todos';
-  }
-
-  toggleOffersOnly() {
-    this.showOnlyOffers = !this.showOnlyOffers;
-    this.loadProducts();
   }
 
   triggerAvatarPicker() {
@@ -243,9 +229,7 @@ export class HomePage implements OnDestroy {
       let avatarUrl: string | null = null;
 
       try {
-        const uploadRes: any = await firstValueFrom(
-          this.authService.uploadAvatar(file),
-        );
+        const uploadRes: any = await firstValueFrom(this.authService.uploadAvatar(file));
         avatarUrl = uploadRes?.imageUrl || uploadRes?.url || null;
       } catch (uploadError: any) {
         avatarUrl = await this.fileToDataUrl(file);
@@ -256,9 +240,7 @@ export class HomePage implements OnDestroy {
       }
 
       try {
-        await firstValueFrom(
-          this.authService.updateProfile({ avatar: avatarUrl }),
-        );
+        await firstValueFrom(this.authService.updateProfile({ avatar: avatarUrl }));
       } catch (profileError) {
         this.authService.updateLocalUser({ avatar: avatarUrl });
       }
@@ -274,9 +256,7 @@ export class HomePage implements OnDestroy {
     } catch (error: any) {
       console.error('Error updating avatar', error);
       const msg =
-        error?.error?.message ||
-        error?.message ||
-        'No se pudo actualizar la foto de perfil';
+        error?.error?.message || error?.message || 'No se pudo actualizar la foto de perfil';
       const toast = await this.toastCtrl.create({
         message: msg,
         duration: 3000,
@@ -292,26 +272,6 @@ export class HomePage implements OnDestroy {
   onAvatarImageError() {
     this.clientAvatar = null;
     this.authService.updateLocalUser({ avatar: null });
-  }
-
-  async confirmLogout() {
-    const modal = await this.modalCtrl.create({
-      component: ConfirmationModalComponent,
-      cssClass: 'confirmation-modal',
-      componentProps: {
-        title: 'Cerrar sesión',
-        message: '¿Estás seguro de que quieres cerrar sesión?',
-        isDangerous: true,
-        cancelText: 'Cancelar',
-        confirmText: 'Cerrar sesión',
-      },
-    });
-
-    await modal.present();
-    const result = await modal.onDidDismiss();
-    if (result.data?.confirmed === true) {
-      this.logout();
-    }
   }
 
   logout() {
@@ -336,12 +296,32 @@ export class HomePage implements OnDestroy {
   }
 
   private matchesSelectedTipo(product: any, tipo: string) {
-    const expectedCategory = this.tipoCategoriaMap[tipo];
+    const selectedTipo = this.normalizeText(tipo);
+    const productTipo = this.normalizeText(product?.tipo);
+    const productCategoriaNombre = this.normalizeText(product?.categoria?.nombre);
+    const allowedTipos = this.tipoAliasesMap[selectedTipo] || [selectedTipo];
+
+    if (productTipo) {
+      return allowedTipos.includes(productTipo);
+    }
+
+    if (productCategoriaNombre) {
+      return allowedTipos.includes(productCategoriaNombre);
+    }
+
+    const expectedCategory = this.tipoCategoriaMap[selectedTipo];
     if (!expectedCategory) {
       return false;
     }
 
-    return Number(product?.idcategoria) === expectedCategory;
+    const categoryId = Number(
+      product?.idcategoria ??
+        product?.id_categoria ??
+        product?.categoria?.idcategoria ??
+        product?.categoria?.id,
+    );
+
+    return Number.isFinite(categoryId) && categoryId === expectedCategory;
   }
 
   private isOfferEnabled(oferta: any) {
@@ -353,11 +333,17 @@ export class HomePage implements OnDestroy {
       return oferta === 1;
     }
 
-    const normalizedOferta = String(oferta || '')
-      .trim()
-      .toLowerCase();
-
+    const normalizedOferta = this.normalizeText(oferta);
     return normalizedOferta === '1' || normalizedOferta === 'true' || normalizedOferta === 'si' || normalizedOferta === 'sí';
+  }
+
+  private normalizeText(value: any) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[_-]+/g, ' ')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
   private fileToDataUrl(file: File): Promise<string> {

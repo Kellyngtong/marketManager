@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PagosService } from '../services/pagos.service';
 import { CarritoService } from '../services/carrito.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-payment-success',
@@ -25,6 +26,7 @@ export class PaymentSuccessPage implements OnInit, OnDestroy {
     private pagosService: PagosService,
     private carritoService: CarritoService,
     private loadingCtrl: LoadingController,
+    private auth: AuthService,
   ) {}
 
   ngOnInit() {
@@ -70,6 +72,17 @@ export class PaymentSuccessPage implements OnInit, OnDestroy {
 
   volver() {
     localStorage.removeItem('stripe_session_id');
-    this.router.navigate(['/home']);
+    this.router.navigate([this.getShoppingRoute()]);
+  }
+
+  private getShoppingRoute(): string {
+    const user = this.auth.currentUserValue;
+    const topLevelRol = user?.idrol;
+    const nestedRol = user?.rol?.idrol;
+    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+    const isPremium =
+      topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
+
+    return isPremium ? '/cliente-premium' : '/home';
   }
 }

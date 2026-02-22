@@ -2,18 +2,18 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { HomePage } from './home.page';
+import { OffersPremiumPage } from './offers-premium.page';
 import { ProductCardModule } from '../product-card/product-card.module';
-import { HomePageRoutingModule } from './home-routing.module';
+import { OffersPremiumPageRoutingModule } from './offers-premium-routing.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    HomePageRoutingModule,
+    OffersPremiumPageRoutingModule,
     ProductCardModule,
   ],
-  declarations: [HomePage],
+  declarations: [OffersPremiumPage],
 })
-export class HomePageModule {}
+export class OffersPremiumPageModule {}

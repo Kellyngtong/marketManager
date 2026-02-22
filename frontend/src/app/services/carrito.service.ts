@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuthService } from '../auth/auth.service';
+import { getOriginalPricesMap, getPremiumUnitPrice } from '../utils/premium-pricing.util';
 
 export interface CartArticulo {
   idarticulo: number;
@@ -42,6 +43,7 @@ const EMPTY_TOTALS: CartTotals = {
 };
 
 const CARRITO_LOCAL_KEY = 'carritoLocal';
+const PREMIUM_ROL_ID = 2;
 
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
@@ -263,8 +265,17 @@ export class CarritoService {
   }
 
   private handleCartResponse(res?: Partial<CartResponse>) {
-    const items = res?.items || [];
-    const totals = res?.totales || EMPTY_TOTALS;
+    const rawItems = res?.items || [];
+    const user = this.auth.currentUserValue;
+    const premiumUser = this.isPremiumUser(user);
+    const items = premiumUser
+      ? this.applyPremiumPricingToItems(rawItems)
+      : rawItems;
+
+    const totals = premiumUser
+      ? this.calculateTotals(items)
+      : res?.totales || EMPTY_TOTALS;
+
     this.cartItemsSubject.next(items);
     this.cartTotalsSubject.next(totals);
   }
@@ -282,5 +293,40 @@ export class CarritoService {
       user?.rol?.nombre || user?.rol || '',
     ).toLowerCase();
     return topLevelRol === 4 || nestedRol === 4 || rolNombre.includes('admin');
+  }
+
+  private isPremiumUser(user: any) {
+    const topLevelRol = user?.idrol;
+    const nestedRol = user?.rol?.idrol;
+    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+
+    return (
+      topLevelRol === PREMIUM_ROL_ID ||
+      nestedRol === PREMIUM_ROL_ID ||
+      rolNombre.includes('premium')
+    );
+  }
+
+  private applyPremiumPricingToItems(items: CartItem[]): CartItem[] {
+    const originalPricesMap = getOriginalPricesMap();
+
+    return (items || []).map((item) => {
+      const articulo = item?.articulo;
+      if (!articulo) {
+        return item;
+      }
+
+      const basePrice = Number(articulo.precio_venta) || 0;
+      const premiumPrice = getPremiumUnitPrice(articulo, originalPricesMap);
+
+      return {
+        ...item,
+        articulo: {
+          ...articulo,
+          precio_base: basePrice,
+          precio_venta: premiumPrice,
+        } as any,
+      };
+    });
   }
 }

@@ -19,6 +19,7 @@ export interface StripeSessionStatus {
 export class PagosService {
   private API_HOST = this.getApiHost();
   private baseUrl = `${this.API_HOST}/api/pagos`;
+  private readonly originalPricesKey = 'marketing_offer_original_prices_v1';
 
   private getApiHost(): string {
     const hostname = window.location.hostname;
@@ -60,7 +61,10 @@ export class PagosService {
 
     return this.http.post<StripeSessionResponse>(
       `${this.baseUrl}/crear-sesion`,
-      { datosEnvio },
+      {
+        datosEnvio,
+        pricingContext: this.getPremiumPricingContext(),
+      },
       cfg,
     );
   }
@@ -156,5 +160,37 @@ export class PagosService {
     const token = this.auth.getToken();
     if (!token) return null;
     return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
+
+  private getPremiumPricingContext() {
+    const user = this.auth.currentUserValue;
+    const topLevelRol = user?.idrol;
+    const nestedRol = user?.rol?.idrol;
+    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+    const isPremium =
+      topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
+
+    if (!isPremium) {
+      return {
+        isPremium: false,
+        originalPrices: {},
+      };
+    }
+
+    try {
+      const raw = localStorage.getItem(this.originalPricesKey);
+      const parsed = raw ? JSON.parse(raw) : {};
+      const originalPrices = parsed && typeof parsed === 'object' ? parsed : {};
+
+      return {
+        isPremium: true,
+        originalPrices,
+      };
+    } catch {
+      return {
+        isPremium: true,
+        originalPrices: {},
+      };
+    }
   }
 }

@@ -30,6 +30,60 @@ export class AdminDashboardComponent implements OnInit {
   products: any[] = [];
   orders: any[] = [];
 
+  private categoriaMap: Record<number, string> = {
+    1: 'Frutas',
+    2: 'Verduras',
+    3: 'Carnes',
+    4: 'Pescados',
+    5: 'Lácteos',
+    6: 'Bebidas',
+    7: 'Congelados',
+    8: 'Panadería',
+  };
+
+  // Search terms
+  userSearch: string = '';
+  productSearch: string = '';
+  orderSearch: string = '';
+
+  get filteredUsers() {
+    const q = String(this.userSearch || '').trim().toLowerCase();
+    if (!q) return this.users;
+    return this.users.filter((u: any) => {
+      return (
+        String(u.username || u.nombre || '').toLowerCase().includes(q) ||
+        String(u.email || '').toLowerCase().includes(q) ||
+        String(u.rol || '').toLowerCase().includes(q)
+      );
+    });
+  }
+
+  get filteredProducts() {
+    const q = String(this.productSearch || '').trim().toLowerCase();
+    if (!q) return this.products;
+    return this.products.filter((p: any) => {
+      const categoria = (p.categoria_nombre || p.categoria?.nombre || p.categoria || '') + '';
+      return (
+        String(p.nombre || '').toLowerCase().includes(q) ||
+        categoria.toLowerCase().includes(q) ||
+        String(p.tipo || '').toLowerCase().includes(q)
+      );
+    });
+  }
+
+  get filteredOrders() {
+    const q = String(this.orderSearch || '').trim().toLowerCase();
+    if (!q) return this.orders;
+    return this.orders.filter((o: any) => {
+      return (
+        String(o.idventa || '').toLowerCase().includes(q) ||
+        String(o.usuario?.username || o.usuario?.nombre || '').toLowerCase().includes(q) ||
+        String(o.estado || '').toLowerCase().includes(q) ||
+        String(o.total || '').toLowerCase().includes(q)
+      );
+    });
+  }
+
   constructor(
     private adminService: AdminService,
     private toastCtrl: ToastController,
@@ -93,6 +147,21 @@ export class AdminDashboardComponent implements OnInit {
         this.adminService.getAllProducts(),
       );
       this.products = Array.isArray(data) ? data : data.data || [];
+
+      // Normalize category display
+      this.products = this.products.map((p: any) => {
+        const categoriaObj = p?.categoria;
+        let categoriaNombre = null;
+        if (categoriaObj && typeof categoriaObj === 'object') {
+          categoriaNombre = categoriaObj.nombre || categoriaObj.name || null;
+        }
+        if (!categoriaNombre && p?.idcategoria) {
+          categoriaNombre = this.categoriaMap[Number(p.idcategoria)];
+        }
+        // attach display property
+        p.categoria_nombre = categoriaNombre || null;
+        return p;
+      });
     } catch (error) {
       console.error('Error loading products:', error);
     }
@@ -175,6 +244,55 @@ export class AdminDashboardComponent implements OnInit {
         await this.showSuccess('Usuario actualizado correctamente');
       } catch (error) {
         await this.showError('Error actualizando usuario');
+      }
+    }
+  }
+
+  async createUser() {
+    const modal = await this.modalCtrl.create({
+      component: EditUserModalComponent,
+      componentProps: {
+        user: null,
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+
+    if (result.data && result.data.user) {
+      try {
+        const created: any = await firstValueFrom(
+          this.adminService.createUser(result.data.user),
+        );
+        // Push to users list and show success
+        this.users.unshift(created);
+        await this.showSuccess('Usuario creado correctamente');
+      } catch (error) {
+        await this.showError('Error creando usuario');
+      }
+    }
+  }
+
+  async createProduct() {
+    const modal = await this.modalCtrl.create({
+      component: EditProductModalComponent,
+      componentProps: {
+        product: null,
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+
+    if (result.data && result.data.product) {
+      try {
+        const created: any = await firstValueFrom(
+          this.adminService.createProduct(result.data.product),
+        );
+        this.products.unshift(created);
+        await this.showSuccess('Producto creado correctamente');
+      } catch (error) {
+        await this.showError('Error creando producto');
       }
     }
   }

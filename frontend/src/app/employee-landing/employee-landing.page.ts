@@ -35,10 +35,6 @@ export class EmployeeLandingPage {
     }
   }
 
-  goToInventario() {
-    this.router.navigateByUrl('/employers');
-  }
-
   goToPedidos() {
     this.router.navigateByUrl('/adminPedidos');
   }
@@ -49,6 +45,10 @@ export class EmployeeLandingPage {
 
   goToContable() {
     this.router.navigateByUrl('/contable');
+  }
+
+  goToInventario() {
+    this.router.navigateByUrl('/employers');
   }
 
   async confirmLogout() {

@@ -113,6 +113,17 @@ export class CartPage {
     return item.idcarrito_item;
   }
 
+  getShoppingRoute(): string {
+    const user = this.auth.currentUserValue;
+    const topLevelRol = user?.idrol;
+    const nestedRol = user?.rol?.idrol;
+    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+    const isPremium =
+      topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
+
+    return isPremium ? '/cliente-premium' : '/home';
+  }
+
   private async presentError(error: any) {
     const message =
       error?.error?.message ||

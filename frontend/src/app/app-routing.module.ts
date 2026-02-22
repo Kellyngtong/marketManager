@@ -15,6 +15,29 @@ const routes: Routes = [
       import('./home/home.module').then((m) => m.HomePageModule),
   },
   {
+    path: 'cliente-premium',
+    canActivate: [RoleGuard],
+    data: { roles: [2] }, // Solo Premium (rol 2)
+    loadChildren: () =>
+      import('./cliente-premium/cliente-premium.module').then(
+        (m) => m.ClientePremiumPageModule,
+      ),
+  },
+  {
+    path: 'ofertas',
+    loadChildren: () =>
+      import('./offers/offers.module').then((m) => m.OffersPageModule),
+  },
+  {
+    path: 'ofertas-premium',
+    canActivate: [RoleGuard],
+    data: { roles: [2] }, // Solo Premium (rol 2)
+    loadChildren: () =>
+      import('./offers-premium/offers-premium.module').then(
+        (m) => m.OffersPremiumPageModule,
+      ),
+  },
+  {
     path: 'product/:id',
     loadChildren: () =>
       import('./product-detail/product-detail.module').then(
@@ -60,17 +83,21 @@ const routes: Routes = [
       import('./historial/historial.module').then((m) => m.HistorialPageModule),
   },
   {
-    path: 'employers',
-    loadChildren: () =>
-      import('./employers/employers.module').then((m) => m.EmployersPageModule),
-  },
-  {
     path: 'empleado',
     canActivate: [RoleGuard],
     data: { roles: [3] }, // Solo Empleado (rol 3)
     loadChildren: () =>
       import('./employee-landing/employee-landing.module').then(
         (m) => m.EmployeeLandingPageModule,
+      ),
+  },
+  {
+    path: 'employers',
+    canActivate: [RoleGuard],
+    data: { roles: [3] }, // Solo Empleado (rol 3)
+    loadComponent: () =>
+      import('./employers/employers.page').then(
+        (m) => m.EmployersPage,
       ),
   },
   {

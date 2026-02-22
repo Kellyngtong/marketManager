@@ -14,7 +14,7 @@ const getFormattedCart = async (idusuario: number) => {
     include: [
       {
         model: Articulo,
-        attributes: ['idarticulo', 'nombre', 'descripcion', 'precio_venta', 'stock', 'imagen'],
+        attributes: ['idarticulo', 'nombre', 'descripcion', 'precio_venta', 'stock', 'imagen', 'oferta'],
       },
     ],
     order: [['creado_en', 'DESC']],
@@ -40,6 +40,7 @@ const getFormattedCart = async (idusuario: number) => {
         precio_venta: parseFloat(item.Articulo.precio_venta),
         stock: item.Articulo.stock,
         imagen: item.Articulo.imagen,
+        oferta: item.Articulo.oferta,
       },
     };
   });

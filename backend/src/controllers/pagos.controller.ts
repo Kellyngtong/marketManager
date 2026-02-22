@@ -6,6 +6,127 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
+const PREMIUM_ROLE_ID = 2;
+const TAX_RATE = 0.18;
+
+const toPositiveNumber = (value: any): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
+
+const roundPrice = (value: number): number => {
+  return Math.round(value * 100) / 100;
+};
+
+const isOfferValue = (oferta: any): boolean => {
+  if (typeof oferta === "boolean") {
+    return oferta;
+  }
+  if (typeof oferta === "number") {
+    return oferta === 1;
+  }
+
+  const normalized = String(oferta || "")
+    .trim()
+    .toLowerCase();
+
+  return (
+    normalized === "1" ||
+    normalized === "true" ||
+    normalized === "si" ||
+    normalized === "sí"
+  );
+};
+
+const isPremiumUser = (req: AuthRequest): boolean => {
+  const idrol = req.idrol;
+  const rolNombre = String(req.rolNombre || "").toLowerCase();
+  return idrol === PREMIUM_ROLE_ID || rolNombre.includes("premium");
+};
+
+const sanitizeOriginalPricesMap = (
+  value: any,
+): Record<string, number> => {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+
+  const sanitized: Record<string, number> = {};
+  Object.entries(value).forEach(([key, mapValue]) => {
+    const price = toPositiveNumber(mapValue);
+    if (key && price > 0) {
+      sanitized[String(key)] = price;
+    }
+  });
+
+  return sanitized;
+};
+
+const serializeOriginalPrices = (
+  map: Record<string, number>,
+  articleIds: number[],
+): string => {
+  const allowedIds = new Set((articleIds || []).map((id) => String(id)));
+  const entries = Object.entries(map)
+    .filter(([key, price]) => allowedIds.has(key) && toPositiveNumber(price) > 0)
+    .map(([key, price]) => `${key}|${roundPrice(Number(price))}`);
+
+  const joined = entries.join(";");
+  return joined.length <= 480 ? joined : "";
+};
+
+const parseSerializedOriginalPrices = (
+  raw: any,
+): Record<string, number> => {
+  const text = String(raw || "").trim();
+  if (!text) {
+    return {};
+  }
+
+  const parsed: Record<string, number> = {};
+  text.split(";").forEach((entry) => {
+    const [id, value] = entry.split("|");
+    const price = toPositiveNumber(value);
+    if (id && price > 0) {
+      parsed[id] = price;
+    }
+  });
+
+  return parsed;
+};
+
+const getPremiumUnitPrice = (
+  articulo: any,
+  premium: boolean,
+  originalPricesMap: Record<string, number>,
+): number => {
+  const currentPrice = toPositiveNumber(articulo?.precio_venta);
+  if (!premium || currentPrice <= 0) {
+    return currentPrice;
+  }
+
+  const oferta = isOfferValue(articulo?.oferta);
+  if (!oferta) {
+    return roundPrice(currentPrice * 0.95);
+  }
+
+  const articleId = String(articulo?.idarticulo || "").trim();
+  const originalPrice = articleId
+    ? toPositiveNumber(originalPricesMap[articleId])
+    : 0;
+
+  if (originalPrice > currentPrice) {
+    const baseDiscount = Math.max(
+      1,
+      Math.round(((originalPrice - currentPrice) / originalPrice) * 100),
+    );
+    const totalDiscount = Math.min(baseDiscount + 10, 95);
+    return roundPrice(originalPrice * (1 - totalDiscount / 100));
+  }
+
+  return roundPrice(currentPrice * 0.9);
+};
+
 /**
  * POST /api/pagos/crear-sesion
  * Crear sesión de Stripe Checkout
@@ -22,13 +143,25 @@ export const crearSesionCheckout = async (
       return;
     }
 
+    const premium = isPremiumUser(req);
+    const requestOriginalPrices = sanitizeOriginalPricesMap(
+      req.body?.pricingContext?.originalPrices,
+    );
+
     // Obtener items del carrito
     const items = await db.carrito_item.findAll({
       where: { idusuario },
       include: [
         {
           model: db.articulo,
-          attributes: ["idarticulo", "nombre", "precio_venta", "imagen"],
+          attributes: [
+            "idarticulo",
+            "nombre",
+            "precio_venta",
+            "imagen",
+            "descripcion",
+            "oferta",
+          ],
         },
       ],
     });
@@ -39,20 +172,58 @@ export const crearSesionCheckout = async (
     }
 
     // Crear line items para Stripe
-    const lineItems = items.map((item: any) => ({
-      price_data: {
-        currency: "eur",
-        product_data: {
-          name: item.Articulo.nombre,
-          images: item.Articulo.imagen ? [item.Articulo.imagen] : [],
-          metadata: {
-            idarticulo: item.Articulo.idarticulo.toString(),
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item: any) => {
+      const articulo = item.Articulo;
+      const unitPrice = getPremiumUnitPrice(
+        articulo,
+        premium,
+        requestOriginalPrices,
+      );
+
+      return {
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: articulo.nombre,
+            images: articulo.imagen ? [articulo.imagen] : [],
+            metadata: {
+              idarticulo: articulo.idarticulo.toString(),
+            },
           },
+          unit_amount: Math.round(unitPrice * 100),
         },
-        unit_amount: Math.round(parseFloat(item.Articulo.precio_venta) * 100), // Convertir a centavos
-      },
-      quantity: item.cantidad,
-    }));
+        quantity: item.cantidad,
+      };
+    });
+
+    const subtotal = items.reduce((sum: number, item: any) => {
+      const unitPrice = getPremiumUnitPrice(
+        item.Articulo,
+        premium,
+        requestOriginalPrices,
+      );
+      return sum + unitPrice * item.cantidad;
+    }, 0);
+
+    const impuesto = +(subtotal * TAX_RATE).toFixed(2);
+
+    if (impuesto > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: `Impuesto (IVA ${Math.round(TAX_RATE * 100)}%)`,
+          },
+          unit_amount: Math.round(impuesto * 100),
+        },
+        quantity: 1,
+      });
+    }
+
+    const serializedOriginalPrices = serializeOriginalPrices(
+      requestOriginalPrices,
+      items.map((item: any) => item.Articulo?.idarticulo).filter(Boolean),
+    );
 
     // Crear sesión de Stripe
     const session = await stripe.checkout.sessions.create({
@@ -68,6 +239,8 @@ export const crearSesionCheckout = async (
       metadata: {
         idusuario: idusuario.toString(),
         id_tenant: req.tenant?.id_tenant?.toString() || "1",
+        premium_pricing: premium ? "1" : "0",
+        premium_original_prices: serializedOriginalPrices,
       },
     });
 
@@ -169,6 +342,12 @@ export const confirmarPago = async (
       return;
     }
 
+    const premiumBySession =
+      String(session.metadata?.premium_pricing || "0") === "1";
+    const originalPricesMap = parseSerializedOriginalPrices(
+      session.metadata?.premium_original_prices,
+    );
+
     // Obtener items del carrito del usuario
     const items: any[] = await db.carrito_item.findAll({
       where: { idusuario },
@@ -205,13 +384,16 @@ export const confirmarPago = async (
 
     // Calcular totales
     const subtotal = items.reduce((sum: number, item: any) => {
-      const price = Number(
-        item.articulo?.precio_venta || item.Articulo?.precio_venta || 0,
+      const articulo = item.articulo || item.Articulo;
+      const price = getPremiumUnitPrice(
+        articulo,
+        premiumBySession,
+        originalPricesMap,
       );
       return sum + price * item.cantidad;
     }, 0);
 
-    const impuesto = +(subtotal * 0.18).toFixed(2);
+    const impuesto = +(subtotal * TAX_RATE).toFixed(2);
     const total = +(subtotal + impuesto).toFixed(2);
 
     // Crear venta
@@ -231,7 +413,12 @@ export const confirmarPago = async (
 
     // Crear detalles de venta y actualizar stock
     for (const item of items) {
-      const precio = item.articulo?.precio_venta || item.Articulo?.precio_venta;
+      const articuloVenta = item.articulo || item.Articulo;
+      const precio = getPremiumUnitPrice(
+        articuloVenta,
+        premiumBySession,
+        originalPricesMap,
+      );
 
       await db.detalle_venta.create({
         idventa: venta.idventa,
@@ -242,10 +429,9 @@ export const confirmarPago = async (
       });
 
       // Actualizar stock
-      const articulo = item.articulo || item.Articulo;
-      if (articulo) {
-        articulo.stock -= item.cantidad;
-        await articulo.save();
+      if (articuloVenta) {
+        articuloVenta.stock -= item.cantidad;
+        await articuloVenta.save();
       }
     }
 
