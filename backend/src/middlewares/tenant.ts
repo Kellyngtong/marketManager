@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
 export interface TenantRequest extends Request {
   tenant?: {
@@ -12,7 +12,11 @@ export interface TenantRequest extends Request {
 }
 
 // Extraer tenant del JWT (OPCIONAL - solo si hay token)
-export const extractTenantOptional = (req: TenantRequest, res: Response, next: NextFunction): void => {
+export const extractTenantOptional = (
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -21,14 +25,17 @@ export const extractTenantOptional = (req: TenantRequest, res: Response, next: N
       return;
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
     if (!token) {
       // Sin token válido, continuar sin tenant
       next();
       return;
     }
 
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+    const decoded: any = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "secretkey",
+    );
 
     if (decoded.id_tenant) {
       req.tenant = {
@@ -48,21 +55,28 @@ export const extractTenantOptional = (req: TenantRequest, res: Response, next: N
 };
 
 // Extraer tenant del JWT (REQUERIDO - debe haber token)
-export const extractTenant = (req: TenantRequest, res: Response, next: NextFunction): void => {
+export const extractTenant = (
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      res.status(401).json({ message: 'Token no proporcionado' });
+      res.status(401).json({ message: "Token no proporcionado" });
       return;
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
     if (!token) {
-      res.status(401).json({ message: 'Token no proporcionado' });
+      res.status(401).json({ message: "Token no proporcionado" });
       return;
     }
 
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+    const decoded: any = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "secretkey",
+    );
 
     // Asignar tenant por defecto (1) si no existe
     const id_tenant = decoded.id_tenant || 1;
@@ -78,23 +92,31 @@ export const extractTenant = (req: TenantRequest, res: Response, next: NextFunct
 
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Token no válido' });
+    res.status(401).json({ message: "Token no válido" });
   }
 };
 
 // Validar que el tenant en el request pertenece al usuario
-export const validateTenant = (req: TenantRequest, res: Response, next: NextFunction): void => {
+export const validateTenant = (
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
   if (!req.tenant) {
-    res.status(401).json({ message: 'Tenant no identificado' });
+    res.status(401).json({ message: "Tenant no identificado" });
     return;
   }
   next();
 };
 
 // Requerir que el usuario sea admin del tenant
-export const requireTenantAdmin = (req: TenantRequest, res: Response, next: NextFunction): void => {
+export const requireTenantAdmin = (
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
   if (!req.tenant) {
-    res.status(401).json({ message: 'Usuario no autenticado' });
+    res.status(401).json({ message: "Usuario no autenticado" });
     return;
   }
 
@@ -103,9 +125,13 @@ export const requireTenantAdmin = (req: TenantRequest, res: Response, next: Next
 };
 
 // Adjuntar tenant a body para operaciones de creación
-export const attachTenantToBody = (req: TenantRequest, res: Response, next: NextFunction): void => {
+export const attachTenantToBody = (
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
   if (!req.tenant) {
-    res.status(401).json({ message: 'Usuario no autenticado' });
+    res.status(401).json({ message: "Usuario no autenticado" });
     return;
   }
 
@@ -115,15 +141,19 @@ export const attachTenantToBody = (req: TenantRequest, res: Response, next: Next
 };
 
 // Validar que la tienda pertenece al tenant
-export const validateStore = (req: TenantRequest, res: Response, next: NextFunction): void => {
+export const validateStore = (
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
   if (!req.tenant) {
-    res.status(401).json({ message: 'Usuario no autenticado' });
+    res.status(401).json({ message: "Usuario no autenticado" });
     return;
   }
 
   const { storeId } = req.params;
   if (storeId && parseInt(storeId as string) !== req.tenant.id_store) {
-    res.status(403).json({ message: 'No tienes acceso a esta tienda' });
+    res.status(403).json({ message: "No tienes acceso a esta tienda" });
     return;
   }
 
