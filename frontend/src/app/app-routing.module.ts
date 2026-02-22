@@ -15,9 +15,27 @@ const routes: Routes = [
       import('./home/home.module').then((m) => m.HomePageModule),
   },
   {
+    path: 'cliente-premium',
+    canActivate: [RoleGuard],
+    data: { roles: [2] }, // Solo Premium (rol 2)
+    loadChildren: () =>
+      import('./cliente-premium/cliente-premium.module').then(
+        (m) => m.ClientePremiumPageModule,
+      ),
+  },
+  {
     path: 'ofertas',
     loadChildren: () =>
       import('./offers/offers.module').then((m) => m.OffersPageModule),
+  },
+  {
+    path: 'ofertas-premium',
+    canActivate: [RoleGuard],
+    data: { roles: [2] }, // Solo Premium (rol 2)
+    loadChildren: () =>
+      import('./offers-premium/offers-premium.module').then(
+        (m) => m.OffersPremiumPageModule,
+      ),
   },
   {
     path: 'product/:id',
@@ -63,11 +81,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./historial/historial.module').then((m) => m.HistorialPageModule),
-  },
-  {
-    path: 'employers',
-    loadChildren: () =>
-      import('./employers/employers.module').then((m) => m.EmployersPageModule),
   },
   {
     path: 'empleado',

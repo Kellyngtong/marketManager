@@ -6,19 +6,17 @@ import { CarritoService } from '../services/carrito.service';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: 'app-offers-premium',
+  templateUrl: 'offers-premium.page.html',
+  styleUrls: ['offers-premium.page.scss'],
   standalone: false,
 })
-export class HomePage implements OnDestroy {
+export class OffersPremiumPage implements OnDestroy {
   @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
   private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
   goToDetail(payload: any) {
     const targetId =
-      typeof payload === 'object'
-        ? payload?.idarticulo || payload?.id
-        : payload;
+      typeof payload === 'object' ? payload?.idarticulo || payload?.id : payload;
     if (targetId) {
       window.location.href = `/product/${targetId}`;
     }
@@ -30,7 +28,7 @@ export class HomePage implements OnDestroy {
   cartItemsCount = 0;
   private cartCountByArticulo: Record<number, number> = {};
   selectedTipo: string | null = null;
-  showOnlyOffers = false;
+  showOnlyOffers = true;
   isUploadingAvatar = false;
   readonly tipos = [
     { label: 'Todos', value: null },
@@ -53,6 +51,21 @@ export class HomePage implements OnDestroy {
     'bebidas alcoholicas': 8,
     trigo: 9,
   };
+  private readonly tipoAliasesMap: Record<string, string[]> = {
+    fruta: ['fruta', 'frutas'],
+    verdura: ['verdura', 'verduras'],
+    embutidos: ['embutido', 'embutidos'],
+    carne: ['carne', 'carnes'],
+    pescado: ['pescado', 'pescados'],
+    bebidas: ['bebida', 'bebidas'],
+    'bebidas alcoholicas': [
+      'bebida alcoholica',
+      'bebidas alcoholicas',
+      'bebida-alcoholica',
+      'bebidas-alcoholicas',
+    ],
+    trigo: ['trigo', 'trigos'],
+  };
   private subscriptions = new Subscription();
 
   constructor(
@@ -74,8 +87,7 @@ export class HomePage implements OnDestroy {
         (items || []).forEach((item) => {
           const id = Number(item?.idarticulo);
           if (!Number.isNaN(id) && id > 0) {
-            byArticulo[id] =
-              (byArticulo[id] || 0) + (Number(item?.cantidad) || 0);
+            byArticulo[id] = (byArticulo[id] || 0) + (Number(item?.cantidad) || 0);
           }
         });
 
@@ -105,9 +117,7 @@ export class HomePage implements OnDestroy {
           limit: '100',
           page: String(page),
         });
-        const response = await fetch(
-          `${this.API_HOST}/api/articulos?${params.toString()}`,
-        );
+        const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
         if (!response.ok) {
           throw new Error('No se pudo obtener la lista de artículos');
         }
@@ -122,9 +132,7 @@ export class HomePage implements OnDestroy {
           ? this.matchesSelectedTipo(product, this.selectedTipo as string)
           : true;
 
-        const matchesOferta = this.showOnlyOffers
-          ? this.isOfferEnabled(product?.oferta)
-          : true;
+        const matchesOferta = this.isOfferEnabled(product?.oferta);
 
         return matchesTipo && matchesOferta;
       });
@@ -163,9 +171,7 @@ export class HomePage implements OnDestroy {
         imagen: producto?.imagen,
         descripcion: producto?.descripcion,
       };
-      await firstValueFrom(
-        this.carritoService.addItem(articuloId, cantidad, articulo),
-      );
+      await firstValueFrom(this.carritoService.addItem(articuloId, cantidad, articulo));
       const t = await this.toastCtrl.create({
         message: 'Producto añadido al carrito',
         duration: 1500,
@@ -173,8 +179,7 @@ export class HomePage implements OnDestroy {
       });
       await t.present();
     } catch (error: any) {
-      const message =
-        this.resolveError(error) || 'No se pudo añadir al carrito';
+      const message = this.resolveError(error) || 'No se pudo añadir al carrito';
       const t = await this.toastCtrl.create({
         message,
         duration: 2500,
@@ -194,11 +199,6 @@ export class HomePage implements OnDestroy {
 
   getTipoLabel(value: string | null) {
     return this.tipos.find((tipo) => tipo.value === value)?.label || 'Todos';
-  }
-
-  toggleOffersOnly() {
-    this.showOnlyOffers = !this.showOnlyOffers;
-    this.loadProducts();
   }
 
   triggerAvatarPicker() {
@@ -229,9 +229,7 @@ export class HomePage implements OnDestroy {
       let avatarUrl: string | null = null;
 
       try {
-        const uploadRes: any = await firstValueFrom(
-          this.authService.uploadAvatar(file),
-        );
+        const uploadRes: any = await firstValueFrom(this.authService.uploadAvatar(file));
         avatarUrl = uploadRes?.imageUrl || uploadRes?.url || null;
       } catch (uploadError: any) {
         avatarUrl = await this.fileToDataUrl(file);
@@ -242,9 +240,7 @@ export class HomePage implements OnDestroy {
       }
 
       try {
-        await firstValueFrom(
-          this.authService.updateProfile({ avatar: avatarUrl }),
-        );
+        await firstValueFrom(this.authService.updateProfile({ avatar: avatarUrl }));
       } catch (profileError) {
         this.authService.updateLocalUser({ avatar: avatarUrl });
       }
@@ -260,9 +256,7 @@ export class HomePage implements OnDestroy {
     } catch (error: any) {
       console.error('Error updating avatar', error);
       const msg =
-        error?.error?.message ||
-        error?.message ||
-        'No se pudo actualizar la foto de perfil';
+        error?.error?.message || error?.message || 'No se pudo actualizar la foto de perfil';
       const toast = await this.toastCtrl.create({
         message: msg,
         duration: 3000,
@@ -302,19 +296,32 @@ export class HomePage implements OnDestroy {
   }
 
   private matchesSelectedTipo(product: any, tipo: string) {
-    const normalizedTipo = String(product?.tipo || '')
-      .trim()
-      .toLowerCase();
-    if (normalizedTipo === tipo) {
-      return true;
+    const selectedTipo = this.normalizeText(tipo);
+    const productTipo = this.normalizeText(product?.tipo);
+    const productCategoriaNombre = this.normalizeText(product?.categoria?.nombre);
+    const allowedTipos = this.tipoAliasesMap[selectedTipo] || [selectedTipo];
+
+    if (productTipo) {
+      return allowedTipos.includes(productTipo);
     }
 
-    const expectedCategory = this.tipoCategoriaMap[tipo];
+    if (productCategoriaNombre) {
+      return allowedTipos.includes(productCategoriaNombre);
+    }
+
+    const expectedCategory = this.tipoCategoriaMap[selectedTipo];
     if (!expectedCategory) {
       return false;
     }
 
-    return Number(product?.idcategoria) === expectedCategory;
+    const categoryId = Number(
+      product?.idcategoria ??
+        product?.id_categoria ??
+        product?.categoria?.idcategoria ??
+        product?.categoria?.id,
+    );
+
+    return Number.isFinite(categoryId) && categoryId === expectedCategory;
   }
 
   private isOfferEnabled(oferta: any) {
@@ -326,11 +333,17 @@ export class HomePage implements OnDestroy {
       return oferta === 1;
     }
 
-    const normalizedOferta = String(oferta || '')
-      .trim()
-      .toLowerCase();
-
+    const normalizedOferta = this.normalizeText(oferta);
     return normalizedOferta === '1' || normalizedOferta === 'true' || normalizedOferta === 'si' || normalizedOferta === 'sí';
+  }
+
+  private normalizeText(value: any) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[_-]+/g, ' ')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
   private fileToDataUrl(file: File): Promise<string> {

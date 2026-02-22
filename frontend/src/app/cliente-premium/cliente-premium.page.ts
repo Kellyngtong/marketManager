@@ -6,12 +6,12 @@ import { CarritoService } from '../services/carrito.service';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: 'app-cliente-premium',
+  templateUrl: 'cliente-premium.page.html',
+  styleUrls: ['cliente-premium.page.scss'],
   standalone: false,
 })
-export class HomePage implements OnDestroy {
+export class ClientePremiumPage implements OnDestroy {
   @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
   private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
   goToDetail(payload: any) {

@@ -25,10 +25,6 @@ export class EmployeeLandingPage {
     }
   }
 
-  goToInventario() {
-    this.router.navigateByUrl('/employers');
-  }
-
   goToPedidos() {
     this.router.navigateByUrl('/adminPedidos');
   }

@@ -1,4 +1,11 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  getBaseOriginalPrice,
+  getOfferDiscountPercent,
+  getOriginalPricesMap,
+  getPremiumUnitPrice,
+  isOfferProduct,
+} from '../utils/premium-pricing.util';
 
 @Component({
   selector: 'app-product-card',
@@ -9,8 +16,10 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 export class ProductCardComponent implements OnChanges {
   @Input() product: any;
   @Input() cartCount = 0;
+  @Input() isPremiumClient = false;
   @Output() addToCart = new EventEmitter<{ product: any; quantity: number }>();
   @Output() goToDetail = new EventEmitter<any>();
+  private originalPricesCache: Record<string, number> | null = null;
 
   quantity = 1;
 
@@ -41,5 +50,111 @@ export class ProductCardComponent implements OnChanges {
 
   emitAddToCart() {
     this.addToCart.emit({ product: this.product, quantity: this.quantity });
+  }
+
+  isOfferProduct(product: any): boolean {
+    return isOfferProduct(product);
+  }
+
+  getCurrentPrice(product: any): number {
+    return this.toPositiveNumber(product?.precio_venta ?? product?.price);
+  }
+
+  getOriginalPrice(product: any): number {
+    const currentPrice = this.getCurrentPrice(product);
+    const candidateOriginal = getBaseOriginalPrice(
+      product,
+      this.getOriginalPricesMap(),
+    );
+
+    if (candidateOriginal > currentPrice) {
+      return candidateOriginal;
+    }
+
+    return currentPrice;
+  }
+
+  hasOfferComparison(product: any): boolean {
+    const currentPrice = this.getCurrentPrice(product);
+    const originalPrice = this.getOriginalPrice(product);
+    return currentPrice > 0 && originalPrice > currentPrice;
+  }
+
+  getDisplayPrice(product: any): number {
+    const currentPrice = this.getCurrentPrice(product);
+    if (!this.isPremiumClient) {
+      return currentPrice;
+    }
+
+    return getPremiumUnitPrice(product, this.getOriginalPricesMap());
+  }
+
+  getBasePriceForDisplay(product: any): number {
+    if (this.isPremiumClient) {
+      if (this.isOfferProduct(product)) {
+        const originalPrice = this.getOriginalPrice(product);
+        if (originalPrice > 0) {
+          return originalPrice;
+        }
+      }
+
+      return this.getCurrentPrice(product);
+    }
+
+    return this.getOriginalPrice(product);
+  }
+
+  hasPremiumComparison(product: any): boolean {
+    if (!this.isPremiumClient) {
+      return false;
+    }
+
+    const basePrice = this.getCurrentPrice(product);
+    const premiumPrice = this.getDisplayPrice(product);
+    return basePrice > 0 && premiumPrice > 0 && premiumPrice < basePrice;
+  }
+
+  isPremiumOfferDisplay(product: any): boolean {
+    if (!this.isPremiumClient || !this.isOfferProduct(product)) {
+      return false;
+    }
+
+    const basePrice = this.getBasePriceForDisplay(product);
+    const premiumPrice = this.getDisplayPrice(product);
+    return basePrice > 0 && premiumPrice > 0 && premiumPrice < basePrice;
+  }
+
+  getDiscountPercent(product: any): number {
+    if (this.isPremiumClient && this.isOfferProduct(product)) {
+      const base = getOfferDiscountPercent(product, this.getOriginalPricesMap());
+      if (base > 0) {
+        return Math.min(base + 10, 95);
+      }
+      return 10;
+    }
+
+    const currentPrice = this.getCurrentPrice(product);
+    const originalPrice = this.getOriginalPrice(product);
+
+    if (originalPrice > currentPrice && currentPrice > 0) {
+      const computed = ((originalPrice - currentPrice) / originalPrice) * 100;
+      return Math.max(1, Math.round(computed));
+    }
+
+    return 0;
+  }
+
+  private getOriginalPricesMap(): Record<string, number> {
+    if (this.originalPricesCache) {
+      return this.originalPricesCache;
+    }
+
+    this.originalPricesCache = getOriginalPricesMap();
+    return this.originalPricesCache;
+  }
+
+  private toPositiveNumber(value: any): number {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
   }
 }

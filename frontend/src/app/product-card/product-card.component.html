@@ -21,13 +21,34 @@
   >
     <ion-card-title>{{ product.nombre || product.name }}</ion-card-title>
     <ion-card-subtitle>
-      {{
-        (product.precio_venta !== undefined
-          ? product.precio_venta
-          : product.price
-        ) | currency: "EUR"
-      }}
-      <span class="offer-label" *ngIf="product.oferta">OFERTA</span>
+      <ng-container *ngIf="isPremiumClient; else standardPriceMode">
+        <span class="price-row premium-price-row" *ngIf="isPremiumOfferDisplay(product); else premiumRegularPrice">
+          <span class="current-price premium-current-price">{{ getDisplayPrice(product) | currency: "EUR" }}</span>
+          <span class="original-price">{{ getBasePriceForDisplay(product) | currency: "EUR" }}</span>
+          <span class="discount-percent">-{{ getDiscountPercent(product) }}%</span>
+          <span class="offer-label">OFERTA</span>
+        </span>
+        <ng-template #premiumRegularPrice>
+          <span class="price-row" *ngIf="hasPremiumComparison(product); else premiumOnlyPrice">
+            <span class="current-price premium-current-price">{{ getDisplayPrice(product) | currency: "EUR" }}</span>
+            <span class="original-price">{{ getBasePriceForDisplay(product) | currency: "EUR" }}</span>
+          </span>
+          <ng-template #premiumOnlyPrice>
+            {{ getDisplayPrice(product) | currency: "EUR" }}
+          </ng-template>
+        </ng-template>
+      </ng-container>
+      <ng-template #standardPriceMode>
+        <span class="price-row" *ngIf="isOfferProduct(product) && hasOfferComparison(product); else regularPrice">
+          <span class="current-price">{{ getCurrentPrice(product) | currency: "EUR" }}</span>
+          <span class="original-price">{{ getOriginalPrice(product) | currency: "EUR" }}</span>
+          <span class="discount-percent">-{{ getDiscountPercent(product) }}%</span>
+          <span class="offer-label">OFERTA</span>
+        </span>
+        <ng-template #regularPrice>
+          {{ getCurrentPrice(product) | currency: "EUR" }}
+        </ng-template>
+      </ng-template>
     </ion-card-subtitle>
   </ion-card-header>
   <ion-card-content>

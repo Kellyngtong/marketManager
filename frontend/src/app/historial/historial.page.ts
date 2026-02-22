@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { VentasService, VentaResumen } from '../services/ventas.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-historial',
@@ -18,6 +19,7 @@ export class HistorialPage {
     private ventasService: VentasService,
     private router: Router,
     private toastCtrl: ToastController,
+    private auth: AuthService,
   ) {}
 
   ionViewWillEnter() {
@@ -49,6 +51,17 @@ export class HistorialPage {
 
   trackByVenta(_: number, venta: VentaResumen) {
     return venta.idventa;
+  }
+
+  getShoppingRoute(): string {
+    const user = this.auth.currentUserValue;
+    const topLevelRol = user?.idrol;
+    const nestedRol = user?.rol?.idrol;
+    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+    const isPremium =
+      topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
+
+    return isPremium ? '/cliente-premium' : '/home';
   }
 
   async presentError(error: any) {
