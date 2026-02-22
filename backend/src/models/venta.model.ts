@@ -1,4 +1,4 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import { DataTypes, Model, Sequelize } from "sequelize";
 
 export class Venta extends Model {
   public idventa!: number;
@@ -61,9 +61,9 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
     {
       sequelize,
       timestamps: false,
-      tableName: 'venta',
-      modelName: 'Venta',
-    }
+      tableName: "venta",
+      modelName: "Venta",
+    },
   );
 
   return Venta;
