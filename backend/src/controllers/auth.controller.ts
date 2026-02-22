@@ -171,6 +171,9 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
         idusuario: usuario.idusuario,
         nombre: usuario.nombre,
         email: usuario.email,
+        avatar: usuario.avatar,
+        telefono: usuario.telefono,
+        direccion: usuario.direccion,
         id_tenant: usuario.id_tenant,
         id_store: usuario.id_store,
         rol: ((usuario as any).rol as any)?.nombre || 'Usuario',
@@ -218,7 +221,7 @@ export const updateProfile = async (
 ): Promise<void> => {
   try {
     const idusuario = req.idusuario;
-    const { nombre, telefono, direccion } = req.body;
+    const { nombre, telefono, direccion, avatar } = req.body;
 
     const usuario = await (db.usuario as typeof Usuario).findByPk(idusuario);
     if (!usuario) {
@@ -229,9 +232,10 @@ export const updateProfile = async (
     }
 
     // Actualizar solo los campos permitidos
-    if (nombre) usuario.nombre = nombre;
-    if (telefono) usuario.telefono = telefono;
-    if (direccion) usuario.direccion = direccion;
+    if (nombre !== undefined) usuario.nombre = nombre;
+    if (telefono !== undefined) usuario.telefono = telefono;
+    if (direccion !== undefined) usuario.direccion = direccion;
+    if (avatar !== undefined) usuario.avatar = avatar;
 
     await usuario.save();
 
@@ -241,6 +245,7 @@ export const updateProfile = async (
         idusuario: usuario.idusuario,
         nombre: usuario.nombre,
         email: usuario.email,
+        avatar: usuario.avatar,
         telefono: usuario.telefono,
         direccion: usuario.direccion,
       },

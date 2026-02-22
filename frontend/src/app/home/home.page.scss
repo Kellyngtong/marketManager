@@ -45,17 +45,14 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  position: relative;
+  z-index: 2;
 }
 
 .avatar-button ion-avatar ion-icon {
   width: 100%;
   height: 100%;
   font-size: 3.2rem;
-  color: colors.$textSecondary;
-}
-
-.avatar-button ion-icon {
-  font-size: 56px;
   color: colors.$textSecondary;
 }
 
@@ -68,6 +65,7 @@
   border-radius: 999px;
   font-size: 1rem;
   padding: 0.2rem;
+  z-index: 3;
 }
 
 ion-header,

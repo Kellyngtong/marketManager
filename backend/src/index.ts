@@ -17,6 +17,7 @@ import carritoRoutes from "./routes/carrito.routes";
 import pagosRoutes from "./routes/pagos.routes";
 import adminRoutes from "./routes/admin.routes";
 import ventasRoutes from "./routes/ventas.routes";
+import uploadRoutes from "./routes/upload.routes";
 
 const app: Express = express();
 
@@ -144,9 +145,12 @@ const startServer = async (): Promise<void> => {
       pagosRoutes(app);
       adminRoutes(app);
       ventasRoutes(app);
+      uploadRoutes(app);
     } catch (routeError) {
       console.error("❌ Error al registrar rutas:", routeError);
     }
+
+    app.use("/public", express.static(path.resolve(__dirname, "../public")));
 
     // Health check
     app.get("/api/health", (req, res) => {

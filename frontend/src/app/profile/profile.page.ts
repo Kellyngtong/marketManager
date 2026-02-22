@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AlertController, ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
@@ -20,7 +20,6 @@ export class ProfilePage implements OnDestroy {
     private fb: FormBuilder,
     private auth: AuthService,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController,
     private router: Router,
   ) {
     this.profileForm = this.fb.group({
@@ -83,15 +82,6 @@ export class ProfilePage implements OnDestroy {
       });
       await t.present();
     }
-  }
-
-  async changePassword() {
-    const alert = await this.alertCtrl.create({
-      header: 'Cambiar contraseña',
-      message: 'Esta función estará disponible en el Sprint 2.',
-      buttons: ['Entendido'],
-    });
-    await alert.present();
   }
 
   logout() {
