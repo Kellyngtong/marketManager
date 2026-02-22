@@ -92,6 +92,15 @@ const routes: Routes = [
       ),
   },
   {
+    path: 'employers',
+    canActivate: [RoleGuard],
+    data: { roles: [3] }, // Solo Empleado (rol 3)
+    loadComponent: () =>
+      import('./employers/employers.page').then(
+        (m) => m.EmployersPage,
+      ),
+  },
+  {
     path: 'adminPedidos',
     canActivate: [RoleGuard],
     data: { roles: [4] }, // Solo Admin (rol 4)

@@ -47,6 +47,10 @@ export class EmployeeLandingPage {
     this.router.navigateByUrl('/contable');
   }
 
+  goToInventario() {
+    this.router.navigateByUrl('/employers');
+  }
+
   async confirmLogout() {
     const modal = await this.modalCtrl.create({
       component: ConfirmationModalComponent,
