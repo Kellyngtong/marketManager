@@ -8,7 +8,7 @@
     "dev": "ts-node src/index.ts",
     "dev:watch": "ts-node -w src/index.ts",
     "migrate": "ts-node src/db/migrate.ts",
-    "seed": "ts-node src/db/seeder.ts",
+    "seed": "node db/seeder.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "aitor peña sánchez, Eduardo Romero Afonso, Verónica Londoño Pereira",
