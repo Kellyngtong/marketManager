@@ -20,7 +20,13 @@
         placeholder="Ej: Manzana Roja"
       ></ion-input>
     </ion-item>
-    <ion-text color="danger" *ngIf="productForm.get('nombre')?.hasError('required') && productForm.get('nombre')?.touched">
+    <ion-text
+      color="danger"
+      *ngIf="
+        productForm.get('nombre')?.hasError('required') &&
+        productForm.get('nombre')?.touched
+      "
+    >
       <small>El nombre es requerido</small>
     </ion-text>
 
@@ -45,10 +51,22 @@
         min="0"
       ></ion-input>
     </ion-item>
-    <ion-text color="danger" *ngIf="productForm.get('precio_venta')?.hasError('required') && productForm.get('precio_venta')?.touched">
+    <ion-text
+      color="danger"
+      *ngIf="
+        productForm.get('precio_venta')?.hasError('required') &&
+        productForm.get('precio_venta')?.touched
+      "
+    >
       <small>El precio es requerido</small>
     </ion-text>
-    <ion-text color="danger" *ngIf="productForm.get('precio_venta')?.hasError('min') && productForm.get('precio_venta')?.touched">
+    <ion-text
+      color="danger"
+      *ngIf="
+        productForm.get('precio_venta')?.hasError('min') &&
+        productForm.get('precio_venta')?.touched
+      "
+    >
       <small>El precio debe ser mayor a 0</small>
     </ion-text>
 
@@ -62,7 +80,13 @@
         min="0"
       ></ion-input>
     </ion-item>
-    <ion-text color="danger" *ngIf="productForm.get('stock')?.hasError('required') && productForm.get('stock')?.touched">
+    <ion-text
+      color="danger"
+      *ngIf="
+        productForm.get('stock')?.hasError('required') &&
+        productForm.get('stock')?.touched
+      "
+    >
       <small>El stock es requerido</small>
     </ion-text>
 

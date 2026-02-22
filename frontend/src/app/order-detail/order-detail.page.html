@@ -38,14 +38,21 @@
     <!-- Order Header -->
     <div class="order-header">
       <div class="order-title-section">
-        <h1 class="order-title">Pedido {{ order!.orderNumber || order!.numero }}</h1>
+        <h1 class="order-title">
+          Pedido {{ order!.orderNumber || order!.numero }}
+        </h1>
         <p class="order-date">
-          Realizado el
-          {{ (order!.date || order!.fecha) | date : 'dd \'de\' MMMM \'de\' yyyy' : '' : 'es-ES' }}
+          Realizado el {{ (order!.date || order!.fecha) | date : 'dd \'de\' MMMM
+          \'de\' yyyy' : '' : 'es-ES' }}
         </p>
       </div>
-      <div class="status-badge" [ngClass]="getStatusConfig((order!.status || order!.estado) || '').color">
-        <ion-icon [name]="getStatusConfig((order!.status || order!.estado) || '').icon"></ion-icon>
+      <div
+        class="status-badge"
+        [ngClass]="getStatusConfig((order!.status || order!.estado) || '').color"
+      >
+        <ion-icon
+          [name]="getStatusConfig((order!.status || order!.estado) || '').icon"
+        ></ion-icon>
         {{ getStatusConfig((order!.status || order!.estado) || '').label }}
       </div>
     </div>
@@ -73,7 +80,11 @@
                     [name]="step.completed ? 'checkmark-circle' : 'ellipse'"
                   ></ion-icon>
                 </div>
-                <div *ngIf="!last" class="timeline-line" [class.completed]="step.completed"></div>
+                <div
+                  *ngIf="!last"
+                  class="timeline-line"
+                  [class.completed]="step.completed"
+                ></div>
                 <div class="timeline-content">
                   <p class="timeline-status" [class.completed]="step.completed">
                     {{ step.status }}
@@ -101,11 +112,20 @@
                   />
                 </div>
                 <div class="item-details">
-                  <h4 class="item-name">{{ item.name || item.nombre || item.articulo?.nombre }}</h4>
-                  <p class="item-quantity">Cantidad: {{ item.quantity || item.cantidad }}</p>
+                  <h4 class="item-name">
+                    {{ item.name || item.nombre || item.articulo?.nombre }}
+                  </h4>
+                  <p class="item-quantity">
+                    Cantidad: {{ item.quantity || item.cantidad }}
+                  </p>
                   <div class="item-price">
-                    <span class="price">€{{ getItemPrice(item).toFixed(2) }}</span>
-                    <span *ngIf="(item.discount || item.descuento || 0) > 0" class="original-price">
+                    <span class="price"
+                      >€{{ getItemPrice(item).toFixed(2) }}</span
+                    >
+                    <span
+                      *ngIf="(item.discount || item.descuento || 0) > 0"
+                      class="original-price"
+                    >
                       €{{ ((item.price || item.precio) || 0).toFixed(2) }}
                     </span>
                   </div>
@@ -122,13 +142,19 @@
                 <span>€{{ (order!.subtotal || 0).toFixed(2) }}</span>
               </div>
               <div class="summary-row">
-                <span>IVA ({{ ((order!.tax || order!.impuesto || 0) / (order!.subtotal || 1) * 100).toFixed(0) }}%)</span>
-                <span>€{{ (order!.tax || order!.impuesto || 0).toFixed(2) }}</span>
+                <span
+                  >IVA ({{ ((order!.tax || order!.impuesto || 0) /
+                  (order!.subtotal || 1) * 100).toFixed(0) }}%)</span
+                >
+                <span
+                  >€{{ (order!.tax || order!.impuesto || 0).toFixed(2) }}</span
+                >
               </div>
               <div class="summary-row" *ngIf="(order!.shipping || 0) !== 0">
                 <span>Envío</span>
                 <span [class.free]="(order!.shipping || 0) === 0">
-                  {{ (order!.shipping || 0) === 0 ? 'Gratis' : '€' + (order!.shipping || 0).toFixed(2) }}
+                  {{ (order!.shipping || 0) === 0 ? 'Gratis' : '€' +
+                  (order!.shipping || 0).toFixed(2) }}
                 </span>
               </div>
               <div class="summary-divider"></div>
@@ -177,7 +203,10 @@
         </ion-card>
 
         <!-- Shipping Address (Admin View) -->
-        <ion-card *ngIf="!isUserView && order!.shippingAddress" class="info-card">
+        <ion-card
+          *ngIf="!isUserView && order!.shippingAddress"
+          class="info-card"
+        >
           <ion-card-header>
             <ion-card-title>
               <ion-icon name="location"></ion-icon>
@@ -187,8 +216,8 @@
           <ion-card-content>
             <p class="info-text">{{ order!.shippingAddress.street }}</p>
             <p class="info-text">
-              {{ order!.shippingAddress.postalCode }}
-              {{ order!.shippingAddress.city }}
+              {{ order!.shippingAddress.postalCode }} {{
+              order!.shippingAddress.city }}
             </p>
             <p class="info-text">{{ order!.shippingAddress.country }}</p>
           </ion-card-content>

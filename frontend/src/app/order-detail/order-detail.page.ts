@@ -98,9 +98,11 @@ export class OrderDetailPage implements OnInit {
     try {
       // Primero intentar cargar desde ventas (usuario autenticado)
       const ventaId = parseInt(id, 10);
-      const detalleRes = await firstValueFrom(this.ventasService.getDetalleVenta(ventaId));
+      const detalleRes = await firstValueFrom(
+        this.ventasService.getDetalleVenta(ventaId),
+      );
       const venta = detalleRes?.venta;
-      
+
       if (venta) {
         this.isUserView = true;
         this.order = this.transformVentaToOrder(venta);
@@ -114,7 +116,9 @@ export class OrderDetailPage implements OnInit {
 
     // Si falla, intentar con admin
     try {
-      const adminData = await firstValueFrom(this.adminService.getOrderDetails(parseInt(id, 10)));
+      const adminData = await firstValueFrom(
+        this.adminService.getOrderDetails(parseInt(id, 10)),
+      );
       console.log('✅ Order data loaded (admin view):', adminData);
       this.order = adminData;
       this.isUserView = false;
@@ -152,8 +156,16 @@ export class OrderDetailPage implements OnInit {
   buildTimeline(status: string): TimelineStep[] {
     const steps: TimelineStep[] = [
       { status: 'Pedido Confirmado', date: '', completed: true },
-      { status: 'Procesando', date: '', completed: status !== 'Completada' ? false : true },
-      { status: 'Enviado', date: '', completed: status === 'Enviado' || status === 'Entregado' },
+      {
+        status: 'Procesando',
+        date: '',
+        completed: status !== 'Completada' ? false : true,
+      },
+      {
+        status: 'Enviado',
+        date: '',
+        completed: status === 'Enviado' || status === 'Entregado',
+      },
       { status: 'Entregado', date: '', completed: status === 'Entregado' },
     ];
     return steps;

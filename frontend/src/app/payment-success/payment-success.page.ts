@@ -31,7 +31,7 @@ export class PaymentSuccessPage implements OnInit, OnDestroy {
     this.route.queryParams.subscribe(async (params) => {
       this.sessionId =
         params['session_id'] || localStorage.getItem('stripe_session_id');
-      
+
       if (this.sessionId) {
         const loading = await this.loadingCtrl.create({
           message: 'Procesando pago...',
@@ -40,11 +40,13 @@ export class PaymentSuccessPage implements OnInit, OnDestroy {
 
         try {
           // Confirmar pago en el servidor
-          const response = await this.pagosService.confirmarPago(this.sessionId).toPromise();
-          
+          const response = await this.pagosService
+            .confirmarPago(this.sessionId)
+            .toPromise();
+
           this.paymentStatus = 'success';
           this.orderNumber = response?.venta?.num_comprobante || this.sessionId;
-          
+
           // Limpiar carrito y sesión
           this.carritoService.clearCart().subscribe();
           localStorage.removeItem('stripe_session_id');

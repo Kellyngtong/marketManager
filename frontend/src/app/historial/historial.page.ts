@@ -17,7 +17,7 @@ export class HistorialPage {
   constructor(
     private ventasService: VentasService,
     private router: Router,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
   ) {}
 
   ionViewWillEnter() {
@@ -57,7 +57,11 @@ export class HistorialPage {
       error?.error?.error ||
       error?.message ||
       'No se pudo cargar la información';
-    const t = await this.toastCtrl.create({ message, duration: 2500, color: 'danger' });
+    const t = await this.toastCtrl.create({
+      message,
+      duration: 2500,
+      color: 'danger',
+    });
     await t.present();
   }
 }

@@ -37,7 +37,10 @@ db.articulo = require("./articulo.model.js")(sequelize, Sequelize);
 
 // Modelos de ingreso (compras a proveedores)
 db.ingreso = require("./ingreso.model.js")(sequelize, Sequelize);
-db.detalle_ingreso = require("./detalle_ingreso.model.js")(sequelize, Sequelize);
+db.detalle_ingreso = require("./detalle_ingreso.model.js")(
+  sequelize,
+  Sequelize,
+);
 
 // Modelos de venta (ventas a clientes)
 const ventaModule = require("./venta.model.ts");
@@ -50,96 +53,96 @@ db.carrito_item = require("./carrito_item.model.js")(sequelize, Sequelize);
 // =====================================================
 
 // Usuario -> Rol (muchos usuarios por rol)
-db.usuario.belongsTo(db.rol, { 
+db.usuario.belongsTo(db.rol, {
   foreignKey: "idrol",
   targetKey: "idrol",
 });
-db.rol.hasMany(db.usuario, { 
+db.rol.hasMany(db.usuario, {
   foreignKey: "idrol",
 });
 
 // Artículo -> Categoría (muchos artículos por categoría)
-db.articulo.belongsTo(db.categoria, { 
+db.articulo.belongsTo(db.categoria, {
   foreignKey: "idcategoria",
   targetKey: "idcategoria",
 });
-db.categoria.hasMany(db.articulo, { 
+db.categoria.hasMany(db.articulo, {
   foreignKey: "idcategoria",
 });
 
 // Ingreso -> Proveedor (muchos ingresos por proveedor)
-db.ingreso.belongsTo(db.proveedor, { 
+db.ingreso.belongsTo(db.proveedor, {
   foreignKey: "idproveedor",
   targetKey: "idproveedor",
 });
-db.proveedor.hasMany(db.ingreso, { 
+db.proveedor.hasMany(db.ingreso, {
   foreignKey: "idproveedor",
 });
 
 // Ingreso -> Usuario (muchos ingresos por usuario)
-db.ingreso.belongsTo(db.usuario, { 
+db.ingreso.belongsTo(db.usuario, {
   foreignKey: "idusuario",
   targetKey: "idusuario",
 });
-db.usuario.hasMany(db.ingreso, { 
+db.usuario.hasMany(db.ingreso, {
   foreignKey: "idusuario",
 });
 
 // DetalleIngreso -> Ingreso (muchos detalles por ingreso)
-db.detalle_ingreso.belongsTo(db.ingreso, { 
+db.detalle_ingreso.belongsTo(db.ingreso, {
   foreignKey: "idingreso",
   targetKey: "idingreso",
   onDelete: "CASCADE",
 });
-db.ingreso.hasMany(db.detalle_ingreso, { 
+db.ingreso.hasMany(db.detalle_ingreso, {
   foreignKey: "idingreso",
   onDelete: "CASCADE",
 });
 
 // DetalleIngreso -> Artículo
-db.detalle_ingreso.belongsTo(db.articulo, { 
+db.detalle_ingreso.belongsTo(db.articulo, {
   foreignKey: "idarticulo",
   targetKey: "idarticulo",
 });
-db.articulo.hasMany(db.detalle_ingreso, { 
+db.articulo.hasMany(db.detalle_ingreso, {
   foreignKey: "idarticulo",
 });
 
 // Venta -> Cliente (muchas ventas por cliente)
-db.venta.belongsTo(db.cliente, { 
+db.venta.belongsTo(db.cliente, {
   foreignKey: "idcliente",
   targetKey: "idcliente",
 });
-db.cliente.hasMany(db.venta, { 
+db.cliente.hasMany(db.venta, {
   foreignKey: "idcliente",
 });
 
 // Venta -> Usuario (muchas ventas por usuario)
-db.venta.belongsTo(db.usuario, { 
+db.venta.belongsTo(db.usuario, {
   foreignKey: "idusuario",
   targetKey: "idusuario",
 });
-db.usuario.hasMany(db.venta, { 
+db.usuario.hasMany(db.venta, {
   foreignKey: "idusuario",
 });
 
 // DetalleVenta -> Venta (muchos detalles por venta)
-db.detalle_venta.belongsTo(db.venta, { 
+db.detalle_venta.belongsTo(db.venta, {
   foreignKey: "idventa",
   targetKey: "idventa",
   onDelete: "CASCADE",
 });
-db.venta.hasMany(db.detalle_venta, { 
+db.venta.hasMany(db.detalle_venta, {
   foreignKey: "idventa",
   onDelete: "CASCADE",
 });
 
 // DetalleVenta -> Artículo
-db.detalle_venta.belongsTo(db.articulo, { 
+db.detalle_venta.belongsTo(db.articulo, {
   foreignKey: "idarticulo",
   targetKey: "idarticulo",
 });
-db.articulo.hasMany(db.detalle_venta, { 
+db.articulo.hasMany(db.detalle_venta, {
   foreignKey: "idarticulo",
 });
 

@@ -19,17 +19,19 @@ export class ProductDetailPage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private carritoService: CarritoService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
   ) {}
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       try {
-        const response = await fetch(`${window.location.protocol}//${window.location.hostname}:4800/api/articulos/${id}`);
+        const response = await fetch(
+          `${window.location.protocol}//${window.location.hostname}:4800/api/articulos/${id}`,
+        );
         const data = await response.json();
         this.product = data?.articulo || null;
-        
+
         // Load related products from same category
         if (this.product?.categoria) {
           await this.loadRelatedProducts(this.product.categoria, id);
@@ -42,7 +44,9 @@ export class ProductDetailPage implements OnInit {
 
   async loadRelatedProducts(category: string, currentId: string) {
     try {
-      const response = await fetch(`${window.location.protocol}//${window.location.hostname}:4800/api/articulos?categoria=${category}`);
+      const response = await fetch(
+        `${window.location.protocol}//${window.location.hostname}:4800/api/articulos?categoria=${category}`,
+      );
       const data = await response.json();
       this.relatedProducts = (data?.articulos || [])
         .filter((p: any) => p.idarticulo !== currentId)
@@ -74,10 +78,10 @@ export class ProductDetailPage implements OnInit {
 
   async addToCart() {
     if (!this.product?.idarticulo) {
-      const t = await this.toastCtrl.create({ 
-        message: 'Artículo no disponible', 
-        duration: 2000, 
-        color: 'warning' 
+      const t = await this.toastCtrl.create({
+        message: 'Artículo no disponible',
+        duration: 2000,
+        color: 'warning',
       });
       await t.present();
       return;
@@ -91,21 +95,30 @@ export class ProductDetailPage implements OnInit {
         stock: this.product.stock,
         oferta: this.product.oferta,
         imagen: this.product.imagen,
-        descripcion: this.product.descripcion
+        descripcion: this.product.descripcion,
       };
       for (let i = 0; i < this.quantity; i++) {
-        await firstValueFrom(this.carritoService.addItem(this.product.idarticulo, 1, articulo));
+        await firstValueFrom(
+          this.carritoService.addItem(this.product.idarticulo, 1, articulo),
+        );
       }
-      const t = await this.toastCtrl.create({ 
-        message: `${this.quantity} x ${this.product.nombre} añadido al carrito`, 
-        duration: 1500, 
-        color: 'success' 
+      const t = await this.toastCtrl.create({
+        message: `${this.quantity} x ${this.product.nombre} añadido al carrito`,
+        duration: 1500,
+        color: 'success',
       });
       await t.present();
       this.quantity = 1;
     } catch (error: any) {
-      const message = error?.error?.message || error?.message || 'No se pudo agregar al carrito';
-      const t = await this.toastCtrl.create({ message, duration: 2500, color: 'danger' });
+      const message =
+        error?.error?.message ||
+        error?.message ||
+        'No se pudo agregar al carrito';
+      const t = await this.toastCtrl.create({
+        message,
+        duration: 2500,
+        color: 'danger',
+      });
       await t.present();
     }
   }

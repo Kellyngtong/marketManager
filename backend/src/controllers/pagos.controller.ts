@@ -151,7 +151,9 @@ export const confirmarPago = async (
     }
 
     // Obtener sesión de Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId as string);
+    const session = await stripe.checkout.sessions.retrieve(
+      sessionId as string,
+    );
 
     if (!session) {
       res.status(404).json({ message: "Sesión no encontrada" });
@@ -160,9 +162,9 @@ export const confirmarPago = async (
 
     // Verificar si el pago fue exitoso
     if (session.payment_status !== "paid") {
-      res.status(400).json({ 
+      res.status(400).json({
         message: "Pago no confirmado",
-        status: session.payment_status 
+        status: session.payment_status,
       });
       return;
     }
@@ -203,7 +205,9 @@ export const confirmarPago = async (
 
     // Calcular totales
     const subtotal = items.reduce((sum: number, item: any) => {
-      const price = Number(item.articulo?.precio_venta || item.Articulo?.precio_venta || 0);
+      const price = Number(
+        item.articulo?.precio_venta || item.Articulo?.precio_venta || 0,
+      );
       return sum + price * item.cantidad;
     }, 0);
 
@@ -228,7 +232,7 @@ export const confirmarPago = async (
     // Crear detalles de venta y actualizar stock
     for (const item of items) {
       const precio = item.articulo?.precio_venta || item.Articulo?.precio_venta;
-      
+
       await db.detalle_venta.create({
         idventa: venta.idventa,
         idarticulo: item.idarticulo,

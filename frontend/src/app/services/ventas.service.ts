@@ -36,27 +36,36 @@ export class VentasService {
   private getApiHost(): string {
     const hostname = window.location.hostname;
     const protocol = window.location.protocol;
-    
+
     // Si estamos en ngrok, usar el hostname de ngrok sin puerto
     if (hostname.includes('ngrok')) {
       return `${protocol}//${hostname}`;
     }
-    
+
     // Si estamos en localhost, usar localhost:4800
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return `${protocol}//${hostname}:4800`;
     }
-    
+
     // Por defecto, asumir que el API está en el mismo host
     return `${protocol}//${hostname}`;
   }
 
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+  ) {}
 
-  checkout(payload: { metodoPago: string; numeroTarjeta?: string | null; datosEnvio: { direccion: string; telefono?: string } }) {
+  checkout(payload: {
+    metodoPago: string;
+    numeroTarjeta?: string | null;
+    datosEnvio: { direccion: string; telefono?: string };
+  }) {
     const cfg = this.authHeaders();
     if (!cfg) {
-      return throwError(() => new Error('Debes iniciar sesión para completar la compra'));
+      return throwError(
+        () => new Error('Debes iniciar sesión para completar la compra'),
+      );
     }
 
     return this.http.post(`${this.baseUrl}`, payload, cfg);
@@ -64,14 +73,25 @@ export class VentasService {
 
   getHistorial(): Observable<{ historial: VentaResumen[] }> {
     const token = this.auth.getToken();
-    console.log('🔍 VentasService.getHistorial() - Token:', token ? 'EXISTE' : 'NO EXISTE');
-    console.log('🔍 localStorage.accessToken:', localStorage.getItem('accessToken'));
-    console.log('🔍 localStorage.currentUser:', localStorage.getItem('currentUser'));
-    
+    console.log(
+      '🔍 VentasService.getHistorial() - Token:',
+      token ? 'EXISTE' : 'NO EXISTE',
+    );
+    console.log(
+      '🔍 localStorage.accessToken:',
+      localStorage.getItem('accessToken'),
+    );
+    console.log(
+      '🔍 localStorage.currentUser:',
+      localStorage.getItem('currentUser'),
+    );
+
     const cfg = this.authHeaders();
     if (!cfg) {
       console.error('❌ Sin headers de autenticación en getHistorial()');
-      return throwError(() => new Error('Debes iniciar sesión para ver tus compras'));
+      return throwError(
+        () => new Error('Debes iniciar sesión para ver tus compras'),
+      );
     }
 
     console.log('✅ Headers configurados correctamente:', cfg);
@@ -81,7 +101,9 @@ export class VentasService {
   getDetalleVenta(id: number): Observable<{ venta: VentaResumen }> {
     const cfg = this.authHeaders();
     if (!cfg) {
-      return throwError(() => new Error('Debes iniciar sesión para ver el detalle'));
+      return throwError(
+        () => new Error('Debes iniciar sesión para ver el detalle'),
+      );
     }
 
     return this.http.get<{ venta: VentaResumen }>(`${this.baseUrl}/${id}`, cfg);

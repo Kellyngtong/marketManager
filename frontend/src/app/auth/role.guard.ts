@@ -20,7 +20,7 @@ export class RoleGuard implements CanActivate {
 
   async canActivate(
     route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
+    state: RouterStateSnapshot,
   ): Promise<boolean> {
     const token = this.auth.getToken();
     const user = this.auth.currentUserValue;
@@ -36,7 +36,7 @@ export class RoleGuard implements CanActivate {
 
     // Obtener roles requeridos de la ruta
     const requiredRoles = route.data['roles'] as number[];
-    
+
     if (!requiredRoles || requiredRoles.length === 0) {
       console.log('✅ RoleGuard - Acceso permitido (sin restricción de roles)');
       return true;
@@ -44,7 +44,7 @@ export class RoleGuard implements CanActivate {
 
     // Verificar si el usuario tiene uno de los roles requeridos
     const hasRole = requiredRoles.includes(user.idrol);
-    
+
     if (hasRole) {
       console.log('✅ RoleGuard - Acceso permitido (rol autorizado)');
       return true;

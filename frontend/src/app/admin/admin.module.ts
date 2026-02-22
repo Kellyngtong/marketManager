@@ -16,6 +16,11 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
     EditProductModalComponent,
     ConfirmationModalComponent,
   ],
-  imports: [CommonModule, IonicModule, AdminPageRoutingModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    IonicModule,
+    AdminPageRoutingModule,
+    ReactiveFormsModule,
+  ],
 })
 export class AdminPageModule {}

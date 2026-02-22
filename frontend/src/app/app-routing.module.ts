@@ -69,21 +69,27 @@ const routes: Routes = [
     canActivate: [RoleGuard],
     data: { roles: [3] }, // Solo Empleado (rol 3)
     loadChildren: () =>
-      import('./employee-landing/employee-landing.module').then((m) => m.EmployeeLandingPageModule),
+      import('./employee-landing/employee-landing.module').then(
+        (m) => m.EmployeeLandingPageModule,
+      ),
   },
   {
     path: 'adminPedidos',
     canActivate: [RoleGuard],
     data: { roles: [4] }, // Solo Admin (rol 4)
     loadChildren: () =>
-      import('./admin-pedidos/admin-pedidos.module').then((m) => m.AdminPedidosPageModule),
+      import('./admin-pedidos/admin-pedidos.module').then(
+        (m) => m.AdminPedidosPageModule,
+      ),
   },
   {
     path: 'adminMarketing',
     canActivate: [RoleGuard],
     data: { roles: [4] }, // Solo Admin (rol 4)
     loadChildren: () =>
-      import('./admin-marketing/admin-marketing.module').then((m) => m.AdminMarketingPageModule),
+      import('./admin-marketing/admin-marketing.module').then(
+        (m) => m.AdminMarketingPageModule,
+      ),
   },
   {
     path: 'contable',

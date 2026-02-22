@@ -1,8 +1,5 @@
-import { Request, Response } from "express";
-import db from "@db/index";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const db = require("../models");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const CarritoItem = db.carrito_item;
 const Articulo = db.articulo;
@@ -13,26 +10,12 @@ const Cliente = db.cliente;
 
 const TAX_RATE = 0.18;
 
-interface DatosEnvio {
-  direccion?: string;
-  telefono?: string;
-}
-
-interface AuthRequest extends Request {
-  idusuario?: number;
-  user?: any;
-}
-
-const buildNumeroComprobante = (): string => {
+const buildNumeroComprobante = () => {
   const timestamp = Date.now().toString().slice(-8);
   return `MM${timestamp}`;
 };
 
-const ensureCliente = async (
-  usuario: any,
-  datosEnvio: DatosEnvio,
-  transaction: any,
-) => {
+const ensureCliente = async (usuario, datosEnvio, transaction) => {
   const email = usuario.email;
   let cliente = await Cliente.findOne({
     where: { email },
@@ -62,14 +45,14 @@ const ensureCliente = async (
  * POST /api/pagos/crear-sesion
  * Body: { datosEnvio: { direccion, telefono } }
  */
-export const crearSesionPago = async (req: AuthRequest, res: Response) => {
+exports.crearSesionPago = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     const idusuario = req.idusuario;
     const { datosEnvio = {} } = req.body;
 
     // Obtener items del carrito
-    const items: any[] = await CarritoItem.findAll({
+    const items = await CarritoItem.findAll({
       where: { idusuario },
       include: [{ model: Articulo }],
       transaction,
@@ -98,7 +81,7 @@ export const crearSesionPago = async (req: AuthRequest, res: Response) => {
     }
 
     // Calcular montos
-    const subtotal = items.reduce((sum: number, item: any) => {
+    const subtotal = items.reduce((sum, item) => {
       const price = Number(item.articulo.precio_venta) || 0;
       return sum + price * item.cantidad;
     }, 0);
@@ -107,20 +90,18 @@ export const crearSesionPago = async (req: AuthRequest, res: Response) => {
     const total = +(subtotal + impuesto).toFixed(2);
 
     // Preparar line items para Stripe
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(
-      (item: any) => ({
-        price_data: {
-          currency: "eur",
-          product_data: {
-            name: item.articulo.nombre,
-            description: item.articulo.descripcion,
-            images: item.articulo.imagen ? [item.articulo.imagen] : [],
-          },
-          unit_amount: Math.round(Number(item.articulo.precio_venta) * 100), // en centavos
+    const lineItems = items.map((item) => ({
+      price_data: {
+        currency: "eur",
+        product_data: {
+          name: item.articulo.nombre,
+          description: item.articulo.descripcion,
+          images: item.articulo.imagen ? [item.articulo.imagen] : [],
         },
-        quantity: item.cantidad,
-      }),
-    );
+        unit_amount: Math.round(Number(item.articulo.precio_venta) * 100), // en centavos
+      },
+      quantity: item.cantidad,
+    }));
 
     // Agregar impuesto como line item separado
     lineItems.push({
@@ -143,7 +124,7 @@ export const crearSesionPago = async (req: AuthRequest, res: Response) => {
       success_url: `${process.env.STRIPE_SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: process.env.STRIPE_CANCEL_URL,
       metadata: {
-        idusuario: idusuario!.toString(),
+        idusuario,
         direccion_envio: datosEnvio?.direccion || "",
         telefono: datosEnvio?.telefono || "",
         impuesto: impuesto.toString(),
@@ -171,35 +152,32 @@ export const crearSesionPago = async (req: AuthRequest, res: Response) => {
  * Webhook de Stripe para confirmar pago
  * POST /api/pagos/webhook
  */
-export const stripeWebhook = async (req: Request, res: Response) => {
+exports.stripeWebhook = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
-    const sig = req.headers["stripe-signature"] as string;
-    let event: Stripe.Event;
+    const sig = req.headers["stripe-signature"];
+    let event;
 
     try {
       event = stripe.webhooks.constructEvent(
         req.body,
         sig,
-        process.env.STRIPE_WEBHOOK_SECRET!,
+        process.env.STRIPE_WEBHOOK_SECRET,
       );
-    } catch (err: any) {
+    } catch (err) {
       await transaction.rollback();
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
     // Manejar evento de pago exitoso
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object;
       await procesarPagoExitoso(session, transaction);
     }
 
     // Manejar evento de pago expirado/cancelado
     if (event.type === "checkout.session.expired") {
-      console.log(
-        "Sesión de pago expirada:",
-        (event.data.object as Stripe.Checkout.Session).id,
-      );
+      console.log("Sesión de pago expirada:", event.data.object.id);
     }
 
     await transaction.commit();
@@ -214,16 +192,13 @@ export const stripeWebhook = async (req: Request, res: Response) => {
 /**
  * Procesar pago exitoso desde webhook
  */
-const procesarPagoExitoso = async (
-  session: Stripe.Checkout.Session,
-  transaction: any,
-) => {
+const procesarPagoExitoso = async (session, transaction) => {
   try {
-    const metadata = session.metadata as Record<string, string>;
+    const metadata = session.metadata;
     const idusuario = parseInt(metadata.idusuario, 10);
 
     // Obtener carrito del usuario
-    const items: any[] = await CarritoItem.findAll({
+    const items = await CarritoItem.findAll({
       where: { idusuario },
       include: [{ model: Articulo }],
       transaction,
@@ -241,14 +216,14 @@ const procesarPagoExitoso = async (
     }
 
     // Asegurar cliente
-    const datosEnvio: DatosEnvio = {
+    const datosEnvio = {
       direccion: metadata.direccion_envio,
       telefono: metadata.telefono,
     };
     const cliente = await ensureCliente(usuario, datosEnvio, transaction);
 
     // Calcular montos
-    const subtotal = items.reduce((sum: number, item: any) => {
+    const subtotal = items.reduce((sum, item) => {
       const price = Number(item.articulo.precio_venta) || 0;
       return sum + price * item.cantidad;
     }, 0);
@@ -307,9 +282,9 @@ const procesarPagoExitoso = async (
  * Obtener estado de sesión de pago
  * GET /api/pagos/sesion/:sessionId
  */
-export const obtenerEstadoSesion = async (req: Request, res: Response) => {
+exports.obtenerEstadoSesion = async (req, res) => {
   try {
-    const sessionId = req.params.sessionId as string;
+    const { sessionId } = req.params;
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     return res.json({
@@ -330,9 +305,9 @@ export const obtenerEstadoSesion = async (req: Request, res: Response) => {
  * Cancelar sesión (no es necesario - Stripe lo maneja, pero útil para UI)
  * POST /api/pagos/cancelar-sesion/:sessionId
  */
-export const cancelarSesion = async (req: Request, res: Response) => {
+exports.cancelarSesion = async (req, res) => {
   try {
-    const sessionId = req.params.sessionId as string;
+    const { sessionId } = req.params;
     // Stripe no permite cancelar sesiones, pero podemos marcar como cancelada localmente
     // Para propósitos de auditoría, solo logueamos
     console.log(`Sesión cancelada por usuario: ${sessionId}`);

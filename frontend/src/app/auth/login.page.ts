@@ -23,7 +23,7 @@ interface TestAccount {
 export class LoginPage {
   // Tab control
   activeTab: 'login' | 'register' = 'login';
-  
+
   // Login form
   email = '';
   password = '';
@@ -166,7 +166,7 @@ export class LoginPage {
           color: 'success',
         });
         await t.present();
-        
+
         // Cambiar a tab login y llenar campos
         this.activeTab = 'login';
         this.email = this.registerEmail;

@@ -19,10 +19,15 @@
       <ion-card-header>
         <div class="card-header-top">
           <div>
-            <ion-card-subtitle>{{ venta.fecha | date:'medium' }}</ion-card-subtitle>
+            <ion-card-subtitle
+              >{{ venta.fecha | date:'medium' }}</ion-card-subtitle
+            >
             <ion-card-title>#{{ venta.numero }}</ion-card-title>
           </div>
-          <ion-badge [color]="venta.estado === 'Completada' ? 'success' : 'warning'">{{ venta.estado }}</ion-badge>
+          <ion-badge
+            [color]="venta.estado === 'Completada' ? 'success' : 'warning'"
+            >{{ venta.estado }}</ion-badge
+          >
         </div>
       </ion-card-header>
       <ion-card-content>
@@ -38,7 +43,11 @@
           <span class="label">Items:</span>
           <strong>{{ venta.items?.length || 0 }} productos</strong>
         </div>
-        <ion-button expand="block" (click)="verDetalle(venta)" class="btn-detalle">
+        <ion-button
+          expand="block"
+          (click)="verDetalle(venta)"
+          class="btn-detalle"
+        >
           <ion-icon name="eye" slot="start"></ion-icon>
           Ver detalle completo
         </ion-button>
@@ -50,7 +59,9 @@
     <div class="empty-state">
       <ion-icon name="receipt"></ion-icon>
       <p>Aún no tienes compras registradas.</p>
-      <ion-button routerLink="/home" color="primary">Empezar a comprar</ion-button>
+      <ion-button routerLink="/home" color="primary"
+        >Empezar a comprar</ion-button
+      >
     </div>
   </ng-template>
 </ion-content>

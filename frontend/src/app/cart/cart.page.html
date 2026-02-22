@@ -58,7 +58,9 @@
                     <span class="item-price"
                       >€{{ item.articulo?.precio_venta | number:'1.2-2' }}</span
                     >
-                    <span class="offer-label" *ngIf="item.articulo?.oferta">OFERTA</span>
+                    <span class="offer-label" *ngIf="item.articulo?.oferta"
+                      >OFERTA</span
+                    >
                   </div>
                 </div>
               </div>

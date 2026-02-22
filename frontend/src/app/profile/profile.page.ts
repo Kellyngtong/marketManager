@@ -21,7 +21,7 @@ export class ProfilePage implements OnDestroy {
     private auth: AuthService,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
-    private router: Router
+    private router: Router,
   ) {
     this.profileForm = this.fb.group({
       nombre: ['', Validators.required],
@@ -34,13 +34,16 @@ export class ProfilePage implements OnDestroy {
     this.userSub = this.auth.user$.subscribe((user) => {
       this.user = user;
       if (user) {
-        this.profileForm.patchValue({
-          nombre: user.nombre || user.username || '',
-          email: user.email || '',
-          telefono: user.telefono || '',
-          direccion: user.direccion || '',
-          rol: user.rol?.nombre || 'Cliente',
-        }, { emitEvent: false });
+        this.profileForm.patchValue(
+          {
+            nombre: user.nombre || user.username || '',
+            email: user.email || '',
+            telefono: user.telefono || '',
+            direccion: user.direccion || '',
+            rol: user.rol?.nombre || 'Cliente',
+          },
+          { emitEvent: false },
+        );
       }
     });
   }
@@ -55,10 +58,17 @@ export class ProfilePage implements OnDestroy {
       return;
     }
 
-    const { nombre, email, telefono, direccion } = this.profileForm.getRawValue();
+    const { nombre, email, telefono, direccion } =
+      this.profileForm.getRawValue();
     try {
-      await firstValueFrom(this.auth.updateProfile({ nombre, email, telefono, direccion }));
-      const t = await this.toastCtrl.create({ message: 'Perfil actualizado', duration: 2000, color: 'success' });
+      await firstValueFrom(
+        this.auth.updateProfile({ nombre, email, telefono, direccion }),
+      );
+      const t = await this.toastCtrl.create({
+        message: 'Perfil actualizado',
+        duration: 2000,
+        color: 'success',
+      });
       await t.present();
     } catch (error: any) {
       const message =
@@ -66,7 +76,11 @@ export class ProfilePage implements OnDestroy {
         error?.error?.error ||
         error?.message ||
         'No se pudo actualizar el perfil';
-      const t = await this.toastCtrl.create({ message, duration: 3000, color: 'danger' });
+      const t = await this.toastCtrl.create({
+        message,
+        duration: 3000,
+        color: 'danger',
+      });
       await t.present();
     }
   }

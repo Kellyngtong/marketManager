@@ -15,7 +15,10 @@ export class HomePage implements OnDestroy {
   @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
   private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
   goToDetail(payload: any) {
-    const targetId = typeof payload === 'object' ? payload?.idarticulo || payload?.id : payload;
+    const targetId =
+      typeof payload === 'object'
+        ? payload?.idarticulo || payload?.id
+        : payload;
     if (targetId) {
       window.location.href = `/product/${targetId}`;
     }
@@ -56,13 +59,13 @@ export class HomePage implements OnDestroy {
     private toastCtrl: ToastController,
     private carritoService: CarritoService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {
     this.subscriptions.add(
       this.authService.user$.subscribe((user) => {
         this.clientName = user?.nombre || user?.username || 'Cliente';
         this.clientAvatar = user?.avatar || null;
-      })
+      }),
     );
 
     this.subscriptions.add(
@@ -71,16 +74,17 @@ export class HomePage implements OnDestroy {
         (items || []).forEach((item) => {
           const id = Number(item?.idarticulo);
           if (!Number.isNaN(id) && id > 0) {
-            byArticulo[id] = (byArticulo[id] || 0) + (Number(item?.cantidad) || 0);
+            byArticulo[id] =
+              (byArticulo[id] || 0) + (Number(item?.cantidad) || 0);
           }
         });
 
         this.cartCountByArticulo = byArticulo;
         this.cartItemsCount = (items || []).reduce(
           (acc, item) => acc + (Number(item?.cantidad) || 0),
-          0
+          0,
         );
-      })
+      }),
     );
 
     this.loadProducts();
@@ -101,7 +105,9 @@ export class HomePage implements OnDestroy {
           limit: '100',
           page: String(page),
         });
-        const response = await fetch(`${this.API_HOST}/api/articulos?${params.toString()}`);
+        const response = await fetch(
+          `${this.API_HOST}/api/articulos?${params.toString()}`,
+        );
         if (!response.ok) {
           throw new Error('No se pudo obtener la lista de artículos');
         }
@@ -122,7 +128,11 @@ export class HomePage implements OnDestroy {
       });
     } catch (error) {
       console.error('Error loading products:', error);
-      const t = await this.toastCtrl.create({ message: 'No se pudieron cargar los artículos', duration: 2500, color: 'danger' });
+      const t = await this.toastCtrl.create({
+        message: 'No se pudieron cargar los artículos',
+        duration: 2500,
+        color: 'danger',
+      });
       await t.present();
     }
   }
@@ -132,7 +142,11 @@ export class HomePage implements OnDestroy {
     const cantidad = Math.max(1, event?.quantity || 1);
     const articuloId = producto?.idarticulo || producto?.id;
     if (!articuloId) {
-      const t = await this.toastCtrl.create({ message: 'Artículo no válido para el carrito', duration: 2500, color: 'warning' });
+      const t = await this.toastCtrl.create({
+        message: 'Artículo no válido para el carrito',
+        duration: 2500,
+        color: 'warning',
+      });
       await t.present();
       return;
     }
@@ -145,14 +159,25 @@ export class HomePage implements OnDestroy {
         stock: producto?.stock,
         oferta: producto?.oferta,
         imagen: producto?.imagen,
-        descripcion: producto?.descripcion
+        descripcion: producto?.descripcion,
       };
-      await firstValueFrom(this.carritoService.addItem(articuloId, cantidad, articulo));
-      const t = await this.toastCtrl.create({ message: 'Producto añadido al carrito', duration: 1500, color: 'success' });
+      await firstValueFrom(
+        this.carritoService.addItem(articuloId, cantidad, articulo),
+      );
+      const t = await this.toastCtrl.create({
+        message: 'Producto añadido al carrito',
+        duration: 1500,
+        color: 'success',
+      });
       await t.present();
     } catch (error: any) {
-      const message = this.resolveError(error) || 'No se pudo añadir al carrito';
-      const t = await this.toastCtrl.create({ message, duration: 2500, color: 'danger' });
+      const message =
+        this.resolveError(error) || 'No se pudo añadir al carrito';
+      const t = await this.toastCtrl.create({
+        message,
+        duration: 2500,
+        color: 'danger',
+      });
       await t.present();
     }
   }
@@ -202,7 +227,9 @@ export class HomePage implements OnDestroy {
       let avatarUrl: string | null = null;
 
       try {
-        const uploadRes: any = await firstValueFrom(this.authService.uploadAvatar(file));
+        const uploadRes: any = await firstValueFrom(
+          this.authService.uploadAvatar(file),
+        );
         avatarUrl = uploadRes?.imageUrl || uploadRes?.url || null;
       } catch (uploadError: any) {
         avatarUrl = await this.fileToDataUrl(file);
@@ -213,7 +240,9 @@ export class HomePage implements OnDestroy {
       }
 
       try {
-        await firstValueFrom(this.authService.updateProfile({ avatar: avatarUrl }));
+        await firstValueFrom(
+          this.authService.updateProfile({ avatar: avatarUrl }),
+        );
       } catch (profileError) {
         this.authService.updateLocalUser({ avatar: avatarUrl });
       }
@@ -255,12 +284,7 @@ export class HomePage implements OnDestroy {
   }
 
   private resolveError(err: any) {
-    return (
-      err?.error?.message ||
-      err?.error?.error ||
-      err?.message ||
-      null
-    );
+    return err?.error?.message || err?.error?.error || err?.message || null;
   }
 
   get cartBadgeLabel() {
@@ -276,7 +300,9 @@ export class HomePage implements OnDestroy {
   }
 
   private matchesSelectedTipo(product: any, tipo: string) {
-    const normalizedTipo = String(product?.tipo || '').trim().toLowerCase();
+    const normalizedTipo = String(product?.tipo || '')
+      .trim()
+      .toLowerCase();
     if (normalizedTipo === tipo) {
       return true;
     }

@@ -27,16 +27,18 @@
       <ion-card>
         <ion-card-header>
           <ion-card-title>Iniciar Sesión</ion-card-title>
-          <ion-card-subtitle>Ingresa tus credenciales para acceder</ion-card-subtitle>
+          <ion-card-subtitle
+            >Ingresa tus credenciales para acceder</ion-card-subtitle
+          >
         </ion-card-header>
 
         <form (ngSubmit)="submit()">
           <ion-card-content>
             <ion-item>
               <ion-label position="stacked">Email</ion-label>
-              <ion-input 
-                type="email" 
-                [(ngModel)]="email" 
+              <ion-input
+                type="email"
+                [(ngModel)]="email"
                 name="email"
                 placeholder="tu@email.com"
                 required
@@ -45,9 +47,9 @@
 
             <ion-item>
               <ion-label position="stacked">Contraseña</ion-label>
-              <ion-input 
-                type="password" 
-                [(ngModel)]="password" 
+              <ion-input
+                type="password"
+                [(ngModel)]="password"
                 name="password"
                 placeholder="••••••••"
                 required
@@ -64,8 +66,8 @@
           </ion-card-content>
 
           <ion-card-content>
-            <ion-button 
-              expand="block" 
+            <ion-button
+              expand="block"
               type="submit"
               [disabled]="loading"
               class="login-button"
@@ -83,16 +85,18 @@
       <ion-card>
         <ion-card-header>
           <ion-card-title>Crear Cuenta</ion-card-title>
-          <ion-card-subtitle>Regístrate para empezar a comprar</ion-card-subtitle>
+          <ion-card-subtitle
+            >Regístrate para empezar a comprar</ion-card-subtitle
+          >
         </ion-card-header>
 
         <form (ngSubmit)="submitRegister()">
           <ion-card-content>
             <ion-item>
               <ion-label position="stacked">Nombre</ion-label>
-              <ion-input 
-                type="text" 
-                [(ngModel)]="registerName" 
+              <ion-input
+                type="text"
+                [(ngModel)]="registerName"
                 name="registerName"
                 placeholder="Tu nombre"
                 required
@@ -101,9 +105,9 @@
 
             <ion-item>
               <ion-label position="stacked">Email</ion-label>
-              <ion-input 
-                type="email" 
-                [(ngModel)]="registerEmail" 
+              <ion-input
+                type="email"
+                [(ngModel)]="registerEmail"
                 name="registerEmail"
                 placeholder="tu@email.com"
                 required
@@ -112,9 +116,9 @@
 
             <ion-item>
               <ion-label position="stacked">Contraseña</ion-label>
-              <ion-input 
-                type="password" 
-                [(ngModel)]="registerPassword" 
+              <ion-input
+                type="password"
+                [(ngModel)]="registerPassword"
                 name="registerPassword"
                 placeholder="••••••••"
                 required
@@ -123,9 +127,9 @@
 
             <ion-item>
               <ion-label position="stacked">Confirmar Contraseña</ion-label>
-              <ion-input 
-                type="password" 
-                [(ngModel)]="registerPasswordConfirm" 
+              <ion-input
+                type="password"
+                [(ngModel)]="registerPasswordConfirm"
                 name="registerPasswordConfirm"
                 placeholder="••••••••"
                 required
@@ -134,8 +138,8 @@
           </ion-card-content>
 
           <ion-card-content>
-            <ion-button 
-              expand="block" 
+            <ion-button
+              expand="block"
               type="submit"
               [disabled]="loading"
               class="login-button"

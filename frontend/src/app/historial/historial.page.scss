@@ -1,4 +1,4 @@
-@use '../components/_colors' as colors;
+@use "../components/_colors" as colors;
 
 .spinner {
   margin: 2rem auto;
@@ -14,7 +14,11 @@ ion-card {
 
 ion-card-header {
   padding: 0;
-  background: linear-gradient(135deg, colors.$primary 0%, rgba(255, 255, 255, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    colors.$primary 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
   padding: 1rem;
 }
 
@@ -103,4 +107,5 @@ ion-badge {
 
 .empty-state p {
   font-size: 1rem;
-  margin: 0;}
+  margin: 0;
+}

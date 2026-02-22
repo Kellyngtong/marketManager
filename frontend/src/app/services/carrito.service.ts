@@ -51,17 +51,17 @@ export class CarritoService {
   private getApiHost(): string {
     const hostname = window.location.hostname;
     const protocol = window.location.protocol;
-    
+
     // Si estamos en ngrok, usar el hostname de ngrok sin puerto
     if (hostname.includes('ngrok')) {
       return `${protocol}//${hostname}`;
     }
-    
+
     // Si estamos en localhost, usar localhost:4800
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return `${protocol}//${hostname}:4800`;
     }
-    
+
     // Por defecto, asumir que el API está en el mismo host
     return `${protocol}//${hostname}`;
   }
@@ -72,7 +72,10 @@ export class CarritoService {
   private cartTotalsSubject = new BehaviorSubject<CartTotals>(EMPTY_TOTALS);
   cartTotals$ = this.cartTotalsSubject.asObservable();
 
-  constructor(private http: HttpClient, private auth: AuthService) {
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+  ) {
     this.auth.user$.subscribe((user) => {
       if (user && !this.isAdminUser(user)) {
         this.refreshCart().subscribe({ next: () => {}, error: () => {} });
@@ -87,17 +90,24 @@ export class CarritoService {
     const cfg = this.authHeaders();
     if (!cfg) {
       this.loadLocalCart();
-      return of({ items: this.getLocalCart(), totales: this.calculateTotals(this.getLocalCart()) });
+      return of({
+        items: this.getLocalCart(),
+        totales: this.calculateTotals(this.getLocalCart()),
+      });
     }
 
-    return this.http.get<CartResponse>(this.baseUrl, cfg).pipe(
-      tap((res) => this.handleCartResponse(res))
-    );
+    return this.http
+      .get<CartResponse>(this.baseUrl, cfg)
+      .pipe(tap((res) => this.handleCartResponse(res)));
   }
 
-  addItem(productoId: number, cantidad = 1, articulo?: CartArticulo): Observable<CartResponse> {
+  addItem(
+    productoId: number,
+    cantidad = 1,
+    articulo?: CartArticulo,
+  ): Observable<CartResponse> {
     const cfg = this.authHeaders();
-    
+
     if (!cfg) {
       // Si no hay autenticación, agregar a localStorage
       this.addToLocalCart(productoId, cantidad, articulo);
@@ -115,7 +125,7 @@ export class CarritoService {
 
   updateItem(itemId: number | undefined, cantidad: number) {
     const cfg = this.authHeaders();
-    
+
     if (!cfg) {
       // SIN autenticación: usar localStorage - itemId es el idarticulo
       if (itemId !== undefined) {
@@ -124,7 +134,10 @@ export class CarritoService {
         const totales = this.calculateTotals(items);
         this.handleCartResponse({ items, totales });
       }
-      return of({ items: this.getLocalCart(), totales: this.calculateTotals(this.getLocalCart()) });
+      return of({
+        items: this.getLocalCart(),
+        totales: this.calculateTotals(this.getLocalCart()),
+      });
     }
 
     // CON autenticación: usar servidor - itemId es el idcarrito_item
@@ -141,7 +154,7 @@ export class CarritoService {
 
   removeItem(itemId: number | undefined) {
     const cfg = this.authHeaders();
-    
+
     if (!cfg) {
       // SIN autenticación: usar localStorage - itemId es el idarticulo
       if (itemId !== undefined) {
@@ -150,7 +163,10 @@ export class CarritoService {
         const totales = this.calculateTotals(items);
         this.handleCartResponse({ items, totales });
       }
-      return of({ items: this.getLocalCart(), totales: this.calculateTotals(this.getLocalCart()) });
+      return of({
+        items: this.getLocalCart(),
+        totales: this.calculateTotals(this.getLocalCart()),
+      });
     }
 
     // CON autenticación: usar servidor - itemId es el idcarrito_item
@@ -167,7 +183,7 @@ export class CarritoService {
 
   clearCart() {
     const cfg = this.authHeaders();
-    
+
     if (!cfg) {
       // Limpiar localStorage
       localStorage.removeItem(CARRITO_LOCAL_KEY);
@@ -190,27 +206,31 @@ export class CarritoService {
     return stored ? JSON.parse(stored) : [];
   }
 
-  private addToLocalCart(productoId: number, cantidad: number, articulo?: CartArticulo) {
+  private addToLocalCart(
+    productoId: number,
+    cantidad: number,
+    articulo?: CartArticulo,
+  ) {
     const items = this.getLocalCart();
-    const existingItem = items.find(item => item.idarticulo === productoId);
-    
+    const existingItem = items.find((item) => item.idarticulo === productoId);
+
     if (existingItem) {
       existingItem.cantidad += cantidad;
     } else {
       items.push({
         idarticulo: productoId,
         cantidad,
-        articulo
+        articulo,
       });
     }
-    
+
     localStorage.setItem(CARRITO_LOCAL_KEY, JSON.stringify(items));
   }
 
   private updateLocalCart(productoId: number, cantidad: number) {
     const items = this.getLocalCart();
-    const item = items.find(i => i.idarticulo === productoId);
-    
+    const item = items.find((i) => i.idarticulo === productoId);
+
     if (item) {
       item.cantidad = cantidad;
       localStorage.setItem(CARRITO_LOCAL_KEY, JSON.stringify(items));
@@ -219,7 +239,7 @@ export class CarritoService {
 
   private removeFromLocalCart(productoId: number) {
     let items = this.getLocalCart();
-    items = items.filter(i => i.idarticulo !== productoId);
+    items = items.filter((i) => i.idarticulo !== productoId);
     localStorage.setItem(CARRITO_LOCAL_KEY, JSON.stringify(items));
   }
 
@@ -232,13 +252,13 @@ export class CarritoService {
   private calculateTotals(items: CartItem[]): CartTotals {
     const subtotal = items.reduce((sum, item) => {
       const precio = item.articulo?.precio_venta || 0;
-      return sum + (precio * item.cantidad);
+      return sum + precio * item.cantidad;
     }, 0);
-    
+
     const tasaImpuesto = 0.21; // 21% IVA
     const impuesto = subtotal * tasaImpuesto;
     const total = subtotal + impuesto;
-    
+
     return { subtotal, impuesto, total, tasaImpuesto };
   }
 
@@ -258,7 +278,9 @@ export class CarritoService {
   private isAdminUser(user: any) {
     const topLevelRol = user?.idrol;
     const nestedRol = user?.rol?.idrol;
-    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+    const rolNombre = String(
+      user?.rol?.nombre || user?.rol || '',
+    ).toLowerCase();
     return topLevelRol === 4 || nestedRol === 4 || rolNombre.includes('admin');
   }
 }

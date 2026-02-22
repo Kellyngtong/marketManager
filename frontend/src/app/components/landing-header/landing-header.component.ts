@@ -15,7 +15,10 @@ export class LandingHeaderComponent {
   currentLanguage: string = 'es';
   user$ = this.auth.user$;
 
-  constructor(private router: Router, private auth: AuthService) {}
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+  ) {}
 
   toggleLanguage() {
     const languages = ['es', 'en', 'ca'];

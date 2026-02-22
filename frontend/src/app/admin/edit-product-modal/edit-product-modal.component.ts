@@ -41,10 +41,7 @@ export class EditProductModalComponent implements OnInit {
         this.product?.stock || 0,
         [Validators.required, Validators.min(0)],
       ],
-      idcategoria: [
-        this.product?.idcategoria || 1,
-        Validators.required,
-      ],
+      idcategoria: [this.product?.idcategoria || 1, Validators.required],
       descripcion: [this.product?.descripcion || ''],
       oferta: [this.product?.oferta || false],
     });

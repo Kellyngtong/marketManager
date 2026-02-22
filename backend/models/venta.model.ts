@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, Model } from 'sequelize';
+import { Sequelize, DataTypes, Model } from "sequelize";
 
 export interface VentaAttributes {
   idventa?: number;
@@ -73,9 +73,9 @@ export default (sequelize: Sequelize) => {
     },
     {
       sequelize,
-      tableName: 'venta',
+      tableName: "venta",
       timestamps: false,
-    }
+    },
   );
 
   return Venta;

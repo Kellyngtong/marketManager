@@ -1,4 +1,4 @@
-@use '../components/_colors' as colors;
+@use "../components/_colors" as colors;
 
 ion-content {
   --padding-top: 0;
@@ -71,7 +71,8 @@ ion-segment {
       margin-bottom: 8px;
     }
 
-    ion-input, ion-textarea {
+    ion-input,
+    ion-textarea {
       font-size: 16px;
       --color: #1f2937;
 
@@ -181,4 +182,3 @@ ion-button:disabled {
   margin-top: 4px;
   display: block;
 }
-
