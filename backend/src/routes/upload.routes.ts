@@ -17,10 +17,10 @@ const generateFilename = (originalName: string): string => {
 };
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
+  destination: (_req: any, _file: any, cb: any) => {
     cb(null, publicImagesDir);
   },
-  filename: (_req, file, cb) => {
+  filename: (_req: any, file: any, cb: any) => {
     cb(null, generateFilename(file.originalname));
   },
 });
@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: { fileSize: 30 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: any, file: any, cb: any) => {
     if (/^image\/(png|jpe?g|webp|gif)$/.test(file.mimetype)) {
       cb(null, true);
       return;

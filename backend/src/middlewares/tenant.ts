@@ -64,14 +64,13 @@ export const extractTenant = (req: TenantRequest, res: Response, next: NextFunct
 
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
 
-    if (!decoded.id_tenant) {
-      res.status(401).json({ message: 'Tenant no identificado en el token' });
-      return;
-    }
+    // Asignar tenant por defecto (1) si no existe
+    const id_tenant = decoded.id_tenant || 1;
+    const id_store = decoded.id_store || 1;
 
     req.tenant = {
-      id_tenant: decoded.id_tenant,
-      id_store: decoded.id_store || undefined,
+      id_tenant,
+      id_store,
       idusuario: decoded.idusuario,
       email: decoded.email,
       idrol: decoded.idrol,
