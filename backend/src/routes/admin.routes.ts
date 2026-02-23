@@ -1,4 +1,5 @@
 import { Express, Router, Request, Response, NextFunction } from "express";
+import bcrypt from "bcrypt";
 import * as authJwt from "@middlewares/authJwt";
 import db, { sequelize } from "@db/index";
 
@@ -211,6 +212,124 @@ export default (app: Express): void => {
       console.error("❌ Error updating user:", error);
       res.status(500).json({
         message: "Error actualizando usuario",
+        error: error?.message || "Error desconocido",
+      });
+    }
+  });
+
+  /**
+   * POST /api/admin/users
+   * Crear usuario
+   */
+  router.post("/users", async (req: Request, res: Response) => {
+    try {
+      const { nombre, email, rol, idrol } = req.body || {};
+
+      if (!nombre || !email) {
+        res.status(400).json({ message: "nombre y email son requeridos" });
+        return;
+      }
+
+      const normalizedEmail = String(email).trim().toLowerCase();
+      const existing = await db.usuario.findOne({
+        where: { email: normalizedEmail },
+      });
+
+      const isExistingActive =
+        !!existing &&
+        (existing.condicion === true || Number(existing.condicion) === 1);
+      const isExistingInactive =
+        !!existing && !isExistingActive;
+
+      const rolMap: { [key: string]: number } = {
+        cliente: 1,
+        premium: 2,
+        empleado: 3,
+        admin: 4,
+      };
+
+      const rolePasswordMap: Record<number, string> = {
+        1: "cli123",
+        2: "pre123",
+        3: "emp123",
+        4: "admin123",
+      };
+
+      const roleName = String(rol || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+
+      const roleIdFromName =
+        rolMap[roleName] ||
+        (roleName.includes("admin")
+          ? 4
+          : roleName.includes("emplead") || roleName.includes("staff")
+            ? 3
+            : roleName.includes("premium")
+              ? 2
+              : roleName.includes("client") || roleName.includes("cliente")
+                ? 1
+                : undefined);
+
+      const roleId = Number(idrol) || roleIdFromName || 1;
+
+      const roleExists = await db.rol.findByPk(roleId);
+      if (!roleExists) {
+        res.status(400).json({ message: "Rol inválido" });
+        return;
+      }
+
+      const presetPassword = rolePasswordMap[roleId] || "cli123";
+      const hashedPassword = await bcrypt.hash(presetPassword, 10);
+
+      if (isExistingActive) {
+        res.status(400).json({ message: "El email ya está registrado" });
+        return;
+      }
+
+      if (isExistingInactive) {
+        existing.nombre = String(nombre).trim();
+        existing.idrol = roleId;
+        existing.clave = hashedPassword;
+        existing.condicion = true;
+        await existing.save();
+
+        res.status(200).json({
+          idusuario: existing.idusuario,
+          nombre: existing.nombre,
+          email: existing.email,
+          idrol: existing.idrol,
+          rol: (roleExists as any)?.nombre || "cliente",
+          condicion: existing.condicion,
+          passwordAsignada: presetPassword,
+          reactivado: true,
+        });
+        return;
+      }
+
+      const usuario = await db.usuario.create({
+        nombre: String(nombre).trim(),
+        email: normalizedEmail,
+        clave: hashedPassword,
+        idrol: roleId,
+        condicion: true,
+      });
+
+      res.status(201).json({
+        idusuario: usuario.idusuario,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        idrol: usuario.idrol,
+        rol: (roleExists as any)?.nombre || "cliente",
+        condicion: usuario.condicion,
+        passwordAsignada: presetPassword,
+      });
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      res.status(500).json({
+        message: "Error creando usuario",
         error: error?.message || "Error desconocido",
       });
     }
