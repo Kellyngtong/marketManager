@@ -154,25 +154,53 @@ export class OrderDetailPage implements OnInit {
   }
 
   buildTimeline(status: string): TimelineStep[] {
+    const normalized = String(status || '')
+      .trim()
+      .toUpperCase();
+
+    const isPending = normalized === 'PENDIENTE';
+    const isShipped = normalized === 'ENVIADA' || normalized === 'ENVIADO';
+    const isClosed = normalized === 'CERRADA' || normalized === 'CERRADO';
+
     const steps: TimelineStep[] = [
       { status: 'Pedido Confirmado', date: '', completed: true },
       {
         status: 'Procesando',
         date: '',
-        completed: status !== 'Completada' ? false : true,
+        completed: isPending || isShipped || isClosed,
       },
       {
         status: 'Enviado',
         date: '',
-        completed: status === 'Enviado' || status === 'Entregado',
+        completed: isShipped || isClosed,
       },
-      { status: 'Entregado', date: '', completed: status === 'Entregado' },
+      { status: 'Pedido entregado', date: '', completed: isClosed },
     ];
     return steps;
   }
 
   getStatusConfig(status: string) {
     const configs: any = {
+      nuevo: {
+        label: 'Nuevo',
+        color: 'warning',
+        icon: 'sparkles',
+      },
+      pendiente: {
+        label: 'Pendiente',
+        color: 'warning',
+        icon: 'time',
+      },
+      enviada: {
+        label: 'Enviada',
+        color: 'primary',
+        icon: 'send',
+      },
+      cerrada: {
+        label: 'Cerrada',
+        color: 'success',
+        icon: 'checkmark-done',
+      },
       completada: {
         label: 'Completada',
         color: 'success',
@@ -193,15 +221,15 @@ export class OrderDetailPage implements OnInit {
         color: 'info',
         icon: 'plane',
       },
-      pending: {
-        label: 'Pendiente',
-        color: 'warning',
-        icon: 'time',
-      },
       cancelled: {
         label: 'Cancelado',
         color: 'danger',
         icon: 'close-circle',
+      },
+      pending: {
+        label: 'Pendiente',
+        color: 'warning',
+        icon: 'time',
       },
     };
 

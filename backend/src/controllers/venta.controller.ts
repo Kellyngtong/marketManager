@@ -1,32 +1,22 @@
-const db = require("../models");
-const CarritoItem = db.carrito_item;
-const Articulo = db.articulo;
-const Venta = db.venta;
-const DetalleVenta = db.detalle_venta;
-const Usuario = db.usuario;
-const Cliente = db.cliente;
+import db from "@db/index";
 
 const TAX_RATE = 0.18;
 
-const buildNumeroComprobante = () => {
+const buildNumeroComprobante = (): string => {
   const timestamp = Date.now().toString().slice(-8);
   return `MM${timestamp}`;
 };
 
-const ensureCliente = async (usuario, datosEnvio, transaction, id_tenant, id_store) => {
+const ensureCliente = async (usuario: any, datosEnvio: any, transaction: any) => {
   const email = usuario.email;
-  let cliente = await Cliente.findOne({ 
-    where: { 
-      email,
-      id_tenant,
-      id_store,
-    }, 
-    transaction, 
-    lock: transaction.LOCK.UPDATE 
+  let cliente = await (db.cliente as any).findOne({
+    where: { email },
+    transaction,
+    lock: transaction.LOCK.UPDATE,
   });
 
   if (!cliente) {
-    cliente = await Cliente.create(
+    cliente = await (db.cliente as any).create(
       {
         nombre: usuario.nombre,
         email,
@@ -34,32 +24,29 @@ const ensureCliente = async (usuario, datosEnvio, transaction, id_tenant, id_sto
         direccion: datosEnvio?.direccion || usuario.direccion || null,
         tipo_documento: usuario.tipo_documento || null,
         num_documento: usuario.num_documento || null,
-        id_tenant,
-        id_store,
       },
-      { transaction }
+      { transaction },
     );
   }
 
   return cliente;
 };
 
-const serializeVenta = (venta) => {
+const serializeVenta = (venta: any) => {
   const plain = venta.get({ plain: true });
-  const items = (plain.detalle_venta || []).map((detalle) => ({
+  const detalles = plain.detalle_venta || plain.DetalleVenta || [];
+  const items = (detalles || []).map((detalle: any) => ({
     iddetalle_venta: detalle.iddetalle_venta,
     cantidad: detalle.cantidad,
     precio: Number(detalle.precio),
     subtotal: Number(detalle.precio) * detalle.cantidad,
-    articulo: detalle.articulo,
+    articulo: detalle.articulo || detalle.Articulo,
   }));
 
   return {
     idventa: plain.idventa,
     numero: plain.num_comprobante,
     fecha: plain.fecha_hora,
-    metodo_pago: plain.metodo_pago,
-    direccion_envio: plain.direccion_envio,
     estado: plain.estado,
     impuesto: Number(plain.impuesto),
     total: Number(plain.total),
@@ -67,38 +54,15 @@ const serializeVenta = (venta) => {
   };
 };
 
-exports.checkout = async (req, res) => {
+export const checkout = async (req: any, res: any) => {
   const transaction = await db.sequelize.transaction();
   try {
     const idusuario = req.idusuario;
-    const id_tenant = req.tenant?.id_tenant;
-    const id_store = req.tenant?.id_store;
-    const { datosEnvio = {}, metodoPago, numeroTarjeta } = req.body;
+    const { datosEnvio = {} } = req.body || {};
 
-    if (!id_tenant || !id_store) {
-      await transaction.rollback();
-      return res.status(401).json({ message: "Tenant o Store no identificado" });
-    }
-
-    if (!metodoPago) {
-      await transaction.rollback();
-      return res.status(400).json({ message: "metodoPago es requerido" });
-    }
-
-    if (metodoPago === "tarjeta") {
-      const card = String(numeroTarjeta || "").replace(/\s+/g, "");
-      if (!/^\d{12,19}$/.test(card)) {
-        await transaction.rollback();
-        return res.status(400).json({ message: "Número de tarjeta inválido" });
-      }
-    }
-
-    const items = await CarritoItem.findAll({
-      where: { 
-        idusuario,
-        id_tenant,
-      },
-      include: [{ model: Articulo }],
+    const items = await (db.carrito_item as any).findAll({
+      where: { idusuario },
+      include: [{ model: db.articulo }],
       transaction,
       lock: transaction.LOCK.UPDATE,
     });
@@ -121,7 +85,7 @@ exports.checkout = async (req, res) => {
       }
     }
 
-    const subtotal = items.reduce((sum, item) => {
+    const subtotal = items.reduce((sum: number, item: any) => {
       const price = Number(item.articulo.precio_venta) || 0;
       return sum + price * item.cantidad;
     }, 0);
@@ -129,35 +93,34 @@ exports.checkout = async (req, res) => {
     const impuesto = +(subtotal * TAX_RATE).toFixed(2);
     const total = +(subtotal + impuesto).toFixed(2);
 
-    const usuario = await Usuario.findByPk(idusuario, { transaction });
+    const usuario = await (db.usuario as any).findByPk(idusuario, { transaction });
     if (!usuario) {
       await transaction.rollback();
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    const cliente = await ensureCliente(usuario, datosEnvio, transaction, id_tenant, id_store);
+    const cliente = await ensureCliente(usuario, datosEnvio, transaction);
 
-    const venta = await Venta.create(
+    const venta = await (db.venta as any).create(
       {
         idcliente: cliente.idcliente,
         idusuario,
-        id_tenant,
-        id_store,
         tipo_comprobante: "BOL",
         serie_comprobante: "MM01",
         num_comprobante: buildNumeroComprobante(),
         fecha_hora: new Date(),
         impuesto,
         total,
-        estado: "Completada",
-        metodo_pago: metodoPago,
-        direccion_envio: datosEnvio?.direccion || usuario.direccion || null,
+        estado: "PENDIENTE",
+        cliente_nombre: String(cliente.nombre || usuario.nombre || "Cliente").trim(),
+        cliente_telefono: String(cliente.telefono || usuario.telefono || "").trim() || null,
+        cliente_direccion: String(datosEnvio?.direccion || cliente.direccion || usuario.direccion || "").trim() || null,
       },
-      { transaction }
+      { transaction },
     );
 
     for (const item of items) {
-      await DetalleVenta.create(
+      await (db.detalle_venta as any).create(
         {
           idventa: venta.idventa,
           idarticulo: item.idarticulo,
@@ -165,20 +128,20 @@ exports.checkout = async (req, res) => {
           precio: item.articulo.precio_venta,
           descuento: 0,
         },
-        { transaction }
+        { transaction },
       );
 
       item.articulo.stock -= item.cantidad;
       await item.articulo.save({ transaction });
     }
 
-    await CarritoItem.destroy({ where: { idusuario }, transaction });
+    await (db.carrito_item as any).destroy({ where: { idusuario }, transaction });
 
-    const ventaConDetalle = await Venta.findByPk(venta.idventa, {
+    const ventaConDetalle = await (db.venta as any).findByPk(venta.idventa, {
       include: [
         {
-          model: DetalleVenta,
-          include: [{ model: Articulo }],
+          model: db.detalle_venta,
+          include: [{ model: db.articulo }],
         },
       ],
       transaction,
@@ -197,15 +160,15 @@ exports.checkout = async (req, res) => {
   }
 };
 
-exports.getHistorialCompras = async (req, res) => {
+export const getHistorialCompras = async (req: any, res: any) => {
   try {
     const idusuario = req.idusuario;
-    const ventas = await Venta.findAll({
+    const ventas = await (db.venta as any).findAll({
       where: { idusuario },
       include: [
         {
-          model: DetalleVenta,
-          include: [{ model: Articulo }],
+          model: db.detalle_venta,
+          include: [{ model: db.articulo }],
         },
       ],
       order: [["fecha_hora", "DESC"]],
@@ -220,17 +183,17 @@ exports.getHistorialCompras = async (req, res) => {
   }
 };
 
-exports.getDetalleVenta = async (req, res) => {
+export const getDetalleVenta = async (req: any, res: any) => {
   try {
     const idusuario = req.idusuario;
     const { id } = req.params;
 
-    const venta = await Venta.findOne({
+    const venta = await (db.venta as any).findOne({
       where: { idventa: id, idusuario },
       include: [
         {
-          model: DetalleVenta,
-          include: [{ model: Articulo }],
+          model: db.detalle_venta,
+          include: [{ model: db.articulo }],
         },
       ],
     });

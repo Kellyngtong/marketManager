@@ -1,9 +1,10 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
+import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-profile',
@@ -19,6 +20,7 @@ export class ProfilePage implements OnDestroy {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
+    private modalCtrl: ModalController,
     private toastCtrl: ToastController,
     private router: Router,
   ) {
@@ -87,6 +89,39 @@ export class ProfilePage implements OnDestroy {
   logout() {
     this.auth.logout();
     this.router.navigateByUrl('/', { replaceUrl: true });
+  }
+
+  async confirmLogout() {
+    const modal = await this.modalCtrl.create({
+      component: ConfirmationModalComponent,
+      cssClass: 'confirmation-modal',
+      componentProps: {
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que quieres cerrar sesión?',
+        isDangerous: true,
+        cancelText: 'Cancelar',
+        confirmText: 'Cerrar sesión',
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+    if (result.data?.confirmed === true) {
+      this.logout();
+    }
+  }
+
+  isPremiumUser(): boolean {
+    const current = this.user;
+    const topLevelRol = current?.idrol;
+    const nestedRol = current?.rol?.idrol;
+    const rolNombre = String(current?.rol?.nombre || current?.rol || '').toLowerCase();
+
+    return topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
+  }
+
+  goToPremiumCheckout() {
+    this.router.navigate(['/checkout'], { queryParams: { mode: 'premium' } });
   }
 
   ngOnDestroy(): void {

@@ -69,6 +69,21 @@ export class PagosService {
     );
   }
 
+  crearSesionPremium(): Observable<StripeSessionResponse> {
+    const cfg = this.authHeaders();
+    if (!cfg) {
+      return throwError(
+        () => new Error('Debes iniciar sesión para hacerte premium'),
+      );
+    }
+
+    return this.http.post<StripeSessionResponse>(
+      `${this.baseUrl}/crear-sesion-premium`,
+      {},
+      cfg,
+    );
+  }
+
   /**
    * Obtener estado de la sesión de pago
    * Útil para verificar si el pago fue completado

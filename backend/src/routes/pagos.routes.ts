@@ -18,6 +18,17 @@ export default (app: Express): void => {
   );
 
   /**
+   * POST /api/pagos/crear-sesion-premium
+   * Crear sesión de Stripe para hacerse cliente premium
+   */
+  router.post(
+    "/crear-sesion-premium",
+    authJwt.verifyToken,
+    extractTenant,
+    pagosController.crearSesionPremiumCheckout,
+  );
+
+  /**
    * GET /api/pagos/sesion/:sessionId
    * Obtener información de la sesión
    */

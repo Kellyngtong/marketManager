@@ -8,8 +8,152 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <section class="panel">
-    <h2>Administrador de pedidos</h2>
-    <p>Esta ventana ya está creada para el módulo de pedidos.</p>
+  <div *ngIf="isLoading" class="loading-placeholder">
+    <ion-skeleton-text animated style="width: 100%; height: 110px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 100%; height: 110px"></ion-skeleton-text>
+  </div>
+
+  <ion-list *ngIf="!isLoading && orders.length" class="orders-list">
+    <ion-card *ngFor="let order of orders">
+      <ion-card-header>
+        <div class="order-head">
+          <div>
+            <ion-card-title>Pedido #{{ order.idventa }}</ion-card-title>
+            <ion-card-subtitle>Fecha de compra: {{ formatDate(order.fecha_hora) }}</ion-card-subtitle>
+          </div>
+          <ion-chip [class]="getEstadoClass(order.estado)">{{ getEstadoLabel(order.estado) }}</ion-chip>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="order-grid">
+          <p><strong>Nombre cliente:</strong> {{ order.clienteNombre || 'Sin cliente' }}</p>
+          <p><strong>Dirección:</strong> {{ order.clienteDireccion || 'Sin dirección' }}</p>
+          <p><strong>Teléfono:</strong> {{ order.clienteTelefono || 'Sin teléfono' }}</p>
+          <p><strong>Usuario:</strong> {{ order.usuarioNombre || ('Usuario #' + order.idusuario) }}</p>
+          <p><strong>Total:</strong> {{ order.total | currency : 'EUR' }}</p>
+          <p><strong>Fecha de compra:</strong> {{ formatDate(order.fecha_hora) }}</p>
+        </div>
+
+        <div class="order-items">
+          <p><strong>Artículos comprados:</strong> {{ getItemsSummary(order.items) }}</p>
+        </div>
+
+        <div class="order-actions">
+          <ion-button class="edit-button" fill="solid" size="small" (click)="editOrder(order)">
+            <ion-icon slot="start" name="create-outline"></ion-icon>
+            Editar
+          </ion-button>
+
+          <ion-button
+            *ngIf="canMoveToPending(order)"
+            color="medium"
+            size="small"
+            (click)="markAsPending(order)"
+          >
+            <ion-icon slot="start" name="hourglass-outline"></ion-icon>
+            Procesar
+          </ion-button>
+
+          <ion-button
+            *ngIf="canSend(order)"
+            color="primary"
+            size="small"
+            (click)="markAsSent(order)"
+          >
+            <ion-icon slot="start" name="send-outline"></ion-icon>
+            Enviar
+          </ion-button>
+
+          <ion-button
+            *ngIf="canClose(order)"
+            color="success"
+            size="small"
+            (click)="markAsClosed(order)"
+          >
+            <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
+            Cerrar
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+
+  <section class="panel" *ngIf="!isLoading && !orders.length">
+    <h2>Sin pedidos</h2>
+    <p>No hay pedidos registrados todavía.</p>
+    <ion-button expand="block" (click)="openCreateOrder()">Crear primer pedido</ion-button>
   </section>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fixed-add-fab">
+    <ion-fab-button (click)="openCreateOrder()" aria-label="Añadir pedido">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal [isOpen]="isEditModalOpen" (didDismiss)="closeEditModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Editar pedido #{{ editingOrder?.idventa }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeEditModal()">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding" *ngIf="editingOrder">
+        <ion-list>
+          <ion-item>
+            <ion-label position="stacked">Nombre cliente</ion-label>
+            <ion-input [(ngModel)]="editDraft.clienteNombre"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Dirección</ion-label>
+            <ion-input [(ngModel)]="editDraft.clienteDireccion"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Teléfono</ion-label>
+            <ion-input [(ngModel)]="editDraft.clienteTelefono"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Total (€)</ion-label>
+            <ion-input type="number" [(ngModel)]="editDraft.total"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Fecha de compra (solo lectura)</ion-label>
+            <ion-input [value]="formatDate(editDraft.fecha_hora)" readonly></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Estado</ion-label>
+            <ion-select [(ngModel)]="editDraft.estado" interface="popover">
+              <ion-select-option value="NUEVO">NUEVO</ion-select-option>
+              <ion-select-option value="PENDIENTE">PENDIENTE</ion-select-option>
+              <ion-select-option value="ENVIADA">ENVIADA</ion-select-option>
+              <ion-select-option value="CERRADA">CERRADA</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+
+        <div class="modal-items" *ngIf="editingOrder.items?.length">
+          <h3>Artículos comprados</h3>
+          <ion-list>
+            <ion-item *ngFor="let item of editingOrder.items">
+              <ion-label>
+                <h4>{{ item.nombre }}</h4>
+                <p>Cantidad: {{ item.cantidad }} · Precio: {{ item.precio | currency : 'EUR' }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+
+        <ion-button expand="block" color="primary" (click)="saveEditOrder()">Guardar cambios</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

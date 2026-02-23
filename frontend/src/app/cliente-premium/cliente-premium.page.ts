@@ -1,9 +1,10 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { CarritoService } from '../services/carrito.service';
 import { AuthService } from '../auth/auth.service';
+import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-cliente-premium',
@@ -57,6 +58,7 @@ export class ClientePremiumPage implements OnDestroy {
 
   constructor(
     private toastCtrl: ToastController,
+    private modalCtrl: ModalController,
     private carritoService: CarritoService,
     private authService: AuthService,
     private router: Router,
@@ -278,6 +280,26 @@ export class ClientePremiumPage implements OnDestroy {
   onAvatarImageError() {
     this.clientAvatar = null;
     this.authService.updateLocalUser({ avatar: null });
+  }
+
+  async confirmLogout() {
+    const modal = await this.modalCtrl.create({
+      component: ConfirmationModalComponent,
+      cssClass: 'confirmation-modal',
+      componentProps: {
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que quieres cerrar sesión?',
+        isDangerous: true,
+        cancelText: 'Cancelar',
+        confirmText: 'Cerrar sesión',
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+    if (result.data?.confirmed === true) {
+      this.logout();
+    }
   }
 
   logout() {

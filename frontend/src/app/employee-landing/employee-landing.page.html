@@ -2,7 +2,7 @@
   <ion-toolbar>
     <ion-title>Empleado</ion-title>
     <ion-buttons slot="end">
-      <ion-button fill="clear" (click)="logout()">
+      <ion-button fill="clear" (click)="confirmLogout()">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -15,7 +15,8 @@
     <p>Selecciona el módulo al que deseas acceder.</p>
 
     <ion-button expand="block" (click)="goToPedidos()">Administrador de pedidos</ion-button>
-    <ion-button expand="block" (click)="goToMarketing()">Administrador de Marketing</ion-button>
+    <ion-button expand="block" (click)="goToMarketing()">Admin de Marketing</ion-button>
     <ion-button expand="block" (click)="goToContable()">Contable</ion-button>
+    <ion-button expand="block" (click)="goToInventario()">Inventario</ion-button>
   </section>
 </ion-content>

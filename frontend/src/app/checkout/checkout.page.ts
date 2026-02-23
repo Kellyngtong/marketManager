@@ -1,5 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import {
   LoadingController,
   NavController,
@@ -21,6 +22,8 @@ export class CheckoutPage implements OnDestroy {
   cartItems$ = this.carritoService.cartItems$;
   totals$ = this.carritoService.cartTotals$;
   isProcessing = false;
+  isPremiumUpgrade = false;
+  readonly premiumPlanPrice = 15;
   private userSub?: Subscription;
 
   constructor(
@@ -31,6 +34,7 @@ export class CheckoutPage implements OnDestroy {
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
     private navCtrl: NavController,
+    private route: ActivatedRoute,
   ) {
     this.checkoutForm = this.fb.group({
       direccion: ['', Validators.required],
@@ -51,6 +55,12 @@ export class CheckoutPage implements OnDestroy {
   }
 
   ionViewWillEnter() {
+    this.isPremiumUpgrade = this.route.snapshot.queryParamMap.get('mode') === 'premium';
+
+    if (this.isPremiumUpgrade) {
+      return;
+    }
+
     this.carritoService
       .refreshCart()
       .subscribe({ error: (err) => this.presentError(err) });
@@ -64,7 +74,9 @@ export class CheckoutPage implements OnDestroy {
 
     this.isProcessing = true;
     const loading = await this.loadingCtrl.create({
-      message: 'Preparando pago...',
+      message: this.isPremiumUpgrade
+        ? 'Preparando suscripción premium...'
+        : 'Preparando pago...',
     });
     await loading.present();
 
@@ -72,10 +84,12 @@ export class CheckoutPage implements OnDestroy {
     try {
       // Crear sesión de Stripe
       const response = await firstValueFrom(
-        this.pagosService.crearSesionPago({
-          direccion: formValue.direccion,
-          telefono: formValue.telefono,
-        }),
+        this.isPremiumUpgrade
+          ? this.pagosService.crearSesionPremium()
+          : this.pagosService.crearSesionPago({
+              direccion: formValue.direccion,
+              telefono: formValue.telefono,
+            }),
       );
 
       // Guardar sessionId para verificación posterior

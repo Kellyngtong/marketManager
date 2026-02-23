@@ -57,10 +57,18 @@
   </form>
 
   <div class="actions">
+    <ion-button
+      *ngIf="!isPremiumUser()"
+      expand="block"
+      color="warning"
+      class="premium-upgrade-btn"
+      (click)="goToPremiumCheckout()"
+      >HACERTE PREMIUM: 15 €</ion-button
+    >
     <ion-button expand="block" color="success" (click)="saveProfile()"
       >Guardar cambios</ion-button
     >
-    <ion-button expand="block" fill="clear" color="medium" (click)="logout()"
+    <ion-button expand="block" fill="clear" color="medium" (click)="confirmLogout()"
       >Cerrar sesión</ion-button
     >
   </div>

@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-employee-landing',
@@ -12,7 +13,11 @@ import { AuthService } from '../auth/auth.service';
   styleUrls: ['./employee-landing.page.scss'],
 })
 export class EmployeeLandingPage {
-  constructor(private router: Router, private auth: AuthService) {}
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private modalCtrl: ModalController,
+  ) {}
 
   ionViewWillEnter() {
     const user = this.auth.currentUserValue;
@@ -26,15 +31,39 @@ export class EmployeeLandingPage {
   }
 
   goToPedidos() {
-    this.router.navigateByUrl('/adminPedidos');
+    this.router.navigateByUrl('/admin-pedidos');
   }
 
   goToMarketing() {
-    this.router.navigateByUrl('/adminMarketing');
+    this.router.navigateByUrl('/admin-marketing');
   }
 
   goToContable() {
     this.router.navigateByUrl('/contable');
+  }
+
+  goToInventario() {
+    this.router.navigateByUrl('/employers');
+  }
+
+  async confirmLogout() {
+    const modal = await this.modalCtrl.create({
+      component: ConfirmationModalComponent,
+      cssClass: 'confirmation-modal',
+      componentProps: {
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que quieres cerrar sesión?',
+        isDangerous: true,
+        cancelText: 'Cancelar',
+        confirmText: 'Cerrar sesión',
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+    if (result.data?.confirmed === true) {
+      this.logout();
+    }
   }
 
   logout() {

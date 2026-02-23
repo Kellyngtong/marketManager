@@ -1,3 +1,5 @@
+@use '../../components/_colors' as colors;
+
 .button-group {
   display: flex;
   gap: 1rem;
@@ -9,26 +11,26 @@
 
   // Botón verde personalizado
   ion-button.btn-save {
-    --background: #10b981;
-    --background-hover: #059669;
-    --background-activated: #047857;
+    --background: #{colors.$primary};
+    --background-hover: #{colors.$primaryDark};
+    --background-activated: #{colors.$primaryDark};
     --color: #fff;
-    --box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    --box-shadow: 0 2px 8px #{colors.$shadowMedium};
     font-weight: 600;
     letter-spacing: 0.5px;
 
     &:hover {
-      --background: #059669;
-      --box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      --background: #{colors.$primaryDark};
+      --box-shadow: 0 4px 12px #{colors.$shadowMedium};
     }
 
     &:active {
-      --background: #047857;
+      --background: #{colors.$primaryDark};
     }
 
     &:disabled {
-      --background: #d1d5db;
-      --color: #9ca3af;
+      --background: #{colors.$disabled};
+      --color: #{colors.$textSecondary};
       opacity: 0.6;
     }
 
@@ -47,6 +49,8 @@
 }
 
 ion-item {
+  --background: #{colors.$surface};
+  --border-color: #{colors.$border};
   --padding-start: 0;
   --padding-end: 0;
   --inner-padding-start: 0;
@@ -60,7 +64,64 @@ ion-item {
   ion-label {
     font-weight: 500;
     margin-bottom: 0.5rem;
+    color: colors.$textPrimary;
   }
+}
+
+.role-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.role-label {
+  font-weight: 600;
+  color: colors.$textPrimary;
+}
+
+.role-options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.role-item {
+  --background: #{colors.$surface};
+  border: 1px solid colors.$border;
+  border-radius: 10px;
+  padding: 0.35rem 0.5rem;
+
+  .role-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: colors.$textPrimary;
+  }
+
+  .role-desc {
+    font-size: 0.8rem;
+    color: colors.$textSecondary;
+    margin-top: 2px;
+  }
+
+  ion-radio {
+    --color: #{colors.$textSecondary};
+    --color-checked: #{colors.$primary};
+  }
+}
+
+.role-item-cliente {
+  border-left: 4px solid colors.$info;
+}
+
+.role-item-premium {
+  border-left: 4px solid colors.$secondary;
+}
+
+.role-item-empleado {
+  border-left: 4px solid colors.$primary;
+}
+
+.role-item-admin {
+  border-left: 4px solid colors.$error;
 }
 
 ion-input,

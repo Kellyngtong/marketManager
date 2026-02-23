@@ -92,9 +92,25 @@ const routes: Routes = [
       ),
   },
   {
+    path: 'employers',
+    canActivate: [RoleGuard],
+    data: { roles: [3] }, // Solo Empleado (rol 3)
+    loadChildren: () =>
+      import('./employers/employers.module').then((m) => m.EmployersPageModule),
+  },
+  {
     path: 'adminPedidos',
     canActivate: [RoleGuard],
-    data: { roles: [4] }, // Solo Admin (rol 4)
+    data: { roles: [3, 4] }, // Empleado y Admin
+    loadChildren: () =>
+      import('./admin-pedidos/admin-pedidos.module').then(
+        (m) => m.AdminPedidosPageModule,
+      ),
+  },
+  {
+    path: 'admin-pedidos',
+    canActivate: [RoleGuard],
+    data: { roles: [3, 4] }, // Empleado y Admin
     loadChildren: () =>
       import('./admin-pedidos/admin-pedidos.module').then(
         (m) => m.AdminPedidosPageModule,
@@ -103,7 +119,16 @@ const routes: Routes = [
   {
     path: 'adminMarketing',
     canActivate: [RoleGuard],
-    data: { roles: [4] }, // Solo Admin (rol 4)
+    data: { roles: [3, 4] }, // Empleado y Admin
+    loadChildren: () =>
+      import('./admin-marketing/admin-marketing.module').then(
+        (m) => m.AdminMarketingPageModule,
+      ),
+  },
+  {
+    path: 'admin-marketing',
+    canActivate: [RoleGuard],
+    data: { roles: [3, 4] }, // Empleado y Admin
     loadChildren: () =>
       import('./admin-marketing/admin-marketing.module').then(
         (m) => m.AdminMarketingPageModule,
