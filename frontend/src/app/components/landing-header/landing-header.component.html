@@ -3,16 +3,9 @@
     <div class="navbar-wrapper">
       <!-- LOGO -->
       <div class="navbar-logo">
-<<<<<<< HEAD
         <a routerLink="/home" class="logo-link">
-          <!-- #####CÓDIGO MODIFICADO --- Aparece el logo -->
           <img src="assets/icon/miniLogo.png" alt="Mercachona" class="logo-img">
         </a>
-=======
-        <span class="logo-text" routerLink="/home" class="logo-link"
-          >Mercachona</span
-        >
->>>>>>> f55c9e424cb4ec3b3afc2607f05f81a90175996b
       </div>
 
       <!-- MENU DESKTOP (only show when no user) -->
@@ -47,12 +40,7 @@
         <!-- LOGIN / LOGOUT BUTTONS -->
         <ng-container *ngIf="!(user$ | async); else logoutButton">
           <ion-button
-<<<<<<< HEAD
             (click)="goToWelcome()"
-=======
-            (click)="goToLogin()"
-            color="primary"
->>>>>>> f55c9e424cb4ec3b3afc2607f05f81a90175996b
             fill="solid"
             size="small"
             class="auth-btn"
@@ -62,21 +50,15 @@
         </ng-container>
 
         <ng-template #logoutButton>
-          <ion-button fill="clear" (click)="confirmLogout()" class="logout-btn">
+          <ion-button fill="clear" (click)="logout()" class="logout-btn">
             <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
           </ion-button>
         </ng-template>
-<<<<<<< HEAD
 
         <!-- MENU MOBILE -->
         <ion-buttons slot="end">
-          <ion-menu-button menu="menu-principal" class="menu-mobile-btn"  ></ion-menu-button>
+          <ion-menu-button menu="menu-principal" class="menu-mobile-btn"></ion-menu-button>
         </ion-buttons>
-
-        
-
-=======
->>>>>>> f55c9e424cb4ec3b3afc2607f05f81a90175996b
       </div>
     </div>
   </ion-toolbar>
@@ -97,6 +79,7 @@
           <ion-label>{{ translations[currentLanguage]['conocenos'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
+
       <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item class="menu-mobile-item">
           <ion-icon name="globe" slot="start"></ion-icon>
@@ -113,47 +96,39 @@
           <ion-label>{{ translations[currentLanguage]['supermercados'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
+
       <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button routerLink="/trabaja" class="menu-mobile-item">
           <ion-icon name="briefcase" slot="start"></ion-icon>
           <ion-label>{{ translations[currentLanguage]['trabaja'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
+
       <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button routerLink="/atencion" class="menu-mobile-item">
           <ion-icon name="help-circle" slot="start"></ion-icon>
           <ion-label>{{ translations[currentLanguage]['atencion'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
-      <!-- ###### CÓDIGO MODIFICADO --- Se ha quitado este item del menú  delmóvil.
+
       <ion-menu-toggle *ngIf="!(user$ | async)">
-        <ion-item>
-          <ion-label>Idioma</ion-label>
-        </ion-item>
-      </ion-menu-toggle>
-      -->
-      <ion-menu-toggle *ngIf="!(user$ | async)">
-        <ion-item button (click)="goToLogin()" class="menu-mobile-item">
+        <ion-item button (click)="goToWelcome()" class="menu-mobile-item">
           <ion-icon name="log-in" slot="start"></ion-icon>
           <ion-label>{{ translations[currentLanguage]['acceder'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
+
       <ion-menu-toggle *ngIf="user$ | async">
         <ion-item button routerLink="/cart" class="menu-mobile-item">
           <ion-icon name="cart" slot="start"></ion-icon>
           <ion-label>{{ translations[currentLanguage]['carrito'] }}</ion-label>
         </ion-item>
       </ion-menu-toggle>
+
       <ion-menu-toggle *ngIf="user$ | async">
-<<<<<<< HEAD
         <ion-item button (click)="logout()" class="menu-mobile-item">
           <ion-icon name="log-out" slot="start"></ion-icon>
           <ion-label>{{ translations[currentLanguage]['cerrar'] }}</ion-label>
-=======
-        <ion-item button routerLink="/profile" class="menu-mobile-item">
-          <ion-icon name="person-circle" slot="start"></ion-icon>
-          <ion-label>Mi Perfil</ion-label>
->>>>>>> f55c9e424cb4ec3b3afc2607f05f81a90175996b
         </ion-item>
       </ion-menu-toggle>
     </ion-list>
