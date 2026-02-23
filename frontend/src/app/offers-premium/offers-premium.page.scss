@@ -246,6 +246,54 @@ ion-toolbar {
   --min-height: 42px;
 }
 
+.filters-panel {
+  padding: 0.75rem 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.name-searchbar {
+  --background: #{colors.$surface};
+  --box-shadow: none;
+  --border-radius: 14px;
+  --color: #{colors.$textPrimary};
+  --placeholder-color: #{colors.$textSecondary};
+  --icon-color: #{colors.$textSecondary};
+  --clear-button-color: #{colors.$primary};
+  padding: 0;
+}
+
+.tipos-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.55rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding-bottom: 0.2rem;
+}
+
+.tipo-chip {
+  flex: 0 0 auto;
+  border: 1px solid colors.$textSecondary;
+  border-radius: 10px;
+  background: colors.$surface;
+  color: colors.$textPrimary;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.45rem 0.8rem;
+}
+
+.tipo-chip.active {
+  border-color: colors.$primary;
+  background: colors.$primary;
+  color: colors.$surface;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -302,6 +350,15 @@ ion-toolbar {
 
   .offers-subtitle {
     font-size: 0.65rem;
+  }
+
+  .filters-panel {
+    padding: 0.65rem 0.75rem 0.4rem;
+  }
+
+  .tipo-chip {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.72rem;
   }
 }
 

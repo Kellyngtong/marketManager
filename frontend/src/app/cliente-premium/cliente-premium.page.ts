@@ -26,9 +26,11 @@ export class ClientePremiumPage implements OnDestroy {
   }
 
   products: any[] = [];
+  allProducts: any[] = [];
   clientName = 'Cliente';
   clientAvatar: string | null = null;
   cartItemsCount = 0;
+  searchTerm = '';
   private cartCountByArticulo: Record<number, number> = {};
   selectedTipo: string | null = null;
   showOnlyOffers = false;
@@ -119,17 +121,8 @@ export class ClientePremiumPage implements OnDestroy {
         page += 1;
       }
 
-      this.products = fullList.filter((product: any) => {
-        const matchesTipo = this.selectedTipo
-          ? this.matchesSelectedTipo(product, this.selectedTipo as string)
-          : true;
-
-        const matchesOferta = this.showOnlyOffers
-          ? this.isOfferEnabled(product?.oferta)
-          : true;
-
-        return matchesTipo && matchesOferta;
-      });
+      this.allProducts = fullList;
+      this.applyFilters();
     } catch (error) {
       console.error('Error loading products:', error);
       const t = await this.toastCtrl.create({
@@ -191,7 +184,15 @@ export class ClientePremiumPage implements OnDestroy {
       return;
     }
     this.selectedTipo = value;
-    this.loadProducts();
+    this.applyFilters();
+  }
+
+  onSearchInput(event: Event | CustomEvent) {
+    const customEvent = event as CustomEvent<{ value?: string }>;
+    const fromDetail = customEvent?.detail?.value;
+    const fromTarget = (event?.target as HTMLInputElement | null)?.value;
+    this.searchTerm = String(fromDetail ?? fromTarget ?? '').trim();
+    this.applyFilters();
   }
 
   getTipoLabel(value: string | null) {
@@ -200,7 +201,7 @@ export class ClientePremiumPage implements OnDestroy {
 
   toggleOffersOnly() {
     this.showOnlyOffers = !this.showOnlyOffers;
-    this.loadProducts();
+    this.applyFilters();
   }
 
   triggerAvatarPicker() {
@@ -337,6 +338,35 @@ export class ClientePremiumPage implements OnDestroy {
     }
 
     return Number(product?.idcategoria) === expectedCategory;
+  }
+
+  private applyFilters() {
+    const normalizedSearch = this.normalizeText(this.searchTerm);
+
+    this.products = this.allProducts.filter((product: any) => {
+      const matchesTipo = this.selectedTipo
+        ? this.matchesSelectedTipo(product, this.selectedTipo as string)
+        : true;
+
+      const matchesOferta = this.showOnlyOffers
+        ? this.isOfferEnabled(product?.oferta)
+        : true;
+
+      const productName = this.normalizeText(product?.nombre || product?.name);
+      const matchesSearch = normalizedSearch
+        ? productName.includes(normalizedSearch)
+        : true;
+
+      return matchesTipo && matchesOferta && matchesSearch;
+    });
+  }
+
+  private normalizeText(value: any) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
   }
 
   private isOfferEnabled(oferta: any) {
