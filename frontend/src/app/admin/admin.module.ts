@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AdminPageRoutingModule } from './admin-routing.module';
 import { AdminDashboardComponent } from './admin-dashboard.component';
@@ -20,6 +20,7 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
     CommonModule,
     IonicModule,
     AdminPageRoutingModule,
+    FormsModule,
     ReactiveFormsModule,
   ],
 })
