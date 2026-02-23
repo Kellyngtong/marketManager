@@ -137,7 +137,7 @@ const routes: Routes = [
   {
     path: 'contable',
     canActivate: [RoleGuard],
-    data: { roles: [4] }, // Solo Admin (rol 4)
+    data: { roles: [3, 4] }, // Empleado y Admin
     loadChildren: () =>
       import('./contable/contable.module').then((m) => m.ContablePageModule),
   },
