@@ -1,4 +1,4 @@
-@use '../components/_colors' as colors;
+@use "../components/_colors" as colors;
 
 .profile-header {
   display: flex;
@@ -8,26 +8,39 @@
 
 .avatar-button {
   position: relative;
+  background: transparent !important;
   border: none;
-  background: transparent;
   padding: 0;
-  display: inline-flex;
+  cursor: pointer;
+  display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: progress;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.8;
+  }
 }
 
-.avatar-button:disabled {
-  cursor: progress;
-  opacity: 0.75;
-}
-
-.profile-header ion-avatar {
-  width: 84px;
-  height: 84px;
+.camera-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: colors.$primary;
+  color: white;
   border-radius: 50%;
-  overflow: hidden;
-  --border-radius: 50%;
+  padding: 6px;
+  font-size: 18px;
+}
+
+.avatar-spinner {
+  position: absolute;
+  --color: colors.$primary;
 }
 
 .profile-header ion-avatar img {
@@ -40,26 +53,6 @@
 .profile-header .hint {
   margin-top: 0.25rem;
   color: colors.$textSecondary;
-}
-
-.camera-icon {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  background: colors.$primary;
-  color: colors.$surface;
-  border-radius: 999px;
-  font-size: 1rem;
-  padding: 0.2rem;
-  z-index: 2;
-}
-
-.avatar-spinner {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  color: colors.$surface;
-  z-index: 3;
 }
 
 form {
@@ -75,9 +68,4 @@ form ion-item {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.premium-upgrade-btn {
-  font-weight: 700;
-  letter-spacing: 0.2px;
 }

@@ -9,12 +9,7 @@
 <ion-header>
   <ion-toolbar class="home-toolbar">
     <div class="identity-block">
-      <button
-        type="button"
-        class="avatar-button"
-        (click)="triggerAvatarPicker()"
-        [disabled]="isUploadingAvatar"
-      >
+      <button type="button" class="avatar-button" routerLink="/profile">
         <ion-avatar>
           <img
             *ngIf="clientAvatar; else defaultAvatar"
@@ -36,13 +31,14 @@
       <div class="identity-info">
         <p class="client-label">Cliente</p>
         <h2>
-          <button
+          <span
             type="button"
             class="client-name-button"
             routerLink="/profile"
+            title="Mi Perfil"
           >
             {{ clientName }}
-          </button>
+          </span>
         </h2>
       </div>
     </div>
@@ -79,31 +75,26 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <section class="filters-panel">
-    <ion-searchbar
-      class="name-searchbar"
-      [value]="searchTerm"
-      (ionInput)="onSearchInput($event)"
-      placeholder="Buscar por nombre"
-      showClearButton="always"
-      inputmode="search"
-      type="search"
-    ></ion-searchbar>
-
-    <div class="tipos-scroll" role="tablist" aria-label="Filtrar por categoría">
-      <button
-        type="button"
-        class="tipo-chip"
-        *ngFor="let tipo of tipos"
-        [class.active]="selectedTipo === tipo.value"
-        (click)="selectTipo(tipo.value)"
-      >
-        {{ tipo.label }}
-      </button>
+  <section class="filter-bar">
+    <div>
+      <p class="filter-label">Tipo seleccionado</p>
+      <h3>{{ getTipoLabel(selectedTipo) }}</h3>
     </div>
+    <ion-button
+      id="tipoFilterTrigger"
+      fill="outline"
+      color="primary"
+      size="small"
+    >
+      <ion-icon slot="start" name="funnel-outline"></ion-icon>
+      {{ getTipoLabel(selectedTipo) }}
+    </ion-button>
   </section>
 
   <div class="product-grid">
+    <div *ngIf="products.length === 0" class="empty-state">
+      <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+    </div>
     <app-product-card
       *ngFor="let product of products"
       [product]="product"

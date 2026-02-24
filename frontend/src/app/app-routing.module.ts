@@ -165,10 +165,27 @@ const routes: Routes = [
       import('./auth/register.module').then((m) => m.RegisterPageModule),
   },
   {
+    path: 'conocenos',
+    loadChildren: () => import('./conocenos/conocenos.module').then( m => m.ConocenosPageModule)
+  },
+  {
+    path: 'supermercados',
+    loadChildren: () => import('./supermercados/supermercados.module').then(m => m.SupermercadosPageModule)
+  },
+  {
+    path: 'trabaja',
+    loadChildren: () => import('./trabaja/trabaja.module').then(m => m.TrabajaPageModule)
+  },
+  {
+    path: 'atencion',
+    loadChildren: () => import('./atencion/atencion.module').then(m => m.AtencionPageModule)
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',
   },
+
 ];
 
 @NgModule({

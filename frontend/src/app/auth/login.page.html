@@ -1,5 +1,8 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
     <ion-title>Mercachona</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -13,14 +16,22 @@
     </div>
 
     <!-- Tabs -->
-    <ion-segment [(ngModel)]="activeTab" class="auth-tabs">
-      <ion-segment-button value="login">
-        <ion-label>Iniciar Sesión</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="register">
-        <ion-label>Registrarse</ion-label>
-      </ion-segment-button>
-    </ion-segment>
+    <div class="tabs-list">
+      <button
+        class="tab-trigger"
+        [class.active]="activeTab === 'login'"
+        (click)="activeTab = 'login'"
+      >
+        Iniciar Sesión
+      </button>
+      <button
+        class="tab-trigger"
+        [class.active]="activeTab === 'register'"
+        (click)="activeTab = 'register'"
+      >
+        Registrarse
+      </button>
+    </div>
 
     <!-- TAB: LOGIN -->
     <div *ngIf="activeTab === 'login'" class="tab-content">
@@ -62,6 +73,7 @@
               <p>Admin: admin@test.com / admin123</p>
               <p>Premium: premium@test.com / pre123</p>
               <p>Cliente: cliente@test.com / cli123</p>
+              <p>Empleado: empleado@test.com / emp123</p>
             </div>
           </ion-card-content>
 

@@ -33,8 +33,14 @@
   </section>
 
   <div *ngIf="isLoading" class="loading-placeholder">
-    <ion-skeleton-text animated style="width: 100%; height: 120px"></ion-skeleton-text>
-    <ion-skeleton-text animated style="width: 100%; height: 120px"></ion-skeleton-text>
+    <ion-skeleton-text
+      animated
+      style="width: 100%; height: 120px"
+    ></ion-skeleton-text>
+    <ion-skeleton-text
+      animated
+      style="width: 100%; height: 120px"
+    ></ion-skeleton-text>
   </div>
 
   <ion-list *ngIf="!isLoading && products.length" class="inventory-list">
@@ -48,17 +54,20 @@
         </ion-thumbnail>
         <ion-label>
           <h2>{{ product.nombre }}</h2>
-          <p>{{ product.codigo || ('ID #' + (product.idarticulo || product.id)) }}</p>
+          <p>
+            {{ product.codigo || ('ID #' + (product.idarticulo || product.id))
+            }}
+          </p>
         </ion-label>
-        <ion-chip color="tertiary">{{ (product.tipo || 'general') | titlecase }}</ion-chip>
+        <ion-chip color="tertiary"
+          >{{ (product.tipo || 'general') | titlecase }}</ion-chip
+        >
       </ion-item>
       <ion-card-content>
         <div class="inventory-meta">
           <div>
             <span class="meta-label">Precio</span>
-            <strong>
-              {{ product.precio_venta | currency : 'EUR' }}
-            </strong>
+            <strong> {{ product.precio_venta | currency : 'EUR' }} </strong>
           </div>
           <div>
             <span class="meta-label">Stock</span>
@@ -67,11 +76,21 @@
         </div>
         <p class="description">{{ product.descripcion }}</p>
         <div class="inventory-actions">
-          <ion-button class="edit-button" fill="solid" size="small" (click)="editProduct(product)">
+          <ion-button
+            class="edit-button"
+            fill="solid"
+            size="small"
+            (click)="editProduct(product)"
+          >
             <ion-icon slot="start" name="create"></ion-icon>
             Editar
           </ion-button>
-          <ion-button fill="outline" color="danger" size="small" (click)="deleteProduct(product.idarticulo || product.id)">
+          <ion-button
+            fill="outline"
+            color="danger"
+            size="small"
+            (click)="deleteProduct(product.idarticulo || product.id)"
+          >
             <ion-icon slot="start" name="trash"></ion-icon>
             Borrar
           </ion-button>
@@ -84,7 +103,12 @@
     <p>No hay artículos para este filtro.</p>
   </div>
 
-  <ion-fab class="fixed-add-fab" vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab
+    class="fixed-add-fab"
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+  >
     <ion-fab-button (click)="openCreateModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>

@@ -4,13 +4,18 @@
   <!-- HERO SECTION -->
   <section class="hero-section">
     <div class="hero-content">
-      <h1 class="hero-title">Empieza tu compra en Mercachona</h1>
+      <div class="hero-cta-group">
+        <h1 class="hero-title">{{ translations[currentLanguage]['heroTitle'] }}</h1>
+        <app-start-shopping-button></app-start-shopping-button>
+      </div>
+        
+        
+      <!--
       <p class="hero-subtitle">
-        Introduce tu código postal y dependiendo de tu ciudad accederás a la
-        nueva compra online o a la web clásica.
+        Los productos de mayor calidad al mejor precio. Realiza tu compra online con entrega a domicilio.
       </p>
+      -->
 
-      <app-start-shopping-button></app-start-shopping-button>
     </div>
   </section>
 
@@ -18,22 +23,22 @@
   <section class="section">
     <div class="section-wrapper">
       <div class="section-content">
-        <h3 class="section-title">Compra online</h3>
+        <h3 class="section-title">{{ translations[currentLanguage]['section1Title'] }}</h3>
         <p class="section-description">
-          Recibe tu pedido en casa con la misma calidad y frescura de siempre.
+          {{ translations[currentLanguage]['section1Desc'] }}
         </p>
         <div class="benefits-list">
           <div class="benefit">
             <ion-icon name="checkmark-circle"></ion-icon>
-            <span>Entrega rápida y segura</span>
+            <span>{{ translations[currentLanguage]['s1b1'] }}</span>
           </div>
           <div class="benefit">
             <ion-icon name="checkmark-circle"></ion-icon>
-            <span>Productos frescos garantizados</span>
+            <span>{{ translations[currentLanguage]['s1b2'] }}</span>
           </div>
           <div class="benefit">
             <ion-icon name="checkmark-circle"></ion-icon>
-            <span>Mejor precio online</span>
+            <span>{{ translations[currentLanguage]['s1b3'] }}</span>
           </div>
         </div>
       </div>
@@ -53,14 +58,12 @@
         />
       </div>
       <div class="section-content">
-        <h3 class="section-title">Nueva tienda online en algunas zonas</h3>
+        <h3 class="section-title">{{ translations[currentLanguage]['section2Title'] }}</h3>
         <p class="section-description">
-          Por el momento, la nueva app y web está disponible en Valencia,
-          Barcelona, Madrid y otras poblaciones. Introduce tu código postal
-          arriba para ver si repartimos en tu zona. Si aún no llegamos,
-          ¡apúntate y te avisamos!
+          {{ translations[currentLanguage]['section2Desc'] }}
         </p>
-        <button class="btn-notify" (click)="notifyZone()">Avísame</button>
+        <!-- <button class="btn-notify" (click)="notifyZone()">Avísame</button>-->
+        <app-start-shopping-button></app-start-shopping-button>
       </div>
     </div>
   </section>
@@ -69,24 +72,22 @@
   <section class="section">
     <div class="section-wrapper">
       <div class="section-content">
-        <h3 class="section-title">Productos de Kilómetro 0</h3>
+        <h3 class="section-title">{{ translations[currentLanguage]['section3Title'] }}</h3>
         <p class="section-description">
-          Nos comprometemos con los productores locales. Disponemos de una
-          selección cuidada de productos frescos de proximidad garantizados, que
-          ayudan a economías locales y reducen la huella de carbono.
+          {{ translations[currentLanguage]['section3Desc'] }}
         </p>
         <div class="benefits-list">
           <div class="benefit">
             <ion-icon name="leaf"></ion-icon>
-            <span>100% local y sostenible</span>
+            <span>{{ translations[currentLanguage]['s3b1'] }}</span>
           </div>
           <div class="benefit">
             <ion-icon name="leaf"></ion-icon>
-            <span>Apoyo a productores locales</span>
+            <span>{{ translations[currentLanguage]['s3b2'] }}</span>
           </div>
           <div class="benefit">
             <ion-icon name="leaf"></ion-icon>
-            <span>Menor huella de carbono</span>
+            <span>{{ translations[currentLanguage]['s3b3'] }}</span>
           </div>
         </div>
       </div>
@@ -99,10 +100,13 @@
   <!-- SECONDARY CTA SECTION -->
   <section class="secondary-cta">
     <div class="secondary-cta-content">
-      <h2 class="secondary-cta-title">Empieza tu compra en Mercachona</h2>
+      <h2 class="secondary-cta-title">{{ translations[currentLanguage]['secondaryCtaTitle'] }}</h2>
       <app-start-shopping-button></app-start-shopping-button>
     </div>
   </section>
+
+  <app-landing-footer></app-landing-footer>
 </ion-content>
 
-<app-landing-footer></app-landing-footer>
+
+

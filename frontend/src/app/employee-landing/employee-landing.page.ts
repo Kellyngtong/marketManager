@@ -8,7 +8,7 @@ import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirma
 @Component({
   selector: 'app-employee-landing',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, ConfirmationModalComponent],
   templateUrl: './employee-landing.page.html',
   styleUrls: ['./employee-landing.page.scss'],
 })
@@ -22,8 +22,13 @@ export class EmployeeLandingPage {
   ionViewWillEnter() {
     const user = this.auth.currentUserValue;
     const rolId = user?.idrol ?? user?.rol?.idrol;
-    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
-    const isEmpleado = rolId === 3 || rolNombre.includes('empleado') || rolNombre.includes('staff');
+    const rolNombre = String(
+      user?.rol?.nombre || user?.rol || '',
+    ).toLowerCase();
+    const isEmpleado =
+      rolId === 3 ||
+      rolNombre.includes('empleado') ||
+      rolNombre.includes('staff');
 
     if (!isEmpleado) {
       this.router.navigateByUrl('/home', { replaceUrl: true });

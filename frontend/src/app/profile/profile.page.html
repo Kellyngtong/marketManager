@@ -1,3 +1,11 @@
+<input
+  #avatarInput
+  type="file"
+  accept="image/*"
+  hidden
+  (change)="onAvatarSelected($event)"
+/>
+
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -45,7 +53,10 @@
       <ion-label position="stacked">Nombre</ion-label>
       <ion-input formControlName="nombre"></ion-input>
     </ion-item>
-    <ion-note color="danger" *ngIf="profileForm.get('nombre')?.touched && profileForm.get('nombre')?.invalid">
+    <ion-note
+      color="danger"
+      *ngIf="profileForm.get('nombre')?.touched && profileForm.get('nombre')?.invalid"
+    >
       El nombre es obligatorio.
     </ion-note>
 
@@ -53,7 +64,10 @@
       <ion-label position="stacked">Email</ion-label>
       <ion-input formControlName="email" type="email"></ion-input>
     </ion-item>
-    <ion-note color="danger" *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.invalid">
+    <ion-note
+      color="danger"
+      *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.invalid"
+    >
       Ingresa un email válido.
     </ion-note>
 

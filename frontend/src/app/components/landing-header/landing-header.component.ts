@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { ConfirmationModalComponent } from '../../admin/confirmation-modal/confirmation-modal.component';
+import { LanguageService } from '../../services/language.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-landing-header',
@@ -12,21 +14,53 @@ import { ConfirmationModalComponent } from '../../admin/confirmation-modal/confi
   standalone: true,
   imports: [CommonModule, IonicModule, RouterModule],
 })
-export class LandingHeaderComponent {
+export class LandingHeaderComponent implements OnInit, OnDestroy {
   currentLanguage: string = 'es';
-  user$ = this.auth.user$;
+  user$: any;
+  private sub: Subscription | null = null;
+
+  translations: Record<string, Record<string, string>> = {
+    es: {
+      conocenos: 'Conócenos',
+      supermercados: 'Supermercados',
+      trabaja: 'Trabaja con nosotros',
+      atencion: 'Atención al cliente',
+      acceder: 'Acceder',
+      menu: 'Menú',
+      carrito: 'Carrito',
+      cerrar: 'Cerrar sesión',
+    },
+    en: {
+      conocenos: 'About',
+      supermercados: 'Supermarkets',
+      trabaja: 'Careers',
+      atencion: 'Support',
+      acceder: 'Sign in',
+      menu: 'Menu',
+      carrito: 'Cart',
+      cerrar: 'Logout',
+    },
+  };
 
   constructor(
     private router: Router,
     private auth: AuthService,
+    private lang: LanguageService,
     private modalCtrl: ModalController,
   ) {}
 
+  ngOnInit(): void {
+    this.user$ = this.auth.user$;
+    this.currentLanguage = this.lang.current;
+    this.sub = this.lang.language$.subscribe((l) => (this.currentLanguage = l));
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
   toggleLanguage() {
-    const languages = ['es', 'en', 'ca'];
-    const currentIndex = languages.indexOf(this.currentLanguage);
-    this.currentLanguage = languages[(currentIndex + 1) % languages.length];
-    console.log('Idioma cambiado a:', this.currentLanguage);
+    this.lang.toggle();
   }
 
   goToLogin() {

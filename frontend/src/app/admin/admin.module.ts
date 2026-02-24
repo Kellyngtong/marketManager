@@ -14,7 +14,6 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
     AdminDashboardComponent,
     EditUserModalComponent,
     EditProductModalComponent,
-    ConfirmationModalComponent,
   ],
   imports: [
     CommonModule,
@@ -22,6 +21,8 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
     AdminPageRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    FormsModule,
+    ConfirmationModalComponent,
   ],
 })
 export class AdminPageModule {}

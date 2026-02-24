@@ -55,39 +55,64 @@ export class AdminDashboardComponent implements OnInit {
   orderSearch: string = '';
 
   get filteredUsers() {
-    const q = String(this.userSearch || '').trim().toLowerCase();
+    const q = String(this.userSearch || '')
+      .trim()
+      .toLowerCase();
     if (!q) return this.users;
     return this.users.filter((u: any) => {
       return (
-        String(u.username || u.nombre || '').toLowerCase().includes(q) ||
-        String(u.email || '').toLowerCase().includes(q) ||
-        String(u.rol || '').toLowerCase().includes(q)
+        String(u.username || u.nombre || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(u.email || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(u.rol || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }
 
   get filteredProducts() {
-    const q = String(this.productSearch || '').trim().toLowerCase();
+    const q = String(this.productSearch || '')
+      .trim()
+      .toLowerCase();
     if (!q) return this.products;
     return this.products.filter((p: any) => {
-      const categoria = (p.categoria_nombre || p.categoria?.nombre || p.categoria || '') + '';
+      const categoria =
+        (p.categoria_nombre || p.categoria?.nombre || p.categoria || '') + '';
       return (
-        String(p.nombre || '').toLowerCase().includes(q) ||
+        String(p.nombre || '')
+          .toLowerCase()
+          .includes(q) ||
         categoria.toLowerCase().includes(q) ||
-        String(p.tipo || '').toLowerCase().includes(q)
+        String(p.tipo || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }
 
   get filteredOrders() {
-    const q = String(this.orderSearch || '').trim().toLowerCase();
+    const q = String(this.orderSearch || '')
+      .trim()
+      .toLowerCase();
     if (!q) return this.orders;
     return this.orders.filter((o: any) => {
       return (
-        String(o.idventa || '').toLowerCase().includes(q) ||
-        String(o.usuario?.username || o.usuario?.nombre || '').toLowerCase().includes(q) ||
-        String(o.estado || '').toLowerCase().includes(q) ||
-        String(o.total || '').toLowerCase().includes(q)
+        String(o.idventa || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(o.usuario?.username || o.usuario?.nombre || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(o.estado || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(o.total || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }
@@ -204,7 +229,10 @@ export class AdminDashboardComponent implements OnInit {
       return 'admin';
     }
 
-    if (roleNormalized.includes('emplead') || roleNormalized.includes('staff')) {
+    if (
+      roleNormalized.includes('emplead') ||
+      roleNormalized.includes('staff')
+    ) {
       return 'empleado';
     }
 
@@ -354,23 +382,10 @@ export class AdminDashboardComponent implements OnInit {
           this.adminService.createUser(result.data.user),
         );
         // Push to users list and show success
-        this.users.unshift(this.toDashboardUser(created));
-        const assignedPassword = created?.passwordAsignada;
-        const actionLabel = created?.reactivado
-          ? 'Usuario reactivado correctamente'
-          : 'Usuario creado correctamente';
-
-        if (assignedPassword) {
-          await this.showSuccess(
-            `${actionLabel}. Contraseña asignada: ${assignedPassword}`,
-          );
-        } else {
-          await this.showSuccess(actionLabel);
-        }
+        this.users.unshift(created);
+        await this.showSuccess('Usuario creado correctamente');
       } catch (error) {
-        await this.showError(
-          this.getApiErrorMessage(error, 'Error creando usuario'),
-        );
+        await this.showError('Error creando usuario');
       }
     }
   }

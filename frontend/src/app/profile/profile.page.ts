@@ -1,7 +1,7 @@
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ModalController, ToastController } from '@ionic/angular';
+import { ToastController, ModalController } from '@ionic/angular';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
@@ -14,6 +14,7 @@ import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirma
 })
 export class ProfilePage implements OnDestroy {
   @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
+
   profileForm: FormGroup;
   userSub?: Subscription;
   user: any = null;
@@ -88,6 +89,10 @@ export class ProfilePage implements OnDestroy {
     }
   }
 
+  onAvatarImageError() {
+    this.auth.updateLocalUser({ avatar: null });
+  }
+
   logout() {
     this.auth.logout();
     this.router.navigateByUrl('/', { replaceUrl: true });
@@ -117,9 +122,13 @@ export class ProfilePage implements OnDestroy {
     const current = this.user;
     const topLevelRol = current?.idrol;
     const nestedRol = current?.rol?.idrol;
-    const rolNombre = String(current?.rol?.nombre || current?.rol || '').toLowerCase();
+    const rolNombre = String(
+      current?.rol?.nombre || current?.rol || '',
+    ).toLowerCase();
 
-    return topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
+    return (
+      topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium')
+    );
   }
 
   getUserRoleLabel(userData: any = this.user): string {
@@ -179,7 +188,9 @@ export class ProfilePage implements OnDestroy {
       let avatarUrl: string | null = null;
 
       try {
-        const uploadRes: any = await firstValueFrom(this.auth.uploadAvatar(file));
+        const uploadRes: any = await firstValueFrom(
+          this.auth.uploadAvatar(file),
+        );
         avatarUrl = uploadRes?.imageUrl || uploadRes?.url || null;
       } catch (uploadError) {
         avatarUrl = await this.fileToDataUrl(file);
@@ -203,7 +214,9 @@ export class ProfilePage implements OnDestroy {
       await toast.present();
     } catch (error: any) {
       const msg =
-        error?.error?.message || error?.message || 'No se pudo actualizar la foto de perfil';
+        error?.error?.message ||
+        error?.message ||
+        'No se pudo actualizar la foto de perfil';
       const toast = await this.toastCtrl.create({
         message: msg,
         duration: 3000,

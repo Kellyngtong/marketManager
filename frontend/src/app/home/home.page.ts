@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { ModalController, ToastController } from '@ionic/angular';
+import { ToastController, ModalController } from '@ionic/angular';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { CarritoService } from '../services/carrito.service';
 import { AuthService } from '../auth/auth.service';
@@ -33,28 +33,29 @@ export class HomePage implements OnDestroy {
   searchTerm = '';
   private cartCountByArticulo: Record<number, number> = {};
   selectedTipo: string | null = null;
+  searchQuery: string = '';
   showOnlyOffers = false;
   isUploadingAvatar = false;
   readonly tipos = [
     { label: 'Todos', value: null },
     { label: 'Fruta', value: 'fruta' },
     { label: 'Verdura', value: 'verdura' },
-    { label: 'Embutidos', value: 'embutidos' },
     { label: 'Carne', value: 'carne' },
     { label: 'Pescado', value: 'pescado' },
+    { label: 'Lácteos', value: 'lacteos' },
     { label: 'Bebidas', value: 'bebidas' },
-    { label: 'Bebidas alcohólicas', value: 'bebidas alcoholicas' },
-    { label: 'Trigo', value: 'trigo' },
+    { label: 'Congelados', value: 'congelados' },
+    { label: 'Panadería', value: 'panaderia' },
   ];
   private readonly tipoCategoriaMap: Record<string, number> = {
     fruta: 1,
     verdura: 2,
-    bebidas: 3,
-    embutidos: 5,
-    carne: 6,
-    pescado: 7,
-    'bebidas alcoholicas': 8,
-    trigo: 9,
+    carne: 3,
+    pescado: 4,
+    lacteos: 5,
+    bebidas: 6,
+    congelados: 7,
+    panaderia: 8,
   };
   private subscriptions = new Subscription();
 
@@ -185,6 +186,11 @@ export class HomePage implements OnDestroy {
     }
     this.selectedTipo = value;
     this.applyFilters();
+  }
+
+  onSearchChange(query: string) {
+    this.searchQuery = query;
+    this.loadProducts();
   }
 
   getTipoLabel(value: string | null) {
@@ -325,13 +331,6 @@ export class HomePage implements OnDestroy {
   }
 
   private matchesSelectedTipo(product: any, tipo: string) {
-    const normalizedTipo = String(product?.tipo || '')
-      .trim()
-      .toLowerCase();
-    if (normalizedTipo === tipo) {
-      return true;
-    }
-
     const expectedCategory = this.tipoCategoriaMap[tipo];
     if (!expectedCategory) {
       return false;
