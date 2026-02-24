@@ -1,6 +1,6 @@
 .conocenos-page {
   .hero {
-    background: url('/assets/landing/heroSection.jpg') center/cover no-repeat;
+    background: url('/assets/landing/bottomImage.jpg') center/cover no-repeat;
     color: white;
     padding: 60px 20px;
     text-align: center;
@@ -18,7 +18,7 @@
   }
 
   .info,
-  .team {
+  .history-team {
     padding: 32px 20px;
 
     h2 {
@@ -29,6 +29,27 @@
     p {
       color: #555;
       line-height: 1.6;
+    }
+  }
+
+  .history-team {
+    padding: 32px 20px;
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin: 10px 0 6px 0;
+      color: #333;
+    }
+
+    p {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 12px;
     }
   }
 }
