@@ -67,7 +67,7 @@ PORT=4800
 Inicia el servidor backend:
 
 ```bash
-node index.js
+npm run dev
 ```
 
 El servidor estará corriendo en `http://localhost:4800`
@@ -97,7 +97,7 @@ Accede a `http://localhost:8100` y deberías ver la lista de productos del super
 
 ```bash
 cd backend
-node index.js
+npm run dev
 ```
 
 Esto iniciará:

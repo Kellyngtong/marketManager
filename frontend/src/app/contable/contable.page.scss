@@ -1,0 +1,162 @@
+@use '../components/_colors' as colors;
+
+ion-content {
+  --background: #{colors.$background};
+}
+
+ion-toolbar {
+  --background: #{colors.$surface};
+  --color: #{colors.$textPrimary};
+  --border-color: #{colors.$border};
+}
+
+.spinner {
+  display: block;
+  margin: 1.5rem auto;
+}
+
+.compras-wrapper {
+  max-width: 860px;
+  margin: 1rem auto;
+  padding: 0 1rem 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.compra-card {
+  border: 1px solid colors.$border;
+  border-radius: 12px;
+  background: colors.$surface;
+  padding: 0.9rem;
+}
+
+.compra-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+
+  h3 {
+    margin: 0.15rem 0 0;
+    font-size: 1rem;
+    color: colors.$textPrimary;
+    font-weight: 700;
+  }
+}
+
+.fecha {
+  margin: 0;
+  font-size: 0.78rem;
+  color: colors.$textSecondary;
+}
+
+.seen-button {
+  --padding-start: 2px;
+  --padding-end: 2px;
+  --min-height: 24px;
+  margin: 0;
+}
+
+.seen-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: colors.$border;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 12px;
+    color: colors.$surface;
+  }
+}
+
+.seen-dot.seen {
+  background: colors.$success;
+}
+
+.items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid colors.$border;
+  border-radius: 10px;
+  overflow: hidden;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid colors.$border;
+  }
+
+  li:last-child {
+    border-bottom: none;
+  }
+}
+
+.nombre {
+  color: colors.$textPrimary;
+  font-weight: 600;
+}
+
+.detalle {
+  color: colors.$textSecondary;
+  white-space: nowrap;
+}
+
+.total-row {
+  margin-top: 0.65rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed colors.$border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  span {
+    color: colors.$textSecondary;
+    font-size: 0.9rem;
+  }
+
+  strong {
+    color: colors.$textPrimary;
+    font-size: 1rem;
+  }
+}
+
+.empty-state {
+  margin: 2rem 1rem;
+  border: 1px dashed colors.$border;
+  border-radius: 12px;
+  background: colors.$surface;
+  padding: 1.4rem;
+  text-align: center;
+  color: colors.$textSecondary;
+
+  ion-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.45rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .compras-wrapper {
+    padding: 0 0.55rem 0.75rem;
+  }
+
+  .compra-card {
+    padding: 0.75rem;
+  }
+
+  .items-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

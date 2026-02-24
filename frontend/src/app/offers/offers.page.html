@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar class="offers-header-toolbar">
+    <ion-title class="offers-title">OFERTAS</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        class="back-home-btn"
+        routerLink="/home"
+        fill="clear"
+        size="small"
+        aria-label="Volver a Home"
+      >
+        <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <section class="filters-panel">
+    <ion-searchbar
+      class="name-searchbar"
+      [value]="searchTerm"
+      (ionInput)="onSearchInput($event)"
+      placeholder="Buscar por nombre"
+      showClearButton="always"
+      inputmode="search"
+      type="search"
+    ></ion-searchbar>
+
+    <div class="tipos-scroll" role="tablist" aria-label="Filtrar por categoría">
+      <button
+        type="button"
+        class="tipo-chip"
+        *ngFor="let tipo of tipos"
+        [class.active]="selectedTipo === tipo.value"
+        (click)="selectTipo(tipo.value)"
+      >
+        {{ tipo.label }}
+      </button>
+    </div>
+  </section>
+
+  <div class="product-grid">
+    <app-product-card
+      *ngFor="let product of products"
+      [product]="product"
+      [cartCount]="getProductCartCount(product)"
+      (addToCart)="addToCart($event)"
+      (goToDetail)="goToDetail($event)"
+    ></app-product-card>
+  </div>
+</ion-content>

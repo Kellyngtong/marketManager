@@ -1,3 +1,181 @@
+@use "../components/_colors" as colors;
+
 ion-content {
-  --padding-top: 16px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+.auth-header {
+  background: linear-gradient(135deg, colors.$primary 0%, #1e3a8a 100%);
+  padding: 48px 24px 32px;
+  color: white;
+  text-align: center;
+
+  .header-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .header-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    font-weight: 300;
+  }
+}
+
+.auth-container {
+  padding: 24px 16px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 3%;
+}
+
+h1 {
+  color: green;
+}
+
+// Form card styling
+.form-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 16px;
+
+  ion-item {
+    --inner-padding-end: 0;
+    --inner-padding-start: 0;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #e5e7eb;
+
+    ion-label {
+      --color: #4b5563;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    ion-input,
+    ion-textarea {
+      font-size: 16px;
+      --color: #1f2937;
+
+      &::placeholder {
+        color: #9ca3af;
+      }
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ion-button {
+    width: 100%;
+    margin-top: 8px;
+    font-weight: 600;
+    text-transform: none;
+    height: 44px;
+  }
+}
+
+// Test accounts card
+.test-accounts {
+  padding: 2%;
+  margin-top: 2%;
+  background: #40a6467d;
+  border-radius: 8px;
+}
+
+// Back to home link
+.back-to-home {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+
+  a {
+    color: colors.$primary;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+}
+
+// Loading state
+ion-button:disabled {
+  opacity: 0.6;
+}
+
+// Error message styling
+.error-message {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+// Tabs styling (copied from admin dashboard)
+.tabs-list {
+  display: flex;
+  gap: 8px;
+  background: #f3f4f6;
+  border-radius: 25px;
+  padding: 6px;
+  margin-bottom: 24px;
+}
+
+.tab-trigger {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent !important;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666 !important;
+  transition: all 0.3s ease;
+  position: relative;
+  text-align: center;
+  border-radius: 10px;
+  white-space: nowrap;
+
+  &:hover {
+    color: colors.$primary;
+  }
+
+  &.active {
+    color: black !important;
+    background: white !important;
+    border-radius: 25px;
+    font-size: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Responsive layout for desktop
+.login-container {
+  margin-top: 5% !important;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .login-container {
+    max-width: 50%;
+    margin: 0 auto;
+  }
 }

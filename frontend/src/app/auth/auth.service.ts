@@ -1,40 +1,93 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+
+interface RegisterPayload {
+  nombre?: string;
+  username?: string;
+  email: string;
+  password?: string;
+  clave?: string;
+  telefono?: string;
+  direccion?: string;
+  avatar?: string;
+  idrol?: number;
+}
+
+interface LoginPayload {
+  email: string;
+  password?: string;
+  clave?: string;
+}
+
+interface UpdateProfilePayload {
+  nombre?: string;
+  telefono?: string;
+  direccion?: string;
+  email?: string;
+  avatar?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
+  private readonly base = `${this.API_HOST}/api/auth`;
 
-  private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
-  private base = `${this.API_HOST}/api/auth`;
-
-  private userSubject = new BehaviorSubject<any>(this._loadUser());
+  private userSubject = new BehaviorSubject<any>(this.loadUser());
   public user$ = this.userSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // If we have a token but no cached user, try to fetch the profile
+    console.log('🔧 AuthService constructor - Inicializando...');
     const token = this.getToken();
+    console.log(
+      '🔧 AuthService constructor - Token al iniciar:',
+      token ? 'EXISTE' : 'NO EXISTE',
+    );
+
+    // Monitor localStorage changes
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'accessToken') {
+        console.log(
+          '⚠️ localStorage "accessToken" cambió externamente:',
+          event.newValue ? 'EXISTE' : 'ELIMINADO',
+        );
+      }
+    });
+
     if (token && !this.userSubject.value) {
       this.getProfile().subscribe({ next: () => {}, error: () => {} });
     }
   }
 
-  register(payload: { username: string; email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.base}/register`, payload);
+  register(payload: RegisterPayload): Observable<any> {
+    const body = {
+      nombre: payload.nombre || payload.username,
+      email: payload.email,
+      clave: payload.clave || payload.password,
+      telefono: payload.telefono || null,
+      direccion: payload.direccion || null,
+      avatar: payload.avatar || null,
+      idrol: payload.idrol || 1,
+    };
+
+    return this.http.post(`${this.base}/register`, body);
   }
 
-  login(payload: { email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.base}/login`, payload).pipe(
+  login(payload: LoginPayload): Observable<any> {
+    const body = {
+      email: payload.email,
+      clave: payload.clave || payload.password,
+    };
+
+    console.log(
+      '🔐 AuthService.login() - Intentando login con email:',
+      payload.email,
+    );
+    return this.http.post(`${this.base}/login`, body).pipe(
       tap((res: any) => {
-        if (res && res.accessToken) {
-          localStorage.setItem('accessToken', res.accessToken);
-          if (res.user) {
-            localStorage.setItem('currentUser', JSON.stringify(res.user));
-            this.userSubject.next(res.user);
-          }
-        }
-      })
+        console.log('✅ Login exitoso - Response:', res);
+        this.persistSession(res);
+      }),
     );
   }
 
@@ -45,33 +98,76 @@ export class AuthService {
   }
 
   updateAvatarUrl(avatarUrl: string) {
-    const token = this.getToken();
-    const headers: any = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.http.put(`${this.API_HOST}/api/users/avatar`, { avatar: avatarUrl }, { headers }).pipe(
-      tap((res: any) => {
-        // if server returns updated user, update local storage and subject
-        if (res) {
-          const user = res;
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          this.userSubject.next(user);
-        }
-      })
-    );
+    const user = this.currentUserValue;
+    if (!user) {
+      return throwError(() => new Error('No hay usuario autenticado'));
+    }
+
+    return this.updateUsuario(user.idusuario || user.id, { avatar: avatarUrl });
   }
 
   getProfile() {
-    const token = this.getToken();
-    const headers: any = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.http.get(`${this.API_HOST}/api/users/me`, { headers }).pipe(
+    const cfg = this.withAuth();
+    if (!cfg) {
+      return throwError(() => new Error('No hay sesión activa'));
+    }
+
+    return this.http.get(`${this.base}/profile`, cfg).pipe(
       tap((res: any) => {
-        if (res) {
-          localStorage.setItem('currentUser', JSON.stringify(res));
-          this.userSubject.next(res);
+        if (res?.usuario) {
+          this.persistUser(this.normalizeUser(res.usuario));
         }
-      })
+      }),
     );
+  }
+
+  updateProfile(payload: UpdateProfilePayload) {
+    const cfg = this.withAuth();
+    if (!cfg) {
+      return throwError(() => new Error('No hay sesión activa'));
+    }
+
+    return this.http.put(`${this.base}/profile`, payload, cfg).pipe(
+      tap((res: any) => {
+        if (res?.usuario) {
+          const currentUser = this.currentUserValue || {};
+          const normalizedUser = this.normalizeUser(res.usuario);
+
+          const merged = {
+            ...currentUser,
+            ...normalizedUser,
+            ...payload,
+          };
+
+          if (!normalizedUser?.rol && currentUser?.rol) {
+            merged.rol = currentUser.rol;
+          }
+
+          if (!Number(normalizedUser?.idrol) && Number(currentUser?.idrol)) {
+            merged.idrol = Number(currentUser.idrol);
+          }
+
+          this.persistUser(merged);
+          return;
+        }
+
+        if (this.currentUserValue) {
+          this.persistUser({
+            ...this.currentUserValue,
+            ...payload,
+          });
+        }
+      }),
+    );
+  }
+
+  updateLocalUser(patch: any) {
+    const current = this.currentUserValue;
+    if (!current) return;
+    this.persistUser({
+      ...current,
+      ...patch,
+    });
   }
 
   logout() {
@@ -81,18 +177,188 @@ export class AuthService {
   }
 
   getToken() {
-    return localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
+    console.log(
+      '🔑 getToken() - Token recuperado:',
+      token ? token.substring(0, 20) + '...' : 'NO EXISTE',
+    );
+    return token;
   }
 
   isLogged() {
-    return !!this.getToken();
+    const logged = !!this.getToken();
+    console.log('📊 isLogged():', logged);
+    return logged;
   }
 
-  private _loadUser() {
+  get currentUserValue() {
+    return this.userSubject.value;
+  }
+
+  private persistSession(res: any) {
+    console.log('💾 persistSession() LLAMADO - Response:', res);
+
+    if (res && res.accessToken) {
+      console.log(
+        '💾 persistSession() - accessToken recibido:',
+        res.accessToken.substring(0, 20) + '...',
+      );
+      console.log(
+        '💾 persistSession() - localStorage antes:',
+        localStorage.getItem('accessToken') ? 'EXISTE' : 'VACÍO',
+      );
+
+      localStorage.setItem('accessToken', res.accessToken);
+      console.log('💾 persistSession() - Token guardado ✅');
+      console.log(
+        '💾 persistSession() - localStorage después:',
+        localStorage.getItem('accessToken') ? 'EXISTE' : 'VACÍO',
+      );
+
+      const user = this.normalizeUser(res.usuario || res.user);
+      if (user) {
+        console.log(
+          '💾 persistSession() - Guardando usuario:',
+          user.idusuario,
+          user.email,
+        );
+        this.persistUser(user);
+      }
+    } else {
+      console.error(
+        '❌ persistSession() - No hay accessToken en la respuesta:',
+        res,
+      );
+      console.error('❌ Propiedades de res:', Object.keys(res || {}));
+    }
+  }
+
+  private updateUsuario(id: number, payload: UpdateProfilePayload) {
+    const cfg = this.withAuth();
+    if (!cfg) {
+      return throwError(() => new Error('No hay sesión activa'));
+    }
+
+    return this.http
+      .put(`${this.API_HOST}/api/usuarios/${id}`, payload, cfg)
+      .pipe(
+        tap((res: any) => {
+          if (res?.usuario) {
+            this.persistUser(this.normalizeUser(res.usuario));
+          }
+        }),
+      );
+  }
+
+  private withAuth() {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
+
+  private persistUser(user: any) {
+    if (!user) {
+      console.error('❌ persistUser() - Usuario es null/undefined');
+      return;
+    }
+    console.log(
+      '💾 persistUser() - Guardando usuario en localStorage:',
+      user.idusuario,
+    );
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    console.log(
+      '💾 persistUser() - Verificando guardado:',
+      localStorage.getItem('currentUser') ? 'OK' : 'FALLO',
+    );
+    this.userSubject.next(user);
+  }
+
+  private normalizeUser(user: any) {
+    if (!user) return null;
+
+    const role = this.normalizeRole(user);
+    const idrol =
+      role?.idrol ??
+      (Number(user?.idrol || user?.rol?.idrol) > 0
+        ? Number(user?.idrol || user?.rol?.idrol)
+        : null);
+
+    return {
+      ...user,
+      idusuario: user.idusuario || user.id,
+      nombre: user.nombre || user.username,
+      email: user.email,
+      avatar: user.avatar,
+      telefono: user.telefono || null,
+      direccion: user.direccion || null,
+      rol: role,
+      idrol,
+    };
+  }
+
+  private normalizeRole(user: any): { idrol: number | null; nombre: string } | null {
+    const rawRole = user?.rol;
+    const rawRoleId = Number(user?.idrol || rawRole?.idrol || 0);
+    const roleId = rawRoleId > 0 ? rawRoleId : null;
+
+    const roleNameCandidate =
+      (typeof rawRole === 'string' ? rawRole : rawRole?.nombre) ||
+      user?.rolNombre;
+    const roleName = String(roleNameCandidate || '').trim();
+
+    if (!roleId && !roleName) {
+      return null;
+    }
+
+    const inferredRoleId = roleId || this.inferRoleIdByName(roleName);
+
+    return {
+      idrol: inferredRoleId,
+      nombre: roleName || this.getRoleNameById(inferredRoleId),
+    };
+  }
+
+  private inferRoleIdByName(roleName: string): number | null {
+    const name = String(roleName || '').trim().toLowerCase();
+    if (!name) {
+      return null;
+    }
+    if (name.includes('premium')) {
+      return 2;
+    }
+    if (name.includes('vendedor')) {
+      return 3;
+    }
+    if (name.includes('admin')) {
+      return 4;
+    }
+    if (name.includes('cliente')) {
+      return 1;
+    }
+    return null;
+  }
+
+  private getRoleNameById(idrol: number | null): string {
+    switch (idrol) {
+      case 2:
+        return 'Premium';
+      case 3:
+        return 'Vendedor';
+      case 4:
+        return 'Admin';
+      case 1:
+      default:
+        return 'Cliente';
+    }
+  }
+
+  private loadUser() {
     try {
       const raw = localStorage.getItem('currentUser');
       return raw ? JSON.parse(raw) : null;
-    } catch (e) {
+    } catch (error) {
       return null;
     }
   }

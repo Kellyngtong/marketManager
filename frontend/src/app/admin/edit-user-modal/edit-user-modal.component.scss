@@ -1,0 +1,164 @@
+@use '../../components/_colors' as colors;
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0 1rem 0;
+
+  ion-button {
+    flex: 1;
+  }
+
+  // Botón verde personalizado
+  ion-button.btn-save {
+    --background: #{colors.$primary};
+    --background-hover: #{colors.$primaryDark};
+    --background-activated: #{colors.$primaryDark};
+    --color: #fff;
+    --box-shadow: 0 2px 8px #{colors.$shadowMedium};
+    font-weight: 600;
+    letter-spacing: 0.5px;
+
+    &:hover {
+      --background: #{colors.$primaryDark};
+      --box-shadow: 0 4px 12px #{colors.$shadowMedium};
+    }
+
+    &:active {
+      --background: #{colors.$primaryDark};
+    }
+
+    &:disabled {
+      --background: #{colors.$disabled};
+      --color: #{colors.$textSecondary};
+      opacity: 0.6;
+    }
+
+    ::ng-deep .button-native {
+      color: #fff !important;
+    }
+
+    ::ng-deep .button-inner {
+      color: #fff !important;
+    }
+
+    ion-icon {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+ion-item {
+  --background: #{colors.$surface};
+  --border-color: #{colors.$border};
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 1rem;
+
+  &:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+
+  ion-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: colors.$textPrimary;
+  }
+}
+
+.role-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.role-label {
+  font-weight: 600;
+  color: colors.$textPrimary;
+}
+
+.role-options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.role-item {
+  --background: #{colors.$surface};
+  border: 1px solid colors.$border;
+  border-radius: 10px;
+  padding: 0.35rem 0.5rem;
+
+  .role-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: colors.$textPrimary;
+  }
+
+  .role-desc {
+    font-size: 0.8rem;
+    color: colors.$textSecondary;
+    margin-top: 2px;
+  }
+
+  ion-radio {
+    --color: #{colors.$textSecondary};
+    --color-checked: #{colors.$primary};
+  }
+}
+
+.role-item-cliente {
+  border-left: 4px solid colors.$info;
+}
+
+.role-item-premium {
+  border-left: 4px solid colors.$secondary;
+}
+
+.role-item-empleado {
+  border-left: 4px solid colors.$primary;
+}
+
+.role-item-admin {
+  border-left: 4px solid colors.$error;
+}
+
+ion-input,
+ion-select,
+ion-textarea {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  margin-top: 0.5rem;
+}
+
+ion-text {
+  display: block;
+  margin-top: 0.25rem;
+
+  small {
+    font-size: 0.8rem;
+    padding-left: 0.25rem;
+  }
+}
+
+ion-header {
+  ion-toolbar {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+
+    ion-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+  }
+}
+
+ion-content {
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+}

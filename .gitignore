@@ -109,10 +109,6 @@ Thumbs.db
 *.swo
 *~
 
-# MySQL
-*.sql
-*.sqlite
-
 # Backend uploads
 backend/uploads/
 

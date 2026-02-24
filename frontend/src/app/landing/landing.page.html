@@ -1,0 +1,112 @@
+<app-landing-header></app-landing-header>
+
+<ion-content [fullscreen]="true" class="landing-content">
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-cta-group">
+        <h1 class="hero-title">{{ translations[currentLanguage]['heroTitle'] }}</h1>
+        <app-start-shopping-button></app-start-shopping-button>
+      </div>
+        
+        
+      <!--
+      <p class="hero-subtitle">
+        Los productos de mayor calidad al mejor precio. Realiza tu compra online con entrega a domicilio.
+      </p>
+      -->
+
+    </div>
+  </section>
+
+  <!-- SECTION 1: COMPRA ONLINE -->
+  <section class="section">
+    <div class="section-wrapper">
+      <div class="section-content">
+        <h3 class="section-title">{{ translations[currentLanguage]['section1Title'] }}</h3>
+        <p class="section-description">
+          {{ translations[currentLanguage]['section1Desc'] }}
+        </p>
+        <div class="benefits-list">
+          <div class="benefit">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>{{ translations[currentLanguage]['s1b1'] }}</span>
+          </div>
+          <div class="benefit">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>{{ translations[currentLanguage]['s1b2'] }}</span>
+          </div>
+          <div class="benefit">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>{{ translations[currentLanguage]['s1b3'] }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="section-image">
+        <img src="assets/landing/onlineShopping.png" alt="Compra online" />
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: NUEVA TIENDA ONLINE (INVERTED) -->
+  <section class="section section-inverted">
+    <div class="section-wrapper">
+      <div class="section-image">
+        <img
+          src="assets/landing/zonaCanarias.png"
+          alt="Nueva tienda online en zonas"
+        />
+      </div>
+      <div class="section-content">
+        <h3 class="section-title">{{ translations[currentLanguage]['section2Title'] }}</h3>
+        <p class="section-description">
+          {{ translations[currentLanguage]['section2Desc'] }}
+        </p>
+        <!-- <button class="btn-notify" (click)="notifyZone()">Avísame</button>-->
+        <app-start-shopping-button></app-start-shopping-button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: PRODUCTOS DE KM 0 -->
+  <section class="section">
+    <div class="section-wrapper">
+      <div class="section-content">
+        <h3 class="section-title">{{ translations[currentLanguage]['section3Title'] }}</h3>
+        <p class="section-description">
+          {{ translations[currentLanguage]['section3Desc'] }}
+        </p>
+        <div class="benefits-list">
+          <div class="benefit">
+            <ion-icon name="leaf"></ion-icon>
+            <span>{{ translations[currentLanguage]['s3b1'] }}</span>
+          </div>
+          <div class="benefit">
+            <ion-icon name="leaf"></ion-icon>
+            <span>{{ translations[currentLanguage]['s3b2'] }}</span>
+          </div>
+          <div class="benefit">
+            <ion-icon name="leaf"></ion-icon>
+            <span>{{ translations[currentLanguage]['s3b3'] }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="section-image">
+        <img src="assets/landing/km0.png" alt="Productos de Kilómetro 0" />
+      </div>
+    </div>
+  </section>
+
+  <!-- SECONDARY CTA SECTION -->
+  <section class="secondary-cta">
+    <div class="secondary-cta-content">
+      <h2 class="secondary-cta-title">{{ translations[currentLanguage]['secondaryCtaTitle'] }}</h2>
+      <app-start-shopping-button></app-start-shopping-button>
+    </div>
+  </section>
+
+  <app-landing-footer></app-landing-footer>
+</ion-content>
+
+
+

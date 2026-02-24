@@ -1,0 +1,99 @@
+@use '../components/_colors' as colors;
+
+.loading-container,
+.success-container,
+.pending-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
+
+.success-icon,
+.pending-icon,
+.error-icon {
+  font-size: 5rem;
+  animation: slideIn 0.5s ease-out;
+}
+
+.success-icon {
+  color: colors.$success;
+}
+
+.pending-icon {
+  color: colors.$warning;
+}
+
+.error-icon {
+  color: colors.$error;
+}
+
+h1 {
+  text-align: center;
+  margin: 0;
+}
+
+.success-container h1 {
+  color: colors.$success;
+}
+
+.pending-container h1 {
+  color: colors.$warning;
+}
+
+.error-container h1 {
+  color: colors.$error;
+}
+
+p {
+  text-align: center;
+  color: colors.$textSecondary;
+  margin: 0.5rem 0;
+}
+
+.order-number {
+  background-color: colors.$background;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 100%;
+}
+
+ion-card {
+  width: 100%;
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid colors.$border;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+.button-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

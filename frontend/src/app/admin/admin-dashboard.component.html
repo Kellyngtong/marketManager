@@ -1,0 +1,336 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Panel Admin</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Admin Header -->
+  <div class="admin-header">
+    <div class="header-wrapper">
+      <div class="header-content">
+        <ion-icon
+          name="shield-checkmark-outline"
+          class="header-icon"
+        ></ion-icon>
+        <div class="header-text">
+          <h1>Panel de Administración</h1>
+          <p>Gestiona usuarios, productos y pedidos de Mercachona</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <ion-progress-bar
+    *ngIf="loading"
+    type="indeterminate"
+    color="primary"
+  ></ion-progress-bar>
+
+  <!-- Stats Cards -->
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Total Usuarios</span>
+        </div>
+        <div class="stat-value">{{ metrics.totalUsers }}</div>
+        <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Total Pedidos</span>
+        </div>
+        <div class="stat-value">{{ metrics.totalOrders }}</div>
+        <ion-icon name="cube-outline" class="stat-icon"></ion-icon>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Ingresos</span>
+        </div>
+        <div class="stat-value">
+          €{{ metrics.totalRevenue | number: "1.2-2" }}
+        </div>
+        <ion-icon name="trending-up-outline" class="stat-icon"></ion-icon>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Productos</span>
+        </div>
+        <div class="stat-value">{{ metrics.totalProducts }}</div>
+        <ion-icon name="layers-outline" class="stat-icon"></ion-icon>
+      </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="tabs-section">
+      <div class="tabs-list">
+        <button
+          class="tab-trigger"
+          [class.active]="activeTab === 'users'"
+          (click)="selectTab('users')"
+        >
+          Usuarios
+        </button>
+        <button
+          class="tab-trigger"
+          [class.active]="activeTab === 'products'"
+          (click)="selectTab('products')"
+        >
+          Productos
+        </button>
+        <button
+          class="tab-trigger"
+          [class.active]="activeTab === 'orders'"
+          (click)="selectTab('orders')"
+        >
+          Pedidos
+        </button>
+      </div>
+
+      <!-- Users Tab Content -->
+      <div *ngIf="activeTab === 'users'" class="tab-content-wrapper">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Gestión de Usuarios</h2>
+              <p>Administra los usuarios registrados</p>
+            </div>
+            <ion-button
+              color="primary"
+              fill="solid"
+              size="small"
+              (click)="createUser()"
+            >
+              <ion-icon slot="start" name="add-outline"></ion-icon>
+              Nuevo Usuario
+            </ion-button>
+          </div>
+          <div class="card-search">
+            <ion-searchbar
+              placeholder="Buscar usuarios..."
+              showCancelButton="never"
+              [(ngModel)]="userSearch"
+            ></ion-searchbar>
+          </div>
+          <div class="card-content">
+            <div
+              class="table-wrapper"
+              *ngIf="filteredUsers.length > 0; else noUsers"
+            >
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th class="text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of filteredUsers">
+                    <td class="font-medium">
+                      {{ user.username || user.nombre || "N/A" }}
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                      <span
+                        class="badge"
+                        [ngClass]="'role-' + (user.rol || 'cliente')"
+                      >
+                        {{ user.rolLabel || "Cliente" }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge status-active">Activo</span>
+                    </td>
+                    <td class="text-right">
+                      <button
+                        class="icon-btn"
+                        (click)="editUser(user)"
+                        title="Editar"
+                      >
+                        <ion-icon name="create-outline"></ion-icon>
+                      </button>
+                      <button
+                        class="icon-btn error"
+                        (click)="deleteUser(user.idusuario)"
+                        title="Eliminar"
+                      >
+                        <ion-icon name="trash-outline"></ion-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #noUsers>
+              <div class="empty-state">
+                <ion-icon name="people-outline"></ion-icon>
+                <p>No hay usuarios para mostrar</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Tab Content -->
+      <div *ngIf="activeTab === 'products'" class="tab-content-wrapper">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Gestión de Productos</h2>
+              <p>Administra el catálogo de productos</p>
+            </div>
+            <ion-button
+              color="primary"
+              fill="solid"
+              size="small"
+              (click)="createProduct()"
+            >
+              <ion-icon slot="start" name="add-outline"></ion-icon>
+              Nuevo Producto
+            </ion-button>
+          </div>
+          <div class="card-search">
+            <ion-searchbar
+              placeholder="Buscar productos..."
+              showCancelButton="never"
+              [(ngModel)]="productSearch"
+            ></ion-searchbar>
+          </div>
+          <div class="card-content">
+            <div
+              class="table-wrapper"
+              *ngIf="filteredProducts.length > 0; else noProducts"
+            >
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th class="text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let product of filteredProducts">
+                    <td class="font-medium">{{ product.nombre }}</td>
+                    <td>
+                      {{
+                        product.categoria_nombre ||
+                          product.categoria?.nombre ||
+                          product.categoria ||
+                          "N/A"
+                      }}
+                    </td>
+                    <td>€{{ product.precio_venta | number: "1.2-2" }}</td>
+                    <td class="text-right action-buttons">
+                      <button
+                        class="icon-btn"
+                        (click)="editProduct(product)"
+                        title="Editar"
+                      >
+                        <ion-icon name="create-outline"></ion-icon>
+                      </button>
+                      <button
+                        class="icon-btn error"
+                        (click)="deleteProduct(product.idarticulo)"
+                        title="Eliminar"
+                      >
+                        <ion-icon name="trash-outline"></ion-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #noProducts>
+              <div class="empty-state">
+                <ion-icon name="layers-outline"></ion-icon>
+                <p>No hay productos para mostrar</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Tab Content -->
+      <div *ngIf="activeTab === 'orders'" class="tab-content-wrapper">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Gestión de Pedidos</h2>
+              <p>Administra los pedidos realizados</p>
+            </div>
+          </div>
+          <div class="card-search">
+            <ion-searchbar
+              placeholder="Buscar pedidos..."
+              showCancelButton="never"
+              [(ngModel)]="orderSearch"
+            ></ion-searchbar>
+          </div>
+          <div class="card-content">
+            <div
+              class="table-wrapper"
+              *ngIf="filteredOrders.length > 0; else noOrders"
+            >
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID Pedido</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th class="text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let order of filteredOrders">
+                    <td class="font-medium">#{{ order.idventa }}</td>
+                    <td>{{ order.usuario?.username || "N/A" }}</td>
+                    <td>€{{ order.total | number: "1.2-2" }}</td>
+                    <td>{{ order.fecha_venta | date: "short" }}</td>
+                    <td>
+                      <span
+                        class="badge"
+                        [ngClass]="'status-' + (order.estado || 'pendiente')"
+                      >
+                        {{ order.estado || "Pendiente" }}
+                      </span>
+                    </td>
+                    <td class="text-right">
+                      <button
+                        class="icon-btn"
+                        (click)="editOrder(order)"
+                        title="Ver Detalles"
+                      >
+                        <ion-icon name="eye-outline"></ion-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #noOrders>
+              <div class="empty-state">
+                <ion-icon name="cube-outline"></ion-icon>
+                <p>No hay pedidos para mostrar</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

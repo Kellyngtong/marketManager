@@ -32,8 +32,8 @@ npm install
 
 # Iniciar servidor
 npm start
-# o
-node index.js
+# o para desarrollo
+npm run dev
 ```
 
 **Esperado:**

@@ -1,46 +1,122 @@
 <ion-card class="product-card">
-  <img
-    [src]="product.image || 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&auto=format'"
-    alt="{{ product.name }}"
-    (click)="goToDetail.emit(product.id)"
-  />
+  <div
+    class="image-wrapper"
+    (click)="goToDetail.emit(product.idarticulo || product.id)"
+  >
+    <img
+      [src]="
+        product.imagen ||
+        product.image ||
+        'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&auto=format'
+      "
+      alt="{{ product.nombre || product.name }}"
+    />
+    <!-- Overlay oscuro con ojo -->
+    <div class="overlay-hover">
+      <div class="eye-icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide-eye"
+        >
+          <path
+            d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
+          ></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      </div>
+    </div>
+    <ion-badge class="item-cart-badge" *ngIf="cartCount > 0">
+      {{ cartCount }}
+    </ion-badge>
+  </div>
   <ion-card-header
-    (click)="goToDetail.emit(product.id)"
+    (click)="goToDetail.emit(product.idarticulo || product.id)"
     style="cursor: pointer"
   >
-    <ion-card-title>{{ product.name }}</ion-card-title>
-    <ion-card-subtitle>{{
-      product.price | currency : "EUR"
-    }}</ion-card-subtitle>
+    <ion-card-title>{{ product.nombre || product.name }}</ion-card-title>
+    <ion-card-subtitle>
+      <ng-container *ngIf="isPremiumClient; else standardPriceMode">
+        <span class="price-row premium-price-row" *ngIf="isPremiumOfferDisplay(product); else premiumRegularPrice">
+          <span class="current-price premium-current-price">{{ getDisplayPrice(product) | currency: "EUR" }}</span>
+          <span class="original-price">{{ getBasePriceForDisplay(product) | currency: "EUR" }}</span>
+          <span class="discount-percent">-{{ getDiscountPercent(product) }}%</span>
+          <span class="offer-label">OFERTA</span>
+        </span>
+        <ng-template #premiumRegularPrice>
+          <span class="price-row" *ngIf="hasPremiumComparison(product); else premiumOnlyPrice">
+            <span class="current-price premium-current-price">{{ getDisplayPrice(product) | currency: "EUR" }}</span>
+            <span class="original-price">{{ getBasePriceForDisplay(product) | currency: "EUR" }}</span>
+          </span>
+          <ng-template #premiumOnlyPrice>
+            {{ getDisplayPrice(product) | currency: "EUR" }}
+          </ng-template>
+        </ng-template>
+      </ng-container>
+      <ng-template #standardPriceMode>
+        <span class="price-row" *ngIf="isOfferProduct(product) && hasOfferComparison(product); else regularPrice">
+          <span class="current-price">{{ getCurrentPrice(product) | currency: "EUR" }}</span>
+          <span class="original-price">{{ getOriginalPrice(product) | currency: "EUR" }}</span>
+          <span class="discount-percent">-{{ getDiscountPercent(product) }}%</span>
+          <span class="offer-label">OFERTA</span>
+        </span>
+        <ng-template #regularPrice>
+          {{ getCurrentPrice(product) | currency: "EUR" }}
+        </ng-template>
+      </ng-template>
+    </ion-card-subtitle>
   </ion-card-header>
   <ion-card-content>
-    <p>{{ product.description }}</p>
+    <p>{{ product.descripcion || product.description }}</p>
+    <div class="product-meta">
+      <ion-chip color="tertiary" mode="md">
+        {{ product.tipo || "general" | titlecase }}
+      </ion-chip>
+      <span class="stock">Stock: {{ product.stock ?? 0 }}</span>
+    </div>
+
+    <div class="quantity-picker">
+      <ion-button
+        fill="clear"
+        size="small"
+        (click)="decreaseQuantity()"
+        [disabled]="quantity <= 1"
+      >
+        <ion-icon slot="icon-only" name="remove"></ion-icon>
+      </ion-button>
+      <ion-input
+        type="number"
+        inputmode="numeric"
+        min="1"
+        [max]="product.stock || 1"
+        [(ngModel)]="quantity"
+        (ionChange)="normalizeQuantity($event)"
+      ></ion-input>
+      <ion-button
+        fill="clear"
+        size="small"
+        (click)="increaseQuantity()"
+        [disabled]="quantity >= (product.stock || 1)"
+      >
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </div>
+
     <ion-button
       expand="block"
       color="primary"
-      (click)="addToCart.emit(product)"
+      (click)="emitAddToCart()"
+      [disabled]="(product?.stock ?? 0) < 1"
     >
       <ion-icon slot="start" name="cart"></ion-icon>
       Añadir al carrito
     </ion-button>
-
-    <div class="action-buttons">
-      <ion-button
-        expand="block"
-        color="warning"
-        (click)="editProduct.emit(product)"
-      >
-        <ion-icon slot="start" name="create"></ion-icon>
-        Editar
-      </ion-button>
-      <ion-button
-        expand="block"
-        color="danger"
-        (click)="deleteProduct.emit(product.id)"
-      >
-        <ion-icon slot="start" name="trash"></ion-icon>
-        Borrar
-      </ion-button>
-    </div>
   </ion-card-content>
 </ion-card>

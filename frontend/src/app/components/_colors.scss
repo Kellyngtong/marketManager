@@ -1,0 +1,45 @@
+// Color Palette for SCSS
+// Colores principales
+$primary: #3fa646; // verde principal - botones, headers, acciones principales
+$primaryDark: #2e7d32; // verde oscuro - hover/estados activos en botones primarios
+$primaryLight: #a5d6a7; // verde claro - fondos suaves, backgrounds secundarios
+
+// Colores secundarios
+$secondary: #f2a900; // amarillo - ofertas, CTAs destacadas, premium
+$secondaryLight: #ffe082; // amarillo claro - fondos suaves de ofertas
+
+// Fondos y superficies
+$background: #f7faf5; // fondo general de páginas
+$surface: #ffffff; // cards, paneles, superficies principales
+
+// Texto
+$textPrimary: #1f2933; // texto principal - títulos, contenido importante
+$textSecondary: #6b7280; // texto secundario - descripciones, labels, metadatos
+
+// Bordes
+$border: #e5e7eb; // bordes en inputs, separadores
+
+// Estados y feedback
+$error: #d92b2b; // errores, validaciones negativas
+$success: #2e7d32; // éxito, confirmaciones, estados positivos
+$warning: #f59e0b; // advertencias, información importante
+$info: #0ea5e9; // información, mensajes informativos (no críticos)
+
+// Elementos deshabilitados
+$disabled: #cccccc; // para inputs deshabilitados, botones inactivos, texto deshabilitado
+
+// Enlaces
+$link: #0066cc; // enlaces, navegación, acciones secundarias
+
+// Sombras (útiles para efectos de profundidad)
+$shadowLight: rgba(0, 0, 0, 0.08); // sombras suaves - cards, hoveres ligeros
+$shadowMedium: rgba(0, 0, 0, 0.12); // sombras medias - elementos elevados
+$shadowDark: rgba(
+  0,
+  0,
+  0,
+  0.2
+); // sombras pronunciadas - modales, overlays complejos
+
+// Overlay
+$overlay: rgba(0, 0, 0, 0.5); // para fondos oscuros en modales y diálogos

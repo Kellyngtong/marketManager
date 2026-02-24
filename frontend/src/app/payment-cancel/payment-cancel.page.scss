@@ -1,0 +1,79 @@
+@use '../components/_colors' as colors;
+
+.cancel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
+
+.cancel-icon {
+  font-size: 5rem;
+  color: colors.$error;
+  animation: slideIn 0.5s ease-out;
+}
+
+h1 {
+  text-align: center;
+  color: colors.$error;
+  margin: 0;
+}
+
+p {
+  text-align: center;
+  color: colors.$textSecondary;
+  margin: 0.5rem 0;
+}
+
+ion-card {
+  width: 100%;
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+
+    li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid colors.$border;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &::before {
+        content: '• ';
+        color: colors.$error;
+        font-weight: bold;
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  .info-text {
+    background-color: rgba(245, 158, 11, 0.1);
+    padding: 1rem;
+    border-radius: 4px;
+    border-left: 4px solid colors.$warning;
+  }
+}
+
+.button-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

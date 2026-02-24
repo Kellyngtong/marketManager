@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/empleado"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Contable</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadCompras($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-spinner name="crescent" *ngIf="isLoading" class="spinner"></ion-spinner>
+
+  <section class="compras-wrapper" *ngIf="compras.length; else emptyState">
+    <article class="compra-card" *ngFor="let compra of compras; trackBy: trackByCompra">
+      <header class="compra-header">
+        <div>
+          <p class="fecha">{{ compra.fecha | date:'medium' }}</p>
+          <h3>{{ compra.tipoCliente }}</h3>
+        </div>
+
+        <ion-button
+          fill="clear"
+          class="seen-button"
+          (click)="toggleSeen(compra.idventa)"
+          [attr.aria-label]="isSeen(compra.idventa) ? 'Marcar compra como no vista' : 'Marcar compra como vista'"
+        >
+          <span class="seen-dot" [class.seen]="isSeen(compra.idventa)">
+            <ion-icon name="checkmark-outline" *ngIf="isSeen(compra.idventa)"></ion-icon>
+          </span>
+        </ion-button>
+      </header>
+
+      <ul class="items-list">
+        <li *ngFor="let item of compra.items">
+          <span class="nombre">{{ item.nombre }}</span>
+          <span class="detalle">{{ item.cantidad }} x {{ item.precio | currency:'EUR' }}</span>
+        </li>
+      </ul>
+
+      <div class="total-row">
+        <span>Total compra</span>
+        <strong>{{ compra.total | currency:'EUR' }}</strong>
+      </div>
+    </article>
+  </section>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <ion-icon name="receipt-outline"></ion-icon>
+      <p>No hay compras registradas todavía.</p>
+    </div>
+  </ng-template>
+</ion-content>

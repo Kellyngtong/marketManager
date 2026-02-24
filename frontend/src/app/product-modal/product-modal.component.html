@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Nuevo producto</ion-title>
+    <ion-title>{{ mode === 'edit' ? 'Editar producto' : 'Nuevo producto' }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="cancel()">Cerrar</ion-button>
     </ion-buttons>
@@ -8,7 +8,7 @@
 </ion-header>
 
 <ion-content>
-  <form (ngSubmit)="create()" #formRef="ngForm" class="product-form">
+  <form (ngSubmit)="submit()" class="product-form">
     <ion-list>
       <ion-item>
         <ion-label position="floating">Nombre</ion-label>
@@ -17,10 +17,22 @@
       <ion-item>
         <ion-label position="floating">Descripción</ion-label>
         <ion-textarea
-          required
           [(ngModel)]="product.description"
           name="description"
         ></ion-textarea>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Tipo</ion-label>
+        <ion-select
+          interface="popover"
+          [(ngModel)]="product.tipo"
+          name="tipo"
+          required
+        >
+          <ion-select-option *ngFor="let tipo of tipos" [value]="tipo.value">
+            {{ tipo.label }}
+          </ion-select-option>
+        </ion-select>
       </ion-item>
       <ion-item>
         <ion-label position="floating">Precio</ion-label>
@@ -43,6 +55,10 @@
       <ion-item>
         <ion-label position="floating">Imagen (URL opcional)</ion-label>
         <ion-input [(ngModel)]="product.image" name="image"></ion-input>
+      </ion-item>
+      <ion-item *ngIf="showOferta">
+        <ion-label>Producto en oferta</ion-label>
+        <ion-toggle [(ngModel)]="product.oferta" name="oferta"></ion-toggle>
       </ion-item>
       <ion-item>
         <ion-label>O subir archivo</ion-label>
@@ -73,8 +89,8 @@
       <ion-button color="medium" type="button" (click)="cancel()"
         >Cancelar</ion-button
       >
-      <ion-button type="submit" [disabled]="!formRef.form.valid"
-        >Crear</ion-button
+      <ion-button type="submit" [disabled]="!canSubmit()"
+        >{{ mode === 'edit' ? 'Guardar cambios' : 'Crear' }}</ion-button
       >
     </div>
   </form>
