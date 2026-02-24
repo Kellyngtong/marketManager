@@ -1,0 +1,34 @@
+.conocenos-page {
+  .hero {
+    background: url('/assets/landing/heroSection.jpg') center/cover no-repeat;
+    color: white;
+    padding: 60px 20px;
+    text-align: center;
+
+    h1 {
+      font-size: 32px;
+      margin: 0 0 12px 0;
+    }
+
+    p {
+      max-width: 900px;
+      margin: 0 auto;
+      opacity: 0.95;
+    }
+  }
+
+  .info,
+  .team {
+    padding: 32px 20px;
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: #555;
+      line-height: 1.6;
+    }
+  }
+}

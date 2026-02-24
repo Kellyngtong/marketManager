@@ -1,8 +1,8 @@
 @use "../_colors" as colors;
 
 .btn-start-shopping {
-  background: colors.$secondary !important;
-  color: colors.$textPrimary;
+  background: colors.$primary !important;
+  color: #ffffff;
   border: none;
   padding: 14px 48px;
   font-size: 16px;
@@ -10,7 +10,7 @@
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(242, 169, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(63, 166, 70, 0.18);
   white-space: nowrap;
 
   span {
@@ -18,9 +18,9 @@
   }
 
   &:hover {
-    background: darken(colors.$secondary, 8%);
+    background: colors.$primaryDark;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(242, 169, 0, 0.35);
+    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.25);
   }
 
   &:active {
