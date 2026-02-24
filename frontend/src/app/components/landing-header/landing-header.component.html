@@ -51,14 +51,12 @@
 
         <!-- LOGIN / LOGOUT BUTTONS -->
         <ng-container *ngIf="!(user$ | async); else logoutButton">
-          <ion-button
+          <button
             (click)="goToLogin()"
-            fill="solid"
-            size="small"
             class="auth-btn"
           >
             {{ translations[currentLanguage]["acceder"] }}
-          </ion-button>
+          </button>
         </ng-container>
 
         <ng-template #logoutButton>

@@ -7,7 +7,9 @@ export default (app: Express): void => {
   const router = Router();
   const requireStaff = [authJwt.verifyToken, authJwt.hasRole([3, 4])];
 
-  const normalizeOrderStatus = (value: any): "NUEVO" | "PENDIENTE" | "ENVIADA" | "CERRADA" => {
+  const normalizeOrderStatus = (
+    value: any,
+  ): "NUEVO" | "PENDIENTE" | "ENVIADA" | "CERRADA" => {
     const normalized = String(value || "")
       .trim()
       .toUpperCase();
@@ -21,13 +23,9 @@ export default (app: Express): void => {
     }
 
     if (
-      [
-        "CERRADO",
-        "CERRADA",
-        "ENTREGADA",
-        "ENTREGADO",
-        "CLOSED",
-      ].includes(normalized)
+      ["CERRADO", "CERRADA", "ENTREGADA", "ENTREGADO", "CLOSED"].includes(
+        normalized,
+      )
     ) {
       return "CERRADA";
     }
@@ -134,9 +132,17 @@ export default (app: Express): void => {
           "precio_venta",
           "stock",
           "oferta",
+          "descripcion",
+          "imagen",
+        ],
+        include: [
+          {
+            model: db.categoria,
+            attributes: ['idcategoria', 'nombre'],
+            required: false,
+          },
         ],
         limit: 100,
-        raw: true,
       });
       res.json(products || []);
     } catch (error) {
@@ -149,176 +155,226 @@ export default (app: Express): void => {
    * GET /api/admin/orders
    * Obtener listado de pedidos (admin only)
    */
-  router.get("/orders", ...requireStaff, async (req: Request, res: Response) => {
-    try {
-      const orders = await db.venta.findAll({
-        attributes: [
-          "idventa",
-          "idusuario",
-          "idcliente",
-          "total",
-          "impuesto",
-          "fecha_hora",
-          "estado",
-          "cliente_nombre",
-          "cliente_telefono",
-          "cliente_direccion",
-        ],
-        order: [["idventa", "DESC"]],
-        limit: 100,
-      });
+  router.get(
+    "/orders",
+    ...requireStaff,
+    async (req: Request, res: Response) => {
+      try {
+        const orders = await db.venta.findAll({
+          attributes: [
+            "idventa",
+            "idusuario",
+            "idcliente",
+            "total",
+            "impuesto",
+            "fecha_hora",
+            "estado",
+            "cliente_nombre",
+            "cliente_telefono",
+            "cliente_direccion",
+          ],
+          order: [["idventa", "DESC"]],
+          limit: 100,
+        });
 
-      const formattedOrders = await Promise.all(
-        (orders || []).map(async (order: any) => {
-          const [usuario, cliente, detalles] = await Promise.all([
-            db.usuario.findByPk(order.idusuario, {
-              attributes: ["idusuario", "nombre", "email", "telefono", "direccion"],
-            }),
-            db.cliente.findByPk(order.idcliente, {
-              attributes: ["idcliente", "nombre", "email", "telefono", "direccion"],
-            }),
-            db.detalle_venta.findAll({
-              where: { idventa: order.idventa },
-              include: [
-                {
-                  model: db.articulo,
-                  attributes: ["idarticulo", "nombre", "imagen"],
-                },
-              ],
-            }),
-          ]);
+        const formattedOrders = await Promise.all(
+          (orders || []).map(async (order: any) => {
+            const [usuario, cliente, detalles] = await Promise.all([
+              db.usuario.findByPk(order.idusuario, {
+                attributes: [
+                  "idusuario",
+                  "nombre",
+                  "email",
+                  "telefono",
+                  "direccion",
+                ],
+              }),
+              db.cliente.findByPk(order.idcliente, {
+                attributes: [
+                  "idcliente",
+                  "nombre",
+                  "email",
+                  "telefono",
+                  "direccion",
+                ],
+              }),
+              db.detalle_venta.findAll({
+                where: { idventa: order.idventa },
+                include: [
+                  {
+                    model: db.articulo,
+                    attributes: ["idarticulo", "nombre", "imagen"],
+                  },
+                ],
+              }),
+            ]);
 
-          const items = (detalles || []).map((detalle: any) => ({
-            iddetalle_venta: detalle.iddetalle_venta,
-            idarticulo: detalle.idarticulo,
-            nombre:
-              detalle?.articulo?.nombre ||
-              detalle?.Articulo?.nombre ||
-              `Artículo #${detalle.idarticulo}`,
-            cantidad: Number(detalle.cantidad || 0),
-            precio: Number(detalle.precio || 0),
-            descuento: Number(detalle.descuento || 0),
-          }));
+            const items = (detalles || []).map((detalle: any) => ({
+              iddetalle_venta: detalle.iddetalle_venta,
+              idarticulo: detalle.idarticulo,
+              nombre:
+                detalle?.articulo?.nombre ||
+                detalle?.Articulo?.nombre ||
+                `Artículo #${detalle.idarticulo}`,
+              cantidad: Number(detalle.cantidad || 0),
+              precio: Number(detalle.precio || 0),
+              descuento: Number(detalle.descuento || 0),
+            }));
 
-          const customerName =
-            String(order?.cliente_nombre || "").trim() ||
-            cliente?.nombre ||
-            usuario?.nombre ||
-            "Sin cliente";
+            const customerName =
+              String(order?.cliente_nombre || "").trim() ||
+              cliente?.nombre ||
+              usuario?.nombre ||
+              "Sin cliente";
 
-          const customerPhone =
-            String(order?.cliente_telefono || "").trim() ||
-            cliente?.telefono ||
-            usuario?.telefono ||
-            "Sin teléfono";
+            const customerPhone =
+              String(order?.cliente_telefono || "").trim() ||
+              cliente?.telefono ||
+              usuario?.telefono ||
+              "Sin teléfono";
 
-          const customerAddress =
-            String(order?.cliente_direccion || "").trim() ||
-            cliente?.direccion ||
-            usuario?.direccion ||
-            "Sin dirección";
+            const customerAddress =
+              String(order?.cliente_direccion || "").trim() ||
+              cliente?.direccion ||
+              usuario?.direccion ||
+              "Sin dirección";
 
-          return {
-            idventa: order.idventa,
-            idusuario: order.idusuario,
-            idcliente: order.idcliente,
-            total: Number(order.total),
-            impuesto: Number(order.impuesto || 0),
-            fecha_hora: order.fecha_hora,
-            estado: normalizeOrderStatus(order.estado),
-            usuarioNombre: usuario?.nombre || `Usuario #${order.idusuario}`,
-            clienteNombre: customerName,
-            clienteDireccion: customerAddress,
-            clienteTelefono: customerPhone,
-            items,
-          };
-        }),
-      );
+            return {
+              idventa: order.idventa,
+              idusuario: order.idusuario,
+              idcliente: order.idcliente,
+              total: Number(order.total),
+              impuesto: Number(order.impuesto || 0),
+              fecha_hora: order.fecha_hora,
+              estado: normalizeOrderStatus(order.estado),
+              usuarioNombre: usuario?.nombre || `Usuario #${order.idusuario}`,
+              clienteNombre: customerName,
+              clienteDireccion: customerAddress,
+              clienteTelefono: customerPhone,
+              items,
+            };
+          }),
+        );
 
-      res.json(formattedOrders);
-    } catch (error) {
-      console.error("Error getting orders:", error);
-      res.json([]);
-    }
-  });
+        res.json(formattedOrders);
+      } catch (error) {
+        console.error("Error getting orders:", error);
+        res.json([]);
+      }
+    },
+  );
 
   /**
    * POST /api/admin/orders
    * Crear pedido manualmente desde administración
    */
-  router.post("/orders", ...requireStaff, async (req: Request, res: Response) => {
-    try {
-      const {
-        idcliente,
-        idusuario,
-        total,
-        impuesto,
-        estado,
-        tipo_comprobante,
-        serie_comprobante,
-        num_comprobante,
-        fecha_hora,
-        clienteNombre,
-        clienteDireccion,
-        clienteTelefono,
-      } = req.body || {};
+  router.post(
+    "/orders",
+    ...requireStaff,
+    async (req: Request, res: Response) => {
+      try {
+        const {
+          idcliente,
+          idusuario,
+          total,
+          impuesto,
+          estado,
+          tipo_comprobante,
+          serie_comprobante,
+          num_comprobante,
+          fecha_hora,
+          clienteNombre,
+          clienteDireccion,
+          clienteTelefono,
+        } = req.body || {};
 
-      const parsedTotal = Number(total);
-      if (!Number.isFinite(parsedTotal) || parsedTotal <= 0) {
-        res.status(400).json({ message: "El total debe ser un número mayor a 0" });
-        return;
+        const parsedTotal = Number(total);
+        if (!Number.isFinite(parsedTotal) || parsedTotal <= 0) {
+          res
+            .status(400)
+            .json({ message: "El total debe ser un número mayor a 0" });
+          return;
+        }
+
+        const parsedCliente = Number(idcliente);
+        if (!Number.isFinite(parsedCliente) || parsedCliente <= 0) {
+          res
+            .status(400)
+            .json({ message: "idcliente es requerido y debe ser válido" });
+          return;
+        }
+
+        const reqAuth = req as any;
+        const parsedUsuario = Number(idusuario || reqAuth.idusuario);
+        if (!Number.isFinite(parsedUsuario) || parsedUsuario <= 0) {
+          res
+            .status(400)
+            .json({ message: "idusuario es requerido y debe ser válido" });
+          return;
+        }
+
+        const normalizedEstado = String(estado || "NUEVO")
+          .trim()
+          .toUpperCase();
+        const normalizedStatus = normalizeOrderStatus(normalizedEstado);
+
+        const clienteExists = await db.cliente.findByPk(parsedCliente);
+        const usuarioExists = await db.usuario.findByPk(parsedUsuario);
+
+        if (!clienteExists) {
+          res.status(404).json({ message: "Cliente no encontrado" });
+          return;
+        }
+
+        if (!usuarioExists) {
+          res.status(404).json({ message: "Usuario no encontrado" });
+          return;
+        }
+
+        const createdOrder = await db.venta.create({
+          idcliente: parsedCliente,
+          idusuario: parsedUsuario,
+          tipo_comprobante: String(tipo_comprobante || "FACTURA")
+            .trim()
+            .toUpperCase(),
+          serie_comprobante: String(serie_comprobante || "F001").trim(),
+          num_comprobante: String(
+            num_comprobante || `AUTO-${Date.now()}`,
+          ).trim(),
+          fecha_hora: fecha_hora ? new Date(fecha_hora) : new Date(),
+          impuesto: Number(impuesto || 0),
+          total: parsedTotal,
+          estado: normalizedStatus,
+          cliente_nombre:
+            String(
+              clienteNombre ||
+                clienteExists.nombre ||
+                usuarioExists.nombre ||
+                "",
+            ).trim() || null,
+          cliente_direccion:
+            String(
+              clienteDireccion ||
+                clienteExists.direccion ||
+                usuarioExists.direccion ||
+                "",
+            ).trim() || null,
+          cliente_telefono:
+            String(
+              clienteTelefono ||
+                clienteExists.telefono ||
+                usuarioExists.telefono ||
+                "",
+            ).trim() || null,
+        });
+
+        res.status(201).json(createdOrder);
+      } catch (error) {
+        console.error("Error creating order:", error);
+        res.status(500).json({ message: "Error creando pedido" });
       }
-
-      const parsedCliente = Number(idcliente);
-      if (!Number.isFinite(parsedCliente) || parsedCliente <= 0) {
-        res.status(400).json({ message: "idcliente es requerido y debe ser válido" });
-        return;
-      }
-
-      const reqAuth = req as any;
-      const parsedUsuario = Number(idusuario || reqAuth.idusuario);
-      if (!Number.isFinite(parsedUsuario) || parsedUsuario <= 0) {
-        res.status(400).json({ message: "idusuario es requerido y debe ser válido" });
-        return;
-      }
-
-      const normalizedEstado = String(estado || "NUEVO").trim().toUpperCase();
-      const normalizedStatus = normalizeOrderStatus(normalizedEstado);
-
-      const clienteExists = await db.cliente.findByPk(parsedCliente);
-      const usuarioExists = await db.usuario.findByPk(parsedUsuario);
-
-      if (!clienteExists) {
-        res.status(404).json({ message: "Cliente no encontrado" });
-        return;
-      }
-
-      if (!usuarioExists) {
-        res.status(404).json({ message: "Usuario no encontrado" });
-        return;
-      }
-
-      const createdOrder = await db.venta.create({
-        idcliente: parsedCliente,
-        idusuario: parsedUsuario,
-        tipo_comprobante: String(tipo_comprobante || "FACTURA").trim().toUpperCase(),
-        serie_comprobante: String(serie_comprobante || "F001").trim(),
-        num_comprobante: String(num_comprobante || `AUTO-${Date.now()}`).trim(),
-        fecha_hora: fecha_hora ? new Date(fecha_hora) : new Date(),
-        impuesto: Number(impuesto || 0),
-        total: parsedTotal,
-        estado: normalizedStatus,
-        cliente_nombre: String(clienteNombre || clienteExists.nombre || usuarioExists.nombre || "").trim() || null,
-        cliente_direccion: String(clienteDireccion || clienteExists.direccion || usuarioExists.direccion || "").trim() || null,
-        cliente_telefono: String(clienteTelefono || clienteExists.telefono || usuarioExists.telefono || "").trim() || null,
-      });
-
-      res.status(201).json(createdOrder);
-    } catch (error) {
-      console.error("Error creating order:", error);
-      res.status(500).json({ message: "Error creando pedido" });
-    }
-  });
+    },
+  );
 
   /**
    * DELETE /api/admin/users/:id
@@ -428,8 +484,7 @@ export default (app: Express): void => {
       const isExistingActive =
         !!existing &&
         (existing.condicion === true || Number(existing.condicion) === 1);
-      const isExistingInactive =
-        !!existing && !isExistingActive;
+      const isExistingInactive = !!existing && !isExistingActive;
 
       const rolMap: { [key: string]: number } = {
         cliente: 1,
@@ -572,7 +627,15 @@ export default (app: Express): void => {
 
       if (updated > 0) {
         console.log("✅ Product updated successfully:", productId);
-        const updatedProduct = await db.articulo.findByPk(productId);
+        const updatedProduct = await db.articulo.findByPk(productId, {
+          include: [
+            {
+              model: db.categoria,
+              attributes: ['idcategoria', 'nombre'],
+              required: false,
+            },
+          ],
+        });
         res.json({ success: true, product: updatedProduct });
       } else {
         console.log("⚠️ No changes made to product:", productId);
@@ -597,7 +660,19 @@ export default (app: Express): void => {
   router.post("/products", async (req: Request, res: Response) => {
     try {
       const product = await db.articulo.create(req.body);
-      res.json(product);
+      
+      // Obtener el producto con la categoría incluida
+      const productWithCategory = await db.articulo.findByPk(product.idarticulo, {
+        include: [
+          {
+            model: db.categoria,
+            attributes: ['idcategoria', 'nombre'],
+            required: false,
+          },
+        ],
+      });
+      
+      res.json(productWithCategory);
     } catch (error) {
       console.error("Error creating product:", error);
       res.status(500).json({ message: "Error creando producto" });
@@ -608,239 +683,257 @@ export default (app: Express): void => {
    * GET /api/admin/orders/:id
    * Obtener detalles completos de un pedido con cliente, usuario e items
    */
-  router.get("/orders/:id", ...requireStaff, async (req: Request, res: Response) => {
-    try {
-      const orderId = parseInt(req.params.id as string, 10);
-      console.log("📦 Fetching order with ID:", orderId);
-
-      if (!orderId || isNaN(orderId)) {
-        console.log("❌ Invalid order ID:", req.params.id);
-        res.status(400).json({ message: "ID de pedido inválido" });
-        return;
-      }
-
-      const order = await db.venta.findOne({
-        where: { idventa: orderId },
-      });
-
-      if (!order) {
-        console.log("❌ Order not found for ID:", orderId);
-        res.status(404).json({ message: "Pedido no encontrado" });
-        return;
-      }
-
-      console.log("✅ Order found:", order.idventa);
-
-      // Obtener cliente
-      let cliente = null;
+  router.get(
+    "/orders/:id",
+    ...requireStaff,
+    async (req: Request, res: Response) => {
       try {
-        cliente = await db.cliente.findByPk(order.idcliente);
-        console.log("👤 Cliente loaded:", cliente?.nombre || "Sin cliente");
-      } catch (clienteError) {
-        console.error("⚠️ Error loading cliente:", clienteError);
-      }
+        const orderId = parseInt(req.params.id as string, 10);
+        console.log("📦 Fetching order with ID:", orderId);
 
-      // Obtener detalles de venta
-      let detalles: any[] = [];
-      try {
-        detalles = await db.detalle_venta.findAll({
+        if (!orderId || isNaN(orderId)) {
+          console.log("❌ Invalid order ID:", req.params.id);
+          res.status(400).json({ message: "ID de pedido inválido" });
+          return;
+        }
+
+        const order = await db.venta.findOne({
           where: { idventa: orderId },
         });
-        console.log("📋 Detalles loaded:", detalles.length);
-      } catch (detallesError) {
-        console.error("⚠️ Error loading detalles:", detallesError);
-      }
 
-      // Construir respuesta simple
-      const normalizedStatus = normalizeOrderStatus(order.estado);
-      const isPendiente = normalizedStatus === "PENDIENTE";
-      const isEnviada = normalizedStatus === "ENVIADA";
-      const isCerrada = normalizedStatus === "CERRADA";
+        if (!order) {
+          console.log("❌ Order not found for ID:", orderId);
+          res.status(404).json({ message: "Pedido no encontrado" });
+          return;
+        }
 
-      const response: any = {
-        id: order.idventa,
-        orderNumber: `ORD-${String(order.idventa).padStart(3, "0")}`,
-        date: order.fecha_hora,
-        status: normalizedStatus.toLowerCase(),
-        customer: {
-          name:
-            String((order as any)?.cliente_nombre || "").trim() ||
-            cliente?.nombre ||
-            "Cliente",
-          email: cliente?.email || "",
-          phone:
-            String((order as any)?.cliente_telefono || "").trim() ||
-            cliente?.telefono ||
-            "",
-        },
-        shippingAddress: {
-          street:
-            String((order as any)?.cliente_direccion || "").trim() ||
-            cliente?.direccion ||
-            "",
-          city: "",
-          postalCode: "",
-          country: "España",
-        },
-        paymentMethod: "No especificado",
-        items: [],
-        subtotal: Number(order.total) - Number(order.impuesto),
-        shipping: 0,
-        tax: Number(order.impuesto),
-        total: Number(order.total),
-        timeline: [
-          {
-            status: "Pedido realizado",
-            date: new Date(order.fecha_hora).toLocaleString("es-ES"),
-            completed: true,
-          },
-          {
-            status: "Pedido confirmado",
-            date: "",
-            completed: isPendiente || isEnviada || isCerrada,
-          },
-          {
-            status: "Procesando",
-            date: "",
-            completed: isPendiente || isEnviada || isCerrada,
-          },
-          {
-            status: "Enviado",
-            date: "",
-            completed: isEnviada || isCerrada,
-          },
-          {
-            status: "Pedido entregado",
-            date: "",
-            completed: isCerrada,
-          },
-        ],
-      };
+        console.log("✅ Order found:", order.idventa);
 
-      // Cargar artículos con error handling individual
-      for (const detalle of detalles) {
+        // Obtener cliente
+        let cliente = null;
         try {
-          console.log(`🔍 Loading articulo for detalle ${detalle.idarticulo}`);
-          const articulo = await db.articulo.findByPk(detalle.idarticulo);
+          cliente = await db.cliente.findByPk(order.idcliente);
+          console.log("👤 Cliente loaded:", cliente?.nombre || "Sin cliente");
+        } catch (clienteError) {
+          console.error("⚠️ Error loading cliente:", clienteError);
+        }
 
-          if (!articulo) {
-            console.warn(
-              `⚠️ Articulo not found with ID: ${detalle.idarticulo}`,
+        // Obtener detalles de venta
+        let detalles: any[] = [];
+        try {
+          detalles = await db.detalle_venta.findAll({
+            where: { idventa: orderId },
+          });
+          console.log("📋 Detalles loaded:", detalles.length);
+        } catch (detallesError) {
+          console.error("⚠️ Error loading detalles:", detallesError);
+        }
+
+        // Construir respuesta simple
+        const normalizedStatus = normalizeOrderStatus(order.estado);
+        const isPendiente = normalizedStatus === "PENDIENTE";
+        const isEnviada = normalizedStatus === "ENVIADA";
+        const isCerrada = normalizedStatus === "CERRADA";
+
+        const response: any = {
+          id: order.idventa,
+          orderNumber: `ORD-${String(order.idventa).padStart(3, "0")}`,
+          date: order.fecha_hora,
+          status: normalizedStatus.toLowerCase(),
+          customer: {
+            name:
+              String((order as any)?.cliente_nombre || "").trim() ||
+              cliente?.nombre ||
+              "Cliente",
+            email: cliente?.email || "",
+            phone:
+              String((order as any)?.cliente_telefono || "").trim() ||
+              cliente?.telefono ||
+              "",
+          },
+          shippingAddress: {
+            street:
+              String((order as any)?.cliente_direccion || "").trim() ||
+              cliente?.direccion ||
+              "",
+            city: "",
+            postalCode: "",
+            country: "España",
+          },
+          paymentMethod: "Pago online con tarjeta",
+          items: [],
+          subtotal: Number(order.total) - Number(order.impuesto),
+          shipping: 0,
+          tax: Number(order.impuesto),
+          total: Number(order.total),
+          timeline: [
+            {
+              status: "Pedido realizado",
+              date: new Date(order.fecha_hora).toLocaleString("es-ES"),
+              completed: true,
+            },
+            {
+              status: "Pedido confirmado",
+              date: "",
+              completed: isPendiente || isEnviada || isCerrada,
+            },
+            {
+              status: "Procesando",
+              date: "",
+              completed: isPendiente || isEnviada || isCerrada,
+            },
+            {
+              status: "Enviado",
+              date: "",
+              completed: isEnviada || isCerrada,
+            },
+            {
+              status: "Pedido entregado",
+              date: "",
+              completed: isCerrada,
+            },
+          ],
+        };
+
+        // Cargar artículos con error handling individual
+        for (const detalle of detalles) {
+          try {
+            console.log(
+              `🔍 Loading articulo for detalle ${detalle.idarticulo}`,
+            );
+            const articulo = await db.articulo.findByPk(detalle.idarticulo);
+
+            if (!articulo) {
+              console.warn(
+                `⚠️ Articulo not found with ID: ${detalle.idarticulo}`,
+              );
+              response.items.push({
+                id: detalle.idarticulo,
+                name: `Artículo #${detalle.idarticulo}`,
+                quantity: detalle.cantidad,
+                price: parseFloat(String(detalle.precio)),
+                discount: parseFloat(String(detalle.descuento)) || 0,
+                image: "",
+              });
+            } else {
+              response.items.push({
+                id: detalle.idarticulo,
+                name: articulo.nombre || "",
+                quantity: detalle.cantidad,
+                price: parseFloat(String(detalle.precio)),
+                discount: parseFloat(String(detalle.descuento)) || 0,
+                image: articulo.imagen || "",
+              });
+            }
+          } catch (articuloError) {
+            console.error(
+              `❌ Error loading articulo ${detalle.idarticulo}:`,
+              articuloError,
             );
             response.items.push({
               id: detalle.idarticulo,
-              name: `Artículo #${detalle.idarticulo}`,
+              name: `Artículo #${detalle.idarticulo} (error)`,
               quantity: detalle.cantidad,
               price: parseFloat(String(detalle.precio)),
               discount: parseFloat(String(detalle.descuento)) || 0,
               image: "",
             });
-          } else {
-            response.items.push({
-              id: detalle.idarticulo,
-              name: articulo.nombre || "",
-              quantity: detalle.cantidad,
-              price: parseFloat(String(detalle.precio)),
-              discount: parseFloat(String(detalle.descuento)) || 0,
-              image: articulo.imagen || "",
-            });
           }
-        } catch (articuloError) {
-          console.error(
-            `❌ Error loading articulo ${detalle.idarticulo}:`,
-            articuloError,
-          );
-          response.items.push({
-            id: detalle.idarticulo,
-            name: `Artículo #${detalle.idarticulo} (error)`,
-            quantity: detalle.cantidad,
-            price: parseFloat(String(detalle.precio)),
-            discount: parseFloat(String(detalle.descuento)) || 0,
-            image: "",
-          });
         }
-      }
 
-      console.log("✅ Response ready with", response.items.length, "items");
-      res.json(response);
-    } catch (error) {
-      console.error("❌ Error getting order:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      console.error("Full error stack:", error);
-      res
-        .status(500)
-        .json({ message: "Error obteniendo pedido", error: errorMessage });
-    }
-  });
+        console.log("✅ Response ready with", response.items.length, "items");
+        res.json(response);
+      } catch (error) {
+        console.error("❌ Error getting order:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        console.error("Full error stack:", error);
+        res
+          .status(500)
+          .json({ message: "Error obteniendo pedido", error: errorMessage });
+      }
+    },
+  );
 
   /**
    * PUT /api/admin/orders/:id
    * Actualizar estado de pedido
    */
-  router.put("/orders/:id", ...requireStaff, async (req: Request, res: Response) => {
-    try {
-      const orderId = parseInt(req.params.id as string, 10);
-      const order = await db.venta.findByPk(orderId);
+  router.put(
+    "/orders/:id",
+    ...requireStaff,
+    async (req: Request, res: Response) => {
+      try {
+        const orderId = parseInt(req.params.id as string, 10);
+        const order = await db.venta.findByPk(orderId);
 
-      if (!order) {
-        res.status(404).json({ success: false, message: "Pedido no encontrado" });
-        return;
-      }
-
-      const nextEstadoRaw = req.body?.estado;
-      if (nextEstadoRaw !== undefined) {
-        order.estado = normalizeOrderStatus(nextEstadoRaw);
-      }
-
-      if (req.body?.total !== undefined) {
-        const nextTotal = Number(req.body.total);
-        if (!Number.isFinite(nextTotal) || nextTotal <= 0) {
-          res.status(400).json({ success: false, message: "Total inválido" });
+        if (!order) {
+          res
+            .status(404)
+            .json({ success: false, message: "Pedido no encontrado" });
           return;
         }
-        order.total = nextTotal;
-      }
 
-      // Fecha y artículos no se editan desde administración de pedidos.
-
-      const nextClienteNombre = String(req.body?.clienteNombre || "").trim();
-      const nextClienteDireccion = String(req.body?.clienteDireccion || "").trim();
-      const nextClienteTelefono = String(req.body?.clienteTelefono || "").trim();
-
-      if (req.body?.clienteNombre !== undefined) {
-        (order as any).cliente_nombre = nextClienteNombre || null;
-      }
-      if (req.body?.clienteDireccion !== undefined) {
-        (order as any).cliente_direccion = nextClienteDireccion || null;
-      }
-      if (req.body?.clienteTelefono !== undefined) {
-        (order as any).cliente_telefono = nextClienteTelefono || null;
-      }
-
-      if (nextClienteNombre || nextClienteDireccion || nextClienteTelefono) {
-        const cliente = await db.cliente.findByPk(order.idcliente);
-        if (cliente) {
-          if (nextClienteNombre) {
-            cliente.nombre = nextClienteNombre;
-          }
-          if (req.body?.clienteDireccion !== undefined) {
-            cliente.direccion = nextClienteDireccion || undefined;
-          }
-          if (req.body?.clienteTelefono !== undefined) {
-            cliente.telefono = nextClienteTelefono || undefined;
-          }
-          await cliente.save();
+        const nextEstadoRaw = req.body?.estado;
+        if (nextEstadoRaw !== undefined) {
+          order.estado = normalizeOrderStatus(nextEstadoRaw);
         }
-      }
 
-      await order.save();
-      res.json({ success: true, order });
-    } catch (error) {
-      console.error("Error updating order:", error);
-      res.status(500).json({ success: false, message: "Error actualizando pedido" });
-    }
-  });
+        if (req.body?.total !== undefined) {
+          const nextTotal = Number(req.body.total);
+          if (!Number.isFinite(nextTotal) || nextTotal <= 0) {
+            res.status(400).json({ success: false, message: "Total inválido" });
+            return;
+          }
+          order.total = nextTotal;
+        }
+
+        // Fecha y artículos no se editan desde administración de pedidos.
+
+        const nextClienteNombre = String(req.body?.clienteNombre || "").trim();
+        const nextClienteDireccion = String(
+          req.body?.clienteDireccion || "",
+        ).trim();
+        const nextClienteTelefono = String(
+          req.body?.clienteTelefono || "",
+        ).trim();
+
+        if (req.body?.clienteNombre !== undefined) {
+          (order as any).cliente_nombre = nextClienteNombre || null;
+        }
+        if (req.body?.clienteDireccion !== undefined) {
+          (order as any).cliente_direccion = nextClienteDireccion || null;
+        }
+        if (req.body?.clienteTelefono !== undefined) {
+          (order as any).cliente_telefono = nextClienteTelefono || null;
+        }
+
+        if (nextClienteNombre || nextClienteDireccion || nextClienteTelefono) {
+          const cliente = await db.cliente.findByPk(order.idcliente);
+          if (cliente) {
+            if (nextClienteNombre) {
+              cliente.nombre = nextClienteNombre;
+            }
+            if (req.body?.clienteDireccion !== undefined) {
+              cliente.direccion = nextClienteDireccion || undefined;
+            }
+            if (req.body?.clienteTelefono !== undefined) {
+              cliente.telefono = nextClienteTelefono || undefined;
+            }
+            await cliente.save();
+          }
+        }
+
+        await order.save();
+        res.json({ success: true, order });
+      } catch (error) {
+        console.error("Error updating order:", error);
+        res
+          .status(500)
+          .json({ success: false, message: "Error actualizando pedido" });
+      }
+    },
+  );
 
   app.use("/api/admin", router);
   console.log("✅ Rutas de admin registradas en /api/admin");
