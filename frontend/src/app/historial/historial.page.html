@@ -59,7 +59,7 @@
     <div class="empty-state">
       <ion-icon name="receipt"></ion-icon>
       <p>Aún no tienes compras registradas.</p>
-      <ion-button routerLink="/home" color="primary"
+      <ion-button [routerLink]="getShoppingRoute()" color="primary"
         >Empezar a comprar</ion-button
       >
     </div>

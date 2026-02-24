@@ -268,3 +268,29 @@ ion-list.list-wp {
   background: #{colors.$background};
   --ion-item-background: #{colors.$surface};
 }
+
+/* Searchbar cancel and back button styling across the app */
+ion-searchbar::part(cancel-button),
+ion-searchbar::part(clear-button),
+ion-searchbar::part(button) {
+  background: transparent !important;
+  color: #303030 !important;
+  --color: #181818 !important;
+  --icon-color: #666666 !important;
+  box-shadow: none !important;
+}
+
+ion-back-button {
+  background: transparent !important;
+  color: #8c8c8c !important;
+  --color: #292929 !important;
+}
+
+/* Fallback selectors for older platforms or unexpected shadow-dom behavior */
+ion-searchbar .searchbar-clear-icon,
+ion-searchbar .searchbar-button,
+ion-searchbar .searchbar-md button,
+ion-searchbar .searchbar-ios button {
+  background: transparent !important;
+  color: #8c8c8c !important;
+}

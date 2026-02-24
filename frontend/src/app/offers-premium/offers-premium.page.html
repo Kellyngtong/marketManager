@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar class="offers-header-toolbar">
+    <div class="offers-title-block">
+      <ion-title class="offers-title">OFERTAS PREMIUM</ion-title>
+      <p class="offers-subtitle">más 10% de descuento en todas las ofertas</p>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button
+        class="back-home-btn"
+        routerLink="/cliente-premium"
+        fill="clear"
+        size="small"
+        aria-label="Volver a Cliente Premium"
+      >
+        <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <section class="filter-bar">
+    <div>
+      <p class="filter-label">Tipo seleccionado</p>
+      <h3>{{ getTipoLabel(selectedTipo) }}</h3>
+    </div>
+    <ion-button
+      id="tipoFilterTriggerOffersPremium"
+      fill="outline"
+      color="primary"
+      size="small"
+    >
+      <ion-icon slot="start" name="funnel-outline"></ion-icon>
+      {{ getTipoLabel(selectedTipo) }}
+    </ion-button>
+  </section>
+
+  <ion-popover
+    trigger="tipoFilterTriggerOffersPremium"
+    triggerAction="click"
+    [dismissOnSelect]="true"
+  >
+    <ng-template>
+      <ion-content class="tipo-popover">
+        <ion-list>
+          <ion-item
+            button
+            detail="false"
+            *ngFor="let tipo of tipos"
+            (click)="selectTipo(tipo.value)"
+          >
+            <ion-label>{{ tipo.label }}</ion-label>
+            <ion-icon
+              slot="end"
+              name="checkmark-outline"
+              *ngIf="selectedTipo === tipo.value"
+            ></ion-icon>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
+
+  <div class="product-grid">
+    <app-product-card
+      *ngFor="let product of products"
+      [product]="product"
+      [isPremiumClient]="true"
+      [cartCount]="getProductCartCount(product)"
+      (addToCart)="addToCart($event)"
+      (goToDetail)="goToDetail($event)"
+    ></app-product-card>
+  </div>
+</ion-content>

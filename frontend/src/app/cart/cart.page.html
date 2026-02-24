@@ -20,7 +20,7 @@
         <h2>Tu carrito está vacío</h2>
         <p>Añade productos para empezar a comprar</p>
         <ion-button
-          routerLink="/home"
+          [routerLink]="getShoppingRoute()"
           color="primary"
           fill="solid"
           size="large"
@@ -150,7 +150,7 @@
               <ion-button
                 expand="block"
                 fill="outline"
-                routerLink="/home"
+                [routerLink]="getShoppingRoute()"
                 class="continue-btn"
               >
                 Seguir Comprando

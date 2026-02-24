@@ -1,4 +1,4 @@
-@use '../components/_colors' as colors;
+@use "../components/_colors" as colors;
 
 :host {
   display: block;
@@ -136,7 +136,7 @@ ion-title {
   --color: #{colors.$surface};
 }
 
-.inventory-actions ion-button[color='danger'] {
+.inventory-actions ion-button[color="danger"] {
   --border-color: #{colors.$error};
   --color: #{colors.$error};
 }

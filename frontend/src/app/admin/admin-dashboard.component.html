@@ -12,7 +12,10 @@
   <div class="admin-header">
     <div class="header-wrapper">
       <div class="header-content">
-        <ion-icon name="shield-checkmark-outline" class="header-icon"></ion-icon>
+        <ion-icon
+          name="shield-checkmark-outline"
+          class="header-icon"
+        ></ion-icon>
         <div class="header-text">
           <h1>Panel de Administración</h1>
           <p>Gestiona usuarios, productos y pedidos de Mercachona</p>
@@ -22,7 +25,11 @@
   </div>
 
   <!-- Loading State -->
-  <ion-progress-bar *ngIf="loading" type="indeterminate" color="primary"></ion-progress-bar>
+  <ion-progress-bar
+    *ngIf="loading"
+    type="indeterminate"
+    color="primary"
+  ></ion-progress-bar>
 
   <!-- Stats Cards -->
   <div class="container">
@@ -47,7 +54,9 @@
         <div class="stat-header">
           <span class="stat-label">Ingresos</span>
         </div>
-        <div class="stat-value">€{{ metrics.totalRevenue | number:'1.2-2' }}</div>
+        <div class="stat-value">
+          €{{ metrics.totalRevenue | number: "1.2-2" }}
+        </div>
         <ion-icon name="trending-up-outline" class="stat-icon"></ion-icon>
       </div>
 
@@ -63,21 +72,21 @@
     <!-- Tabs Section -->
     <div class="tabs-section">
       <div class="tabs-list">
-        <button 
+        <button
           class="tab-trigger"
           [class.active]="activeTab === 'users'"
           (click)="selectTab('users')"
         >
           Usuarios
         </button>
-        <button 
+        <button
           class="tab-trigger"
           [class.active]="activeTab === 'products'"
           (click)="selectTab('products')"
         >
           Productos
         </button>
-        <button 
+        <button
           class="tab-trigger"
           [class.active]="activeTab === 'orders'"
           (click)="selectTab('orders')"
@@ -94,9 +103,21 @@
               <h2>Gestión de Usuarios</h2>
               <p>Administra los usuarios registrados</p>
             </div>
+            <ion-button
+              color="primary"
+              fill="solid"
+              size="small"
+              (click)="createUser()"
+            >
+              <ion-icon slot="start" name="add-outline"></ion-icon>
+              Nuevo Usuario
+            </ion-button>
+          </div>
+          <div class="card-search">
+            <ion-searchbar placeholder="Buscar usuarios..." showCancelButton="never" [(ngModel)]="userSearch"></ion-searchbar>
           </div>
           <div class="card-content">
-            <div class="table-wrapper" *ngIf="users.length > 0; else noUsers">
+            <div class="table-wrapper" *ngIf="filteredUsers.length > 0; else noUsers">
               <table class="data-table">
                 <thead>
                   <tr>
@@ -108,22 +129,35 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let user of users">
-                    <td class="font-medium">{{ user.username || user.nombre || 'N/A' }}</td>
+                  <tr *ngFor="let user of filteredUsers">
+                    <td class="font-medium">
+                      {{ user.username || user.nombre || "N/A" }}
+                    </td>
                     <td>{{ user.email }}</td>
                     <td>
-                      <span class="badge" [ngClass]="'role-' + (user.rol || 'cliente')">
-                        {{ user.rol || 'Cliente' }}
+                      <span
+                        class="badge"
+                        [ngClass]="'role-' + (user.rol || 'cliente')"
+                      >
+                        {{ user.rol || "Cliente" }}
                       </span>
                     </td>
                     <td>
                       <span class="badge status-active">Activo</span>
                     </td>
                     <td class="text-right">
-                      <button class="icon-btn" (click)="editUser(user)" title="Editar">
+                      <button
+                        class="icon-btn"
+                        (click)="editUser(user)"
+                        title="Editar"
+                      >
                         <ion-icon name="create-outline"></ion-icon>
                       </button>
-                      <button class="icon-btn error" (click)="deleteUser(user.idusuario)" title="Eliminar">
+                      <button
+                        class="icon-btn error"
+                        (click)="deleteUser(user.idusuario)"
+                        title="Eliminar"
+                      >
                         <ion-icon name="trash-outline"></ion-icon>
                       </button>
                     </td>
@@ -149,13 +183,16 @@
               <h2>Gestión de Productos</h2>
               <p>Administra el catálogo de productos</p>
             </div>
-            <ion-button color="primary" fill="solid" size="small">
+            <ion-button color="primary" fill="solid" size="small" (click)="createProduct()">
               <ion-icon slot="start" name="add-outline"></ion-icon>
               Nuevo Producto
             </ion-button>
           </div>
+          <div class="card-search">
+            <ion-searchbar placeholder="Buscar productos..." showCancelButton="never" [(ngModel)]="productSearch"></ion-searchbar>
+          </div>
           <div class="card-content">
-            <div class="table-wrapper" *ngIf="products.length > 0; else noProducts">
+            <div class="table-wrapper" *ngIf="filteredProducts.length > 0; else noProducts">
               <table class="data-table">
                 <thead>
                   <tr>
@@ -167,9 +204,9 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let product of products">
+                  <tr *ngFor="let product of filteredProducts">
                     <td class="font-medium">{{ product.nombre }}</td>
-                    <td>{{ product.categoria || 'N/A' }}</td>
+                    <td>{{ product.categoria_nombre || product.categoria?.nombre || product.categoria || 'N/A' }}</td>
                     <td>€{{ product.precio_venta | number:'1.2-2' }}</td>
                     <td>
                       <span class="badge" [ngClass]="product.oferta ? 'badge-secondary' : 'badge-outline'">
@@ -207,8 +244,11 @@
               <p>Administra los pedidos realizados</p>
             </div>
           </div>
+          <div class="card-search">
+            <ion-searchbar placeholder="Buscar pedidos..." showCancelButton="never" [(ngModel)]="orderSearch"></ion-searchbar>
+          </div>
           <div class="card-content">
-            <div class="table-wrapper" *ngIf="orders.length > 0; else noOrders">
+            <div class="table-wrapper" *ngIf="filteredOrders.length > 0; else noOrders">
               <table class="data-table">
                 <thead>
                   <tr>
@@ -221,18 +261,25 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let order of orders">
+                  <tr *ngFor="let order of filteredOrders">
                     <td class="font-medium">#{{ order.idventa }}</td>
-                    <td>{{ order.usuario?.username || 'N/A' }}</td>
-                    <td>€{{ order.total | number:'1.2-2' }}</td>
-                    <td>{{ order.fecha_venta | date:'short' }}</td>
+                    <td>{{ order.usuario?.username || "N/A" }}</td>
+                    <td>€{{ order.total | number: "1.2-2" }}</td>
+                    <td>{{ order.fecha_venta | date: "short" }}</td>
                     <td>
-                      <span class="badge" [ngClass]="'status-' + (order.estado || 'pendiente')">
-                        {{ order.estado || 'Pendiente' }}
+                      <span
+                        class="badge"
+                        [ngClass]="'status-' + (order.estado || 'pendiente')"
+                      >
+                        {{ order.estado || "Pendiente" }}
                       </span>
                     </td>
                     <td class="text-right">
-                      <button class="icon-btn" (click)="editOrder(order)" title="Ver Detalles">
+                      <button
+                        class="icon-btn"
+                        (click)="editOrder(order)"
+                        title="Ver Detalles"
+                      >
                         <ion-icon name="eye-outline"></ion-icon>
                       </button>
                     </td>

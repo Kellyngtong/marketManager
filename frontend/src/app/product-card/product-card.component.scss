@@ -23,10 +23,52 @@ ion-card-subtitle {
   font-size: 1.2em;
 }
 
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.current-price {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.original-price {
+  color: #d84a4a;
+  font-size: 0.88rem;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.discount-percent {
+  color: colors.$textSecondary;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .offer-label {
   color: colors.$secondary;
   font-weight: 700;
-  margin-left: 0.35rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+.premium-price-row {
+  gap: 0.6rem;
+}
+
+.premium-current-price {
+  color: colors.$primary;
+  font-weight: 700;
+}
+
+.premium-original-price {
+  color: #d84a4a;
+  font-size: 0.9rem;
+  text-decoration: line-through;
 }
 
 img {

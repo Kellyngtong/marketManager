@@ -1,18 +1,17 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastController, ModalController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { CarritoService } from '../services/carrito.service';
 import { AuthService } from '../auth/auth.service';
-import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: 'app-cliente-premium',
+  templateUrl: 'cliente-premium.page.html',
+  styleUrls: ['cliente-premium.page.scss'],
   standalone: false,
 })
-export class HomePage implements OnDestroy {
+export class ClientePremiumPage implements OnDestroy {
   @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
   private API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
   goToDetail(payload: any) {
@@ -31,35 +30,33 @@ export class HomePage implements OnDestroy {
   cartItemsCount = 0;
   private cartCountByArticulo: Record<number, number> = {};
   selectedTipo: string | null = null;
-  searchQuery: string = '';
   showOnlyOffers = false;
   isUploadingAvatar = false;
   readonly tipos = [
     { label: 'Todos', value: null },
     { label: 'Fruta', value: 'fruta' },
     { label: 'Verdura', value: 'verdura' },
+    { label: 'Embutidos', value: 'embutidos' },
     { label: 'Carne', value: 'carne' },
     { label: 'Pescado', value: 'pescado' },
-    { label: 'Lácteos', value: 'lacteos' },
     { label: 'Bebidas', value: 'bebidas' },
-    { label: 'Congelados', value: 'congelados' },
-    { label: 'Panadería', value: 'panaderia' },
+    { label: 'Bebidas alcohólicas', value: 'bebidas alcoholicas' },
+    { label: 'Trigo', value: 'trigo' },
   ];
   private readonly tipoCategoriaMap: Record<string, number> = {
     fruta: 1,
     verdura: 2,
-    carne: 3,
-    pescado: 4,
-    lacteos: 5,
-    bebidas: 6,
-    congelados: 7,
-    panaderia: 8,
+    bebidas: 3,
+    embutidos: 5,
+    carne: 6,
+    pescado: 7,
+    'bebidas alcoholicas': 8,
+    trigo: 9,
   };
   private subscriptions = new Subscription();
 
   constructor(
     private toastCtrl: ToastController,
-    private modalCtrl: ModalController,
     private carritoService: CarritoService,
     private authService: AuthService,
     private router: Router,
@@ -129,13 +126,7 @@ export class HomePage implements OnDestroy {
           ? this.isOfferEnabled(product?.oferta)
           : true;
 
-        const matchesSearch = this.searchQuery
-          ? (product?.nombre || '')
-              .toLowerCase()
-              .includes(this.searchQuery.toLowerCase())
-          : true;
-
-        return matchesTipo && matchesOferta && matchesSearch;
+        return matchesTipo && matchesOferta;
       });
     } catch (error) {
       console.error('Error loading products:', error);
@@ -198,11 +189,6 @@ export class HomePage implements OnDestroy {
       return;
     }
     this.selectedTipo = value;
-    this.loadProducts();
-  }
-
-  onSearchChange(query: string) {
-    this.searchQuery = query;
     this.loadProducts();
   }
 
@@ -294,26 +280,6 @@ export class HomePage implements OnDestroy {
     this.authService.updateLocalUser({ avatar: null });
   }
 
-  async confirmLogout() {
-    const modal = await this.modalCtrl.create({
-      component: ConfirmationModalComponent,
-      cssClass: 'confirmation-modal',
-      componentProps: {
-        title: 'Cerrar sesión',
-        message: '¿Estás seguro de que quieres cerrar sesión?',
-        isDangerous: true,
-        cancelText: 'Cancelar',
-        confirmText: 'Cerrar sesión',
-      },
-    });
-
-    await modal.present();
-    const result = await modal.onDidDismiss();
-    if (result.data?.confirmed === true) {
-      this.logout();
-    }
-  }
-
   logout() {
     this.authService.logout();
     this.router.navigateByUrl('/login', { replaceUrl: true });
@@ -336,6 +302,13 @@ export class HomePage implements OnDestroy {
   }
 
   private matchesSelectedTipo(product: any, tipo: string) {
+    const normalizedTipo = String(product?.tipo || '')
+      .trim()
+      .toLowerCase();
+    if (normalizedTipo === tipo) {
+      return true;
+    }
+
     const expectedCategory = this.tipoCategoriaMap[tipo];
     if (!expectedCategory) {
       return false;
