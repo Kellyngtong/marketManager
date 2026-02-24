@@ -2,6 +2,7 @@
 
 ion-content {
   --background: #{colors.$background};
+  --padding-bottom: 96px;
 }
 
 ion-toolbar {
@@ -26,5 +27,116 @@ ion-toolbar {
   p {
     margin: 0;
     color: colors.$textSecondary;
+  }
+}
+
+.loading-placeholder {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.orders-list ion-card {
+  margin: 0 0 1rem;
+  border: 1px solid colors.$border;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px colors.$shadowLight;
+  background: colors.$surface;
+}
+
+.order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 1rem;
+  margin-bottom: 0.75rem;
+
+  p {
+    margin: 0;
+    color: colors.$textPrimary;
+    font-size: 0.92rem;
+  }
+}
+
+.order-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.order-items {
+  margin-bottom: 0.75rem;
+
+  strong {
+    color: colors.$textPrimary;
+  }
+
+  ion-item {
+    --background: #{colors.$surface};
+    --color: #{colors.$textPrimary};
+    --min-height: 44px;
+  }
+}
+
+.edit-button {
+  --background: #{colors.$primary};
+  --background-activated: #{colors.$primaryDark};
+  --background-focused: #{colors.$primaryDark};
+  --border-color: #{colors.$primary};
+  --color: #{colors.$surface};
+}
+
+ion-chip.status-pendiente {
+  --background: #{colors.$secondaryLight};
+  --color: #{colors.$warning};
+}
+
+ion-chip.status-nuevo {
+  --background: #{colors.$border};
+  --color: #{colors.$textPrimary};
+}
+
+ion-chip.status-enviada {
+  --background: #{colors.$primaryLight};
+  --color: #{colors.$success};
+}
+
+ion-chip.status-cerrada {
+  --background: #{colors.$textPrimary};
+  --color: #{colors.$surface};
+}
+
+.fixed-add-fab {
+  position: fixed;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 40;
+}
+
+ion-fab-button {
+  --background: #{colors.$primary};
+  --background-activated: #{colors.$primaryDark};
+  --background-focused: #{colors.$primaryDark};
+  --box-shadow: 0 8px 20px #{colors.$shadowMedium};
+}
+
+.modal-items {
+  margin: 1rem 0;
+
+  h3 {
+    margin: 0 0 0.5rem;
+    color: colors.$textPrimary;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .order-grid {
+    grid-template-columns: 1fr;
   }
 }

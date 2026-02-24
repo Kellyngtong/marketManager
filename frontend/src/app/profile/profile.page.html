@@ -23,26 +23,27 @@
         class="avatar-button"
         (click)="triggerAvatarPicker()"
         [disabled]="isUploadingAvatar"
+        aria-label="Cambiar foto de perfil"
       >
         <ion-avatar>
-          <img
-            [src]="current.avatar || 'https://www.gravatar.com/avatar?d=mp&s=160'"
-            alt="avatar"
-            (error)="onAvatarImageError()"
-          />
+          <img [src]="current.avatar || 'https://www.gravatar.com/avatar?d=mp&s=160'" alt="avatar" />
         </ion-avatar>
-        <ion-icon class="camera-icon" name="camera-outline"></ion-icon>
-        <ion-spinner
-          *ngIf="isUploadingAvatar"
-          class="avatar-spinner"
-          name="crescent"
-        ></ion-spinner>
+        <ion-icon class="camera-icon" name="camera"></ion-icon>
+        <ion-spinner *ngIf="isUploadingAvatar" name="crescent" class="avatar-spinner"></ion-spinner>
       </button>
+      <input
+        #avatarInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onAvatarSelected($event)"
+      />
       <div>
         <h2>{{ current.nombre || current.username }}</h2>
         <ion-chip color="primary">
-          <ion-label>{{ current.rol?.nombre || 'Cliente' }}</ion-label>
+          <ion-label>{{ getUserRoleLabel(current) }}</ion-label>
         </ion-chip>
+        <p class="hint">Pulsa la imagen para cambiar tu avatar.</p>
       </div>
     </ion-card-content>
   </ion-card>
@@ -87,14 +88,18 @@
   </form>
 
   <div class="actions">
+    <ion-button
+      *ngIf="!isPremiumUser()"
+      expand="block"
+      color="warning"
+      class="premium-upgrade-btn"
+      (click)="goToPremiumCheckout()"
+      >HACERTE PREMIUM: 15 €</ion-button
+    >
     <ion-button expand="block" color="success" (click)="saveProfile()"
       >Guardar cambios</ion-button
     >
-    <ion-button
-      expand="block"
-      fill="clear"
-      color="medium"
-      (click)="confirmLogout()"
+    <ion-button expand="block" fill="clear" color="medium" (click)="confirmLogout()"
       >Cerrar sesión</ion-button
     >
   </div>

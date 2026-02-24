@@ -59,14 +59,26 @@
     </ion-text>
 
     <!-- Rol -->
-    <ion-item class="ion-margin-bottom ion-margin-top">
-      <ion-label position="stacked">Rol</ion-label>
-      <ion-select formControlName="rol">
-        <ion-select-option *ngFor="let role of roles" [value]="role">
-          {{ role | titlecase }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
+    <div class="ion-margin-bottom ion-margin-top role-section">
+      <ion-label class="role-label">Rol</ion-label>
+      <ion-radio-group formControlName="rol" class="role-options">
+        <ion-item
+          *ngFor="let role of roles"
+          lines="none"
+          class="role-item"
+          [ngClass]="'role-item-' + role.value"
+          button
+          detail="false"
+          (click)="userForm.get('rol')?.setValue(role.value)"
+        >
+          <ion-radio slot="start" [value]="role.value"></ion-radio>
+          <ion-label>
+            <div class="role-title">{{ role.label }}</div>
+            <div class="role-desc">{{ role.description }}</div>
+          </ion-label>
+        </ion-item>
+      </ion-radio-group>
+    </div>
 
     <!-- Botón Guardar -->
     <div class="button-group">

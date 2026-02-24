@@ -23,9 +23,9 @@ export class ProfilePage implements OnDestroy {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
+    private modalCtrl: ModalController,
     private toastCtrl: ToastController,
     private router: Router,
-    private modalCtrl: ModalController,
   ) {
     this.profileForm = this.fb.group({
       nombre: ['', Validators.required],
@@ -44,7 +44,7 @@ export class ProfilePage implements OnDestroy {
             email: user.email || '',
             telefono: user.telefono || '',
             direccion: user.direccion || '',
-            rol: user.rol?.nombre || 'Cliente',
+            rol: this.getUserRoleLabel(user),
           },
           { emitEvent: false },
         );
@@ -89,7 +89,78 @@ export class ProfilePage implements OnDestroy {
     }
   }
 
+  onAvatarImageError() {
+    this.auth.updateLocalUser({ avatar: null });
+  }
+
+  logout() {
+    this.auth.logout();
+    this.router.navigateByUrl('/', { replaceUrl: true });
+  }
+
+  async confirmLogout() {
+    const modal = await this.modalCtrl.create({
+      component: ConfirmationModalComponent,
+      cssClass: 'confirmation-modal',
+      componentProps: {
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que quieres cerrar sesión?',
+        isDangerous: true,
+        cancelText: 'Cancelar',
+        confirmText: 'Cerrar sesión',
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+    if (result.data?.confirmed === true) {
+      this.logout();
+    }
+  }
+
+  isPremiumUser(): boolean {
+    const current = this.user;
+    const topLevelRol = current?.idrol;
+    const nestedRol = current?.rol?.idrol;
+    const rolNombre = String(
+      current?.rol?.nombre || current?.rol || '',
+    ).toLowerCase();
+
+    return (
+      topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium')
+    );
+  }
+
+  getUserRoleLabel(userData: any = this.user): string {
+    const rawRoleName = userData?.rol?.nombre || userData?.rol;
+    const roleName = String(rawRoleName || '').trim();
+
+    if (roleName) {
+      return roleName;
+    }
+
+    const roleId = Number(userData?.idrol || userData?.rol?.idrol || 0);
+    switch (roleId) {
+      case 2:
+        return 'Premium';
+      case 3:
+        return 'Vendedor';
+      case 4:
+        return 'Admin';
+      case 1:
+      default:
+        return 'Cliente';
+    }
+  }
+
+  goToPremiumCheckout() {
+    this.router.navigate(['/checkout'], { queryParams: { mode: 'premium' } });
+  }
+
   triggerAvatarPicker() {
+    if (this.isUploadingAvatar) {
+      return;
+    }
     this.avatarInput?.nativeElement?.click();
   }
 
@@ -121,7 +192,7 @@ export class ProfilePage implements OnDestroy {
           this.auth.uploadAvatar(file),
         );
         avatarUrl = uploadRes?.imageUrl || uploadRes?.url || null;
-      } catch (uploadError: any) {
+      } catch (uploadError) {
         avatarUrl = await this.fileToDataUrl(file);
       }
 
@@ -142,7 +213,6 @@ export class ProfilePage implements OnDestroy {
       });
       await toast.present();
     } catch (error: any) {
-      console.error('Error updating avatar', error);
       const msg =
         error?.error?.message ||
         error?.message ||
@@ -159,41 +229,13 @@ export class ProfilePage implements OnDestroy {
     }
   }
 
-  onAvatarImageError() {
-    this.auth.updateLocalUser({ avatar: null });
-  }
-
   private fileToDataUrl(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('No se pudo leer la imagen'));
       reader.readAsDataURL(file);
     });
-  }
-  async confirmLogout() {
-    const modal = await this.modalCtrl.create({
-      component: ConfirmationModalComponent,
-      cssClass: 'confirmation-modal',
-      componentProps: {
-        title: 'Cerrar sesión',
-        message: '¿Estás seguro de que quieres cerrar sesión?',
-        isDangerous: true,
-        cancelText: 'Cancelar',
-        confirmText: 'Cerrar sesión',
-      },
-    });
-
-    await modal.present();
-    const result = await modal.onDidDismiss();
-    if (result.data?.confirmed === true) {
-      this.logout();
-    }
-  }
-
-  logout() {
-    this.auth.logout();
-    this.router.navigateByUrl('/', { replaceUrl: true });
   }
 
   ngOnDestroy(): void {

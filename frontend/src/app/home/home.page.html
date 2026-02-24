@@ -75,30 +75,20 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <section class="filter-section">
-    <!-- Search Bar -->
-    <div class="search-container">
-      <ion-searchbar
-        [(ngModel)]="searchQuery"
-        (ionChange)="onSearchChange($any($event).detail.value)"
-        placeholder="Buscar productos..."
-        debounce="300"
-      ></ion-searchbar>
+  <section class="filter-bar">
+    <div>
+      <p class="filter-label">Tipo seleccionado</p>
+      <h3>{{ getTipoLabel(selectedTipo) }}</h3>
     </div>
-
-    <!-- Category Filters -->
-    <div class="category-filters">
-      <ion-button
-        *ngFor="let tipo of tipos"
-        [fill]="selectedTipo === tipo.value ? 'solid' : 'outline'"
-        [color]="selectedTipo === tipo.value ? 'primary' : 'medium'"
-        size="small"
-        (click)="selectTipo(tipo.value)"
-        class="filter-button"
-      >
-        {{ tipo.label }}
-      </ion-button>
-    </div>
+    <ion-button
+      id="tipoFilterTrigger"
+      fill="outline"
+      color="primary"
+      size="small"
+    >
+      <ion-icon slot="start" name="funnel-outline"></ion-icon>
+      {{ getTipoLabel(selectedTipo) }}
+    </ion-button>
   </section>
 
   <div class="product-grid">

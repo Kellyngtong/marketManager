@@ -12,7 +12,28 @@ export class EditUserModalComponent implements OnInit {
   @Input() user: any;
   
   userForm!: FormGroup;
-  roles = ['cliente', 'premium', 'empleado', 'admin'];
+  roles = [
+    {
+      value: 'cliente',
+      label: 'Cliente',
+      description: 'Compra productos y consulta su historial',
+    },
+    {
+      value: 'premium',
+      label: 'Premium',
+      description: 'Cliente con beneficios y ofertas exclusivas',
+    },
+    {
+      value: 'empleado',
+      label: 'Empleado',
+      description: 'Gestiona inventario y operaciones de tienda',
+    },
+    {
+      value: 'admin',
+      label: 'Admin',
+      description: 'Acceso total al panel y gestión global',
+    },
+  ];
 
   constructor(
     private modalCtrl: ModalController,

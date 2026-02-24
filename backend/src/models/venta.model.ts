@@ -11,6 +11,9 @@ export class Venta extends Model {
   public impuesto!: number;
   public total!: number;
   public estado!: string;
+  public cliente_nombre?: string;
+  public cliente_telefono?: string;
+  public cliente_direccion?: string;
 }
 
 export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
@@ -56,6 +59,18 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
       estado: {
         type: dataTypes.STRING(20),
         allowNull: false,
+      },
+      cliente_nombre: {
+        type: dataTypes.STRING(100),
+        allowNull: true,
+      },
+      cliente_telefono: {
+        type: dataTypes.STRING(20),
+        allowNull: true,
+      },
+      cliente_direccion: {
+        type: dataTypes.STRING(180),
+        allowNull: true,
       },
     },
     {

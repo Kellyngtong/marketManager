@@ -1,17 +1,10 @@
-import { Express, Router, Request, Response, NextFunction } from "express";
+import { Express, Router, Request, Response } from "express";
 import * as authJwt from "@middlewares/authJwt";
 import { extractTenant } from "@middlewares/tenant";
-
-// Dynamically import the JavaScript controller
-let ventaController: any;
+import * as ventaController from "@controllers/venta.controller";
 
 export default (app: Express): void => {
   const router = Router();
-
-  // Lazy load the controller
-  if (!ventaController) {
-    ventaController = require("../../controllers/venta.controller.js");
-  }
 
   const requireCliente = [authJwt.verifyToken, authJwt.hasRole([1, 2])];
 
@@ -23,8 +16,8 @@ export default (app: Express): void => {
     "/",
     ...requireCliente,
     extractTenant,
-    (req: Request, res: Response, next: NextFunction) => {
-      ventaController.checkout(req, res, next);
+    (req: Request, res: Response) => {
+      ventaController.checkout(req, res);
     },
   );
 
@@ -36,8 +29,8 @@ export default (app: Express): void => {
     "/:id",
     ...requireCliente,
     extractTenant,
-    (req: Request, res: Response, next: NextFunction) => {
-      ventaController.getDetalleVenta(req, res, next);
+    (req: Request, res: Response) => {
+      ventaController.getDetalleVenta(req, res);
     },
   );
 
@@ -51,8 +44,8 @@ export default (app: Express): void => {
     "/api/mis-compras",
     ...requireCliente,
     extractTenant,
-    (req: Request, res: Response, next: NextFunction) => {
-      ventaController.getHistorialCompras(req, res, next);
+    (req: Request, res: Response) => {
+      ventaController.getHistorialCompras(req, res);
     },
   );
 };

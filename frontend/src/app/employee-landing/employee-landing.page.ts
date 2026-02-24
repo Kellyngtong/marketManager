@@ -36,11 +36,11 @@ export class EmployeeLandingPage {
   }
 
   goToPedidos() {
-    this.router.navigateByUrl('/adminPedidos');
+    this.router.navigateByUrl('/admin-pedidos');
   }
 
   goToMarketing() {
-    this.router.navigateByUrl('/adminMarketing');
+    this.router.navigateByUrl('/admin-marketing');
   }
 
   goToContable() {

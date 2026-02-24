@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PagosService } from '../services/pagos.service';
 import { CarritoService } from '../services/carrito.service';
 import { AuthService } from '../auth/auth.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-payment-success',
@@ -42,15 +43,25 @@ export class PaymentSuccessPage implements OnInit, OnDestroy {
 
         try {
           // Confirmar pago en el servidor
-          const response = await this.pagosService
-            .confirmarPago(this.sessionId)
-            .toPromise();
+          const response = await firstValueFrom(
+            this.pagosService.confirmarPago(this.sessionId),
+          );
 
           this.paymentStatus = 'success';
-          this.orderNumber = response?.venta?.num_comprobante || this.sessionId;
+          this.orderNumber =
+            response?.venta?.num_comprobante ||
+            (response?.premiumUpdated ? 'PREMIUM-1M' : this.sessionId);
 
-          // Limpiar carrito y sesión
-          this.carritoService.clearCart().subscribe();
+          if (response?.premiumUpdated) {
+            try {
+              await firstValueFrom(this.auth.getProfile());
+            } catch {
+              // No bloquear la confirmación si refrescar perfil falla
+            }
+          } else {
+            this.carritoService.clearCart().subscribe();
+          }
+
           localStorage.removeItem('stripe_session_id');
         } catch (error: any) {
           console.error('Error confirmando pago:', error);

@@ -8,6 +8,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 const PREMIUM_ROLE_ID = 2;
 const TAX_RATE = 0.18;
+const PREMIUM_UPGRADE_PRICE = 15;
+const STANDARD_CHECKOUT_TYPE = "cart_purchase";
+const PREMIUM_CHECKOUT_TYPE = "premium_upgrade";
 
 const toPositiveNumber = (value: any): number => {
   const parsed = Number(value);
@@ -143,7 +146,11 @@ export const crearSesionCheckout = async (
       return;
     }
 
-    const premium = isPremiumUser(req);
+    const usuarioSesion = await db.usuario.findByPk(idusuario, {
+      attributes: ["idrol", "nombre", "direccion", "telefono", "email"],
+    });
+    const premium =
+      Number(usuarioSesion?.idrol || 0) === PREMIUM_ROLE_ID || isPremiumUser(req);
     const requestOriginalPrices = sanitizeOriginalPricesMap(
       req.body?.pricingContext?.originalPrices,
     );
@@ -225,6 +232,20 @@ export const crearSesionCheckout = async (
       items.map((item: any) => item.Articulo?.idarticulo).filter(Boolean),
     );
 
+    const direccionEnvio = String(
+      req.body?.datosEnvio?.direccion || usuarioSesion?.direccion || "",
+    )
+      .trim()
+      .slice(0, 180);
+    const telefonoEnvio = String(
+      req.body?.datosEnvio?.telefono || usuarioSesion?.telefono || "",
+    )
+      .trim()
+      .slice(0, 40);
+    const nombreCliente = String(usuarioSesion?.nombre || "")
+      .trim()
+      .slice(0, 100);
+
     // Crear sesión de Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -239,8 +260,12 @@ export const crearSesionCheckout = async (
       metadata: {
         idusuario: idusuario.toString(),
         id_tenant: req.tenant?.id_tenant?.toString() || "1",
+        checkout_type: STANDARD_CHECKOUT_TYPE,
         premium_pricing: premium ? "1" : "0",
         premium_original_prices: serializedOriginalPrices,
+        direccion_envio: direccionEnvio,
+        telefono_envio: telefonoEnvio,
+        cliente_nombre: nombreCliente,
       },
     });
 
@@ -254,6 +279,69 @@ export const crearSesionCheckout = async (
     console.error("Error al crear sesión de Stripe:", error);
     res.status(500).json({
       message: "Error al crear sesión de pago",
+      error:
+        process.env.NODE_ENV === "development"
+          ? (error as any).message
+          : undefined,
+    });
+  }
+};
+
+/**
+ * POST /api/pagos/crear-sesion-premium
+ * Crear sesión de Stripe para upgrade a cliente premium (1 mes)
+ */
+export const crearSesionPremiumCheckout = async (
+  req: TenantRequest & AuthRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const idusuario = req.idusuario;
+
+    if (!idusuario) {
+      res.status(401).json({ message: "Usuario no autenticado" });
+      return;
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: "1 mes de cliente premium",
+              description: "Upgrade a cuenta cliente premium durante 1 mes",
+            },
+            unit_amount: Math.round(PREMIUM_UPGRADE_PRICE * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      customer_email: req.email,
+      success_url:
+        process.env.STRIPE_SUCCESS_URL ||
+        "http://localhost:8100/payment-success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url:
+        process.env.STRIPE_CANCEL_URL || "http://localhost:8100/payment-cancel",
+      metadata: {
+        idusuario: idusuario.toString(),
+        id_tenant: req.tenant?.id_tenant?.toString() || "1",
+        checkout_type: PREMIUM_CHECKOUT_TYPE,
+      },
+    });
+
+    res.json({
+      message: "Sesión de Stripe premium creada",
+      sessionId: session.id,
+      publicKey: process.env.STRIPE_PUBLIC_KEY,
+      url: session.url,
+    });
+  } catch (error) {
+    console.error("Error al crear sesión premium de Stripe:", error);
+    res.status(500).json({
+      message: "Error al crear sesión premium",
       error:
         process.env.NODE_ENV === "development"
           ? (error as any).message
@@ -342,6 +430,40 @@ export const confirmarPago = async (
       return;
     }
 
+    const checkoutType = String(
+      session.metadata?.checkout_type || STANDARD_CHECKOUT_TYPE,
+    );
+
+    const sessionUserId = Number(session.metadata?.idusuario || 0);
+    if (sessionUserId > 0 && sessionUserId !== Number(idusuario)) {
+      res.status(403).json({ message: "La sesión de pago no pertenece al usuario autenticado" });
+      return;
+    }
+
+    if (checkoutType === PREMIUM_CHECKOUT_TYPE) {
+      const usuarioPremium = await db.usuario.findByPk(idusuario);
+      if (!usuarioPremium) {
+        res.status(404).json({ message: "Usuario no encontrado" });
+        return;
+      }
+
+      if (Number(usuarioPremium.idrol || 0) !== PREMIUM_ROLE_ID) {
+        usuarioPremium.idrol = PREMIUM_ROLE_ID;
+        await usuarioPremium.save();
+      }
+
+      res.json({
+        message: "Pago premium confirmado y rol actualizado",
+        premiumUpdated: true,
+        usuario: {
+          idusuario: usuarioPremium.idusuario,
+          idrol: usuarioPremium.idrol,
+          rol: "premium",
+        },
+      });
+      return;
+    }
+
     const premiumBySession =
       String(session.metadata?.premium_pricing || "0") === "1";
     const originalPricesMap = parseSerializedOriginalPrices(
@@ -366,6 +488,33 @@ export const confirmarPago = async (
       return;
     }
 
+    const direccionEnvio = String(session.metadata?.direccion_envio || "")
+      .trim()
+      .slice(0, 180);
+    const telefonoEnvio = String(session.metadata?.telefono_envio || "")
+      .trim()
+      .slice(0, 40);
+
+    const resolvedNombre = String(usuario.nombre || "").trim();
+    const resolvedDireccion =
+      direccionEnvio || String(usuario.direccion || "").trim();
+    const resolvedTelefono =
+      telefonoEnvio || String(usuario.telefono || "").trim();
+
+    // Persistir datos del checkout también en usuario
+    let shouldUpdateUsuario = false;
+    if (resolvedDireccion && usuario.direccion !== resolvedDireccion) {
+      usuario.direccion = resolvedDireccion;
+      shouldUpdateUsuario = true;
+    }
+    if (resolvedTelefono && usuario.telefono !== resolvedTelefono) {
+      usuario.telefono = resolvedTelefono;
+      shouldUpdateUsuario = true;
+    }
+    if (shouldUpdateUsuario) {
+      await usuario.save();
+    }
+
     // Crear o actualizar cliente
     let cliente = await db.cliente.findOne({
       where: { email: usuario.email },
@@ -373,12 +522,18 @@ export const confirmarPago = async (
 
     if (!cliente) {
       cliente = await db.cliente.create({
-        nombre: usuario.nombre,
+        nombre: resolvedNombre || "Cliente",
         email: usuario.email,
-        telefono: usuario.telefono || null,
-        direccion: usuario.direccion || null,
+        telefono: resolvedTelefono || null,
+        direccion: resolvedDireccion || null,
         tipo_documento: usuario.tipo_documento || null,
         num_documento: usuario.num_documento || null,
+      });
+    } else {
+      await cliente.update({
+        nombre: resolvedNombre || cliente.nombre,
+        telefono: resolvedTelefono || null,
+        direccion: resolvedDireccion || null,
       });
     }
 
@@ -406,7 +561,10 @@ export const confirmarPago = async (
       fecha_hora: new Date(),
       impuesto,
       total,
-      estado: "Completada",
+      estado: "NUEVO",
+      cliente_nombre: resolvedNombre || cliente.nombre || "Cliente",
+      cliente_telefono: resolvedTelefono || cliente.telefono || null,
+      cliente_direccion: resolvedDireccion || cliente.direccion || null,
       metodo_pago: "stripe",
       stripe_session_id: session.id,
     });

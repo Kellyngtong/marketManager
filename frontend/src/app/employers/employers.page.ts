@@ -22,8 +22,10 @@ import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirma
 export class EmployersPage {
   private readonly API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;
   products: any[] = [];
+  allProducts: any[] = [];
   isLoading = false;
   selectedTipo: string | null = null;
+  searchTerm = '';
   readonly tipos = [
     { label: 'Todos', value: null },
     { label: 'Fruta', value: 'fruta' },
@@ -109,11 +111,8 @@ export class EmployersPage {
         page += 1;
       }
 
-      this.products = this.selectedTipo
-        ? fullList.filter((product: any) =>
-            this.matchesSelectedTipo(product, this.selectedTipo as string),
-          )
-        : fullList;
+      this.allProducts = fullList;
+      this.applyFilters();
     } catch (error) {
       console.error('Error loading inventory', error);
       this.presentToast('No se pudo cargar el inventario', 'danger');
@@ -127,7 +126,15 @@ export class EmployersPage {
       return;
     }
     this.selectedTipo = value;
-    this.loadProducts();
+    this.applyFilters();
+  }
+
+  onSearchInput(event: Event | CustomEvent) {
+    const customEvent = event as CustomEvent<{ value?: string }>;
+    const fromDetail = customEvent?.detail?.value;
+    const fromTarget = (event?.target as HTMLInputElement | null)?.value;
+    this.searchTerm = String(fromDetail ?? fromTarget ?? '').trim();
+    this.applyFilters();
   }
 
   getTipoLabel(value: string | null) {
@@ -362,6 +369,31 @@ export class EmployersPage {
     }
 
     return Number(product?.idcategoria) === expectedCategory;
+  }
+
+  private applyFilters() {
+    const normalizedSearch = this.normalizeText(this.searchTerm);
+
+    this.products = this.allProducts.filter((product: any) => {
+      const matchesTipo = this.selectedTipo
+        ? this.matchesSelectedTipo(product, this.selectedTipo as string)
+        : true;
+
+      const productName = this.normalizeText(product?.nombre || product?.name);
+      const matchesSearch = normalizedSearch
+        ? productName.includes(normalizedSearch)
+        : true;
+
+      return matchesTipo && matchesSearch;
+    });
+  }
+
+  private normalizeText(value: any) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
   }
 
   private async uploadImage(file: File) {

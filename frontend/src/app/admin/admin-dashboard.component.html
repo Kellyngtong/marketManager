@@ -114,10 +114,17 @@
             </ion-button>
           </div>
           <div class="card-search">
-            <ion-searchbar placeholder="Buscar usuarios..." showCancelButton="never" [(ngModel)]="userSearch"></ion-searchbar>
+            <ion-searchbar
+              placeholder="Buscar usuarios..."
+              showCancelButton="never"
+              [(ngModel)]="userSearch"
+            ></ion-searchbar>
           </div>
           <div class="card-content">
-            <div class="table-wrapper" *ngIf="filteredUsers.length > 0; else noUsers">
+            <div
+              class="table-wrapper"
+              *ngIf="filteredUsers.length > 0; else noUsers"
+            >
               <table class="data-table">
                 <thead>
                   <tr>
@@ -139,7 +146,7 @@
                         class="badge"
                         [ngClass]="'role-' + (user.rol || 'cliente')"
                       >
-                        {{ user.rol || "Cliente" }}
+                        {{ user.rolLabel || "Cliente" }}
                       </span>
                     </td>
                     <td>
@@ -183,41 +190,62 @@
               <h2>Gestión de Productos</h2>
               <p>Administra el catálogo de productos</p>
             </div>
-            <ion-button color="primary" fill="solid" size="small" (click)="createProduct()">
+            <ion-button
+              color="primary"
+              fill="solid"
+              size="small"
+              (click)="createProduct()"
+            >
               <ion-icon slot="start" name="add-outline"></ion-icon>
               Nuevo Producto
             </ion-button>
           </div>
           <div class="card-search">
-            <ion-searchbar placeholder="Buscar productos..." showCancelButton="never" [(ngModel)]="productSearch"></ion-searchbar>
+            <ion-searchbar
+              placeholder="Buscar productos..."
+              showCancelButton="never"
+              [(ngModel)]="productSearch"
+            ></ion-searchbar>
           </div>
           <div class="card-content">
-            <div class="table-wrapper" *ngIf="filteredProducts.length > 0; else noProducts">
+            <div
+              class="table-wrapper"
+              *ngIf="filteredProducts.length > 0; else noProducts"
+            >
               <table class="data-table">
                 <thead>
                   <tr>
                     <th>Producto</th>
                     <th>Categoría</th>
                     <th>Precio</th>
-                    <th>Tipo</th>
                     <th class="text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let product of filteredProducts">
                     <td class="font-medium">{{ product.nombre }}</td>
-                    <td>{{ product.categoria_nombre || product.categoria?.nombre || product.categoria || 'N/A' }}</td>
-                    <td>€{{ product.precio_venta | number:'1.2-2' }}</td>
                     <td>
-                      <span class="badge" [ngClass]="product.oferta ? 'badge-secondary' : 'badge-outline'">
-                        {{ product.oferta ? 'Premium' : 'Regular' }}
-                      </span>
+                      {{
+                        product.categoria_nombre ||
+                          product.categoria?.nombre ||
+                          product.categoria ||
+                          "N/A"
+                      }}
                     </td>
+                    <td>€{{ product.precio_venta | number: "1.2-2" }}</td>
                     <td class="text-right action-buttons">
-                      <button class="icon-btn" (click)="editProduct(product)" title="Editar">
+                      <button
+                        class="icon-btn"
+                        (click)="editProduct(product)"
+                        title="Editar"
+                      >
                         <ion-icon name="create-outline"></ion-icon>
                       </button>
-                      <button class="icon-btn error" (click)="deleteProduct(product.idarticulo)" title="Eliminar">
+                      <button
+                        class="icon-btn error"
+                        (click)="deleteProduct(product.idarticulo)"
+                        title="Eliminar"
+                      >
                         <ion-icon name="trash-outline"></ion-icon>
                       </button>
                     </td>
@@ -245,10 +273,17 @@
             </div>
           </div>
           <div class="card-search">
-            <ion-searchbar placeholder="Buscar pedidos..." showCancelButton="never" [(ngModel)]="orderSearch"></ion-searchbar>
+            <ion-searchbar
+              placeholder="Buscar pedidos..."
+              showCancelButton="never"
+              [(ngModel)]="orderSearch"
+            ></ion-searchbar>
           </div>
           <div class="card-content">
-            <div class="table-wrapper" *ngIf="filteredOrders.length > 0; else noOrders">
+            <div
+              class="table-wrapper"
+              *ngIf="filteredOrders.length > 0; else noOrders"
+            >
               <table class="data-table">
                 <thead>
                   <tr>

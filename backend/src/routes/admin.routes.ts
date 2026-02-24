@@ -1,9 +1,43 @@
 import { Express, Router, Request, Response, NextFunction } from "express";
+import bcrypt from "bcrypt";
 import * as authJwt from "@middlewares/authJwt";
 import db, { sequelize } from "@db/index";
 
 export default (app: Express): void => {
   const router = Router();
+  const requireStaff = [authJwt.verifyToken, authJwt.hasRole([3, 4])];
+
+  const normalizeOrderStatus = (value: any): "NUEVO" | "PENDIENTE" | "ENVIADA" | "CERRADA" => {
+    const normalized = String(value || "")
+      .trim()
+      .toUpperCase();
+
+    if (["NUEVO", "NUEVA", "NEW"].includes(normalized)) {
+      return "NUEVO";
+    }
+
+    if (["ENVIADO", "ENVIADA", "SENT", "SHIPPED"].includes(normalized)) {
+      return "ENVIADA";
+    }
+
+    if (
+      [
+        "CERRADO",
+        "CERRADA",
+        "ENTREGADA",
+        "ENTREGADO",
+        "CLOSED",
+      ].includes(normalized)
+    ) {
+      return "CERRADA";
+    }
+
+    if (["PENDIENTE", "PENDIENTE_DE_ENVIO", "PENDING"].includes(normalized)) {
+      return "PENDIENTE";
+    }
+
+    return "NUEVO";
+  };
 
   // Middleware para verificar admin
   const verifyAdmin = (req: Request, res: Response, next: NextFunction) => {
@@ -18,8 +52,8 @@ export default (app: Express): void => {
    */
   router.get("/metrics", async (req: Request, res: Response) => {
     try {
-      // Total de usuarios
-      const totalUsers = await db.users.count();
+      // Total de usuarios registrados (tabla real del sistema)
+      const totalUsers = await db.usuario.count();
 
       // Total de pedidos/ventas
       const totalOrders = await db.venta.count();
@@ -115,17 +149,174 @@ export default (app: Express): void => {
    * GET /api/admin/orders
    * Obtener listado de pedidos (admin only)
    */
-  router.get("/orders", async (req: Request, res: Response) => {
+  router.get("/orders", ...requireStaff, async (req: Request, res: Response) => {
     try {
       const orders = await db.venta.findAll({
-        attributes: ["idventa", "idusuario", "total", "fecha_hora", "estado"],
+        attributes: [
+          "idventa",
+          "idusuario",
+          "idcliente",
+          "total",
+          "impuesto",
+          "fecha_hora",
+          "estado",
+          "cliente_nombre",
+          "cliente_telefono",
+          "cliente_direccion",
+        ],
+        order: [["idventa", "DESC"]],
         limit: 100,
-        raw: true,
       });
-      res.json(orders || []);
+
+      const formattedOrders = await Promise.all(
+        (orders || []).map(async (order: any) => {
+          const [usuario, cliente, detalles] = await Promise.all([
+            db.usuario.findByPk(order.idusuario, {
+              attributes: ["idusuario", "nombre", "email", "telefono", "direccion"],
+            }),
+            db.cliente.findByPk(order.idcliente, {
+              attributes: ["idcliente", "nombre", "email", "telefono", "direccion"],
+            }),
+            db.detalle_venta.findAll({
+              where: { idventa: order.idventa },
+              include: [
+                {
+                  model: db.articulo,
+                  attributes: ["idarticulo", "nombre", "imagen"],
+                },
+              ],
+            }),
+          ]);
+
+          const items = (detalles || []).map((detalle: any) => ({
+            iddetalle_venta: detalle.iddetalle_venta,
+            idarticulo: detalle.idarticulo,
+            nombre:
+              detalle?.articulo?.nombre ||
+              detalle?.Articulo?.nombre ||
+              `Artículo #${detalle.idarticulo}`,
+            cantidad: Number(detalle.cantidad || 0),
+            precio: Number(detalle.precio || 0),
+            descuento: Number(detalle.descuento || 0),
+          }));
+
+          const customerName =
+            String(order?.cliente_nombre || "").trim() ||
+            cliente?.nombre ||
+            usuario?.nombre ||
+            "Sin cliente";
+
+          const customerPhone =
+            String(order?.cliente_telefono || "").trim() ||
+            cliente?.telefono ||
+            usuario?.telefono ||
+            "Sin teléfono";
+
+          const customerAddress =
+            String(order?.cliente_direccion || "").trim() ||
+            cliente?.direccion ||
+            usuario?.direccion ||
+            "Sin dirección";
+
+          return {
+            idventa: order.idventa,
+            idusuario: order.idusuario,
+            idcliente: order.idcliente,
+            total: Number(order.total),
+            impuesto: Number(order.impuesto || 0),
+            fecha_hora: order.fecha_hora,
+            estado: normalizeOrderStatus(order.estado),
+            usuarioNombre: usuario?.nombre || `Usuario #${order.idusuario}`,
+            clienteNombre: customerName,
+            clienteDireccion: customerAddress,
+            clienteTelefono: customerPhone,
+            items,
+          };
+        }),
+      );
+
+      res.json(formattedOrders);
     } catch (error) {
       console.error("Error getting orders:", error);
       res.json([]);
+    }
+  });
+
+  /**
+   * POST /api/admin/orders
+   * Crear pedido manualmente desde administración
+   */
+  router.post("/orders", ...requireStaff, async (req: Request, res: Response) => {
+    try {
+      const {
+        idcliente,
+        idusuario,
+        total,
+        impuesto,
+        estado,
+        tipo_comprobante,
+        serie_comprobante,
+        num_comprobante,
+        fecha_hora,
+        clienteNombre,
+        clienteDireccion,
+        clienteTelefono,
+      } = req.body || {};
+
+      const parsedTotal = Number(total);
+      if (!Number.isFinite(parsedTotal) || parsedTotal <= 0) {
+        res.status(400).json({ message: "El total debe ser un número mayor a 0" });
+        return;
+      }
+
+      const parsedCliente = Number(idcliente);
+      if (!Number.isFinite(parsedCliente) || parsedCliente <= 0) {
+        res.status(400).json({ message: "idcliente es requerido y debe ser válido" });
+        return;
+      }
+
+      const reqAuth = req as any;
+      const parsedUsuario = Number(idusuario || reqAuth.idusuario);
+      if (!Number.isFinite(parsedUsuario) || parsedUsuario <= 0) {
+        res.status(400).json({ message: "idusuario es requerido y debe ser válido" });
+        return;
+      }
+
+      const normalizedEstado = String(estado || "NUEVO").trim().toUpperCase();
+      const normalizedStatus = normalizeOrderStatus(normalizedEstado);
+
+      const clienteExists = await db.cliente.findByPk(parsedCliente);
+      const usuarioExists = await db.usuario.findByPk(parsedUsuario);
+
+      if (!clienteExists) {
+        res.status(404).json({ message: "Cliente no encontrado" });
+        return;
+      }
+
+      if (!usuarioExists) {
+        res.status(404).json({ message: "Usuario no encontrado" });
+        return;
+      }
+
+      const createdOrder = await db.venta.create({
+        idcliente: parsedCliente,
+        idusuario: parsedUsuario,
+        tipo_comprobante: String(tipo_comprobante || "FACTURA").trim().toUpperCase(),
+        serie_comprobante: String(serie_comprobante || "F001").trim(),
+        num_comprobante: String(num_comprobante || `AUTO-${Date.now()}`).trim(),
+        fecha_hora: fecha_hora ? new Date(fecha_hora) : new Date(),
+        impuesto: Number(impuesto || 0),
+        total: parsedTotal,
+        estado: normalizedStatus,
+        cliente_nombre: String(clienteNombre || clienteExists.nombre || usuarioExists.nombre || "").trim() || null,
+        cliente_direccion: String(clienteDireccion || clienteExists.direccion || usuarioExists.direccion || "").trim() || null,
+        cliente_telefono: String(clienteTelefono || clienteExists.telefono || usuarioExists.telefono || "").trim() || null,
+      });
+
+      res.status(201).json(createdOrder);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      res.status(500).json({ message: "Error creando pedido" });
     }
   });
 
@@ -217,6 +408,124 @@ export default (app: Express): void => {
   });
 
   /**
+   * POST /api/admin/users
+   * Crear usuario
+   */
+  router.post("/users", async (req: Request, res: Response) => {
+    try {
+      const { nombre, email, rol, idrol } = req.body || {};
+
+      if (!nombre || !email) {
+        res.status(400).json({ message: "nombre y email son requeridos" });
+        return;
+      }
+
+      const normalizedEmail = String(email).trim().toLowerCase();
+      const existing = await db.usuario.findOne({
+        where: { email: normalizedEmail },
+      });
+
+      const isExistingActive =
+        !!existing &&
+        (existing.condicion === true || Number(existing.condicion) === 1);
+      const isExistingInactive =
+        !!existing && !isExistingActive;
+
+      const rolMap: { [key: string]: number } = {
+        cliente: 1,
+        premium: 2,
+        empleado: 3,
+        admin: 4,
+      };
+
+      const rolePasswordMap: Record<number, string> = {
+        1: "cli123",
+        2: "pre123",
+        3: "emp123",
+        4: "admin123",
+      };
+
+      const roleName = String(rol || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+
+      const roleIdFromName =
+        rolMap[roleName] ||
+        (roleName.includes("admin")
+          ? 4
+          : roleName.includes("emplead") || roleName.includes("staff")
+            ? 3
+            : roleName.includes("premium")
+              ? 2
+              : roleName.includes("client") || roleName.includes("cliente")
+                ? 1
+                : undefined);
+
+      const roleId = Number(idrol) || roleIdFromName || 1;
+
+      const roleExists = await db.rol.findByPk(roleId);
+      if (!roleExists) {
+        res.status(400).json({ message: "Rol inválido" });
+        return;
+      }
+
+      const presetPassword = rolePasswordMap[roleId] || "cli123";
+      const hashedPassword = await bcrypt.hash(presetPassword, 10);
+
+      if (isExistingActive) {
+        res.status(400).json({ message: "El email ya está registrado" });
+        return;
+      }
+
+      if (isExistingInactive) {
+        existing.nombre = String(nombre).trim();
+        existing.idrol = roleId;
+        existing.clave = hashedPassword;
+        existing.condicion = true;
+        await existing.save();
+
+        res.status(200).json({
+          idusuario: existing.idusuario,
+          nombre: existing.nombre,
+          email: existing.email,
+          idrol: existing.idrol,
+          rol: (roleExists as any)?.nombre || "cliente",
+          condicion: existing.condicion,
+          passwordAsignada: presetPassword,
+          reactivado: true,
+        });
+        return;
+      }
+
+      const usuario = await db.usuario.create({
+        nombre: String(nombre).trim(),
+        email: normalizedEmail,
+        clave: hashedPassword,
+        idrol: roleId,
+        condicion: true,
+      });
+
+      res.status(201).json({
+        idusuario: usuario.idusuario,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        idrol: usuario.idrol,
+        rol: (roleExists as any)?.nombre || "cliente",
+        condicion: usuario.condicion,
+        passwordAsignada: presetPassword,
+      });
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      res.status(500).json({
+        message: "Error creando usuario",
+        error: error?.message || "Error desconocido",
+      });
+    }
+  });
+
+  /**
    * DELETE /api/admin/products/:id
    * Eliminar producto
    */
@@ -299,7 +608,7 @@ export default (app: Express): void => {
    * GET /api/admin/orders/:id
    * Obtener detalles completos de un pedido con cliente, usuario e items
    */
-  router.get("/orders/:id", async (req: Request, res: Response) => {
+  router.get("/orders/:id", ...requireStaff, async (req: Request, res: Response) => {
     try {
       const orderId = parseInt(req.params.id as string, 10);
       console.log("📦 Fetching order with ID:", orderId);
@@ -343,18 +652,32 @@ export default (app: Express): void => {
       }
 
       // Construir respuesta simple
+      const normalizedStatus = normalizeOrderStatus(order.estado);
+      const isPendiente = normalizedStatus === "PENDIENTE";
+      const isEnviada = normalizedStatus === "ENVIADA";
+      const isCerrada = normalizedStatus === "CERRADA";
+
       const response: any = {
         id: order.idventa,
         orderNumber: `ORD-${String(order.idventa).padStart(3, "0")}`,
         date: order.fecha_hora,
-        status: order.estado?.toLowerCase() || "pending",
+        status: normalizedStatus.toLowerCase(),
         customer: {
-          name: cliente?.nombre || "Cliente",
+          name:
+            String((order as any)?.cliente_nombre || "").trim() ||
+            cliente?.nombre ||
+            "Cliente",
           email: cliente?.email || "",
-          phone: cliente?.telefono || "",
+          phone:
+            String((order as any)?.cliente_telefono || "").trim() ||
+            cliente?.telefono ||
+            "",
         },
         shippingAddress: {
-          street: cliente?.direccion || "",
+          street:
+            String((order as any)?.cliente_direccion || "").trim() ||
+            cliente?.direccion ||
+            "",
           city: "",
           postalCode: "",
           country: "España",
@@ -374,26 +697,22 @@ export default (app: Express): void => {
           {
             status: "Pedido confirmado",
             date: "",
-            completed: (order.estado || "").toUpperCase() !== "PENDIENTE",
+            completed: isPendiente || isEnviada || isCerrada,
           },
           {
-            status: "En preparación",
+            status: "Procesando",
             date: "",
-            completed: ["PROCESANDO", "ENVIADO", "ENTREGADO"].includes(
-              (order.estado || "").toUpperCase(),
-            ),
+            completed: isPendiente || isEnviada || isCerrada,
           },
           {
             status: "Enviado",
             date: "",
-            completed: ["ENVIADO", "ENTREGADO"].includes(
-              (order.estado || "").toUpperCase(),
-            ),
+            completed: isEnviada || isCerrada,
           },
           {
-            status: "Entregado",
+            status: "Pedido entregado",
             date: "",
-            completed: (order.estado || "").toUpperCase() === "ENTREGADO",
+            completed: isCerrada,
           },
         ],
       };
@@ -459,16 +778,67 @@ export default (app: Express): void => {
    * PUT /api/admin/orders/:id
    * Actualizar estado de pedido
    */
-  router.put("/orders/:id", async (req: Request, res: Response) => {
+  router.put("/orders/:id", ...requireStaff, async (req: Request, res: Response) => {
     try {
-      const orderId = req.params.id;
-      const [updated] = await db.venta.update(req.body, {
-        where: { idventa: orderId },
-      });
-      res.json({ success: updated > 0 });
+      const orderId = parseInt(req.params.id as string, 10);
+      const order = await db.venta.findByPk(orderId);
+
+      if (!order) {
+        res.status(404).json({ success: false, message: "Pedido no encontrado" });
+        return;
+      }
+
+      const nextEstadoRaw = req.body?.estado;
+      if (nextEstadoRaw !== undefined) {
+        order.estado = normalizeOrderStatus(nextEstadoRaw);
+      }
+
+      if (req.body?.total !== undefined) {
+        const nextTotal = Number(req.body.total);
+        if (!Number.isFinite(nextTotal) || nextTotal <= 0) {
+          res.status(400).json({ success: false, message: "Total inválido" });
+          return;
+        }
+        order.total = nextTotal;
+      }
+
+      // Fecha y artículos no se editan desde administración de pedidos.
+
+      const nextClienteNombre = String(req.body?.clienteNombre || "").trim();
+      const nextClienteDireccion = String(req.body?.clienteDireccion || "").trim();
+      const nextClienteTelefono = String(req.body?.clienteTelefono || "").trim();
+
+      if (req.body?.clienteNombre !== undefined) {
+        (order as any).cliente_nombre = nextClienteNombre || null;
+      }
+      if (req.body?.clienteDireccion !== undefined) {
+        (order as any).cliente_direccion = nextClienteDireccion || null;
+      }
+      if (req.body?.clienteTelefono !== undefined) {
+        (order as any).cliente_telefono = nextClienteTelefono || null;
+      }
+
+      if (nextClienteNombre || nextClienteDireccion || nextClienteTelefono) {
+        const cliente = await db.cliente.findByPk(order.idcliente);
+        if (cliente) {
+          if (nextClienteNombre) {
+            cliente.nombre = nextClienteNombre;
+          }
+          if (req.body?.clienteDireccion !== undefined) {
+            cliente.direccion = nextClienteDireccion || undefined;
+          }
+          if (req.body?.clienteTelefono !== undefined) {
+            cliente.telefono = nextClienteTelefono || undefined;
+          }
+          await cliente.save();
+        }
+      }
+
+      await order.save();
+      res.json({ success: true, order });
     } catch (error) {
       console.error("Error updating order:", error);
-      res.status(500).json({ success: false });
+      res.status(500).json({ success: false, message: "Error actualizando pedido" });
     }
   });
 

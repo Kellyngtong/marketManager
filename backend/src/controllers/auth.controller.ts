@@ -53,9 +53,11 @@ export const register = async (
       return;
     }
 
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+
     // Validar que el email no exista
     const existing = await (db.usuario as typeof Usuario).findOne({
-      where: { email },
+      where: { email: normalizedEmail },
     });
     if (existing) {
       res.status(400).json({
@@ -80,7 +82,7 @@ export const register = async (
     // Crear usuario
     const usuario = await (db.usuario as typeof Usuario).create({
       nombre,
-      email,
+      email: normalizedEmail,
       clave: hashed,
       idrol: rol,
       telefono: telefono || null,
@@ -117,8 +119,9 @@ export const register = async (
 export const login = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { email, clave } = req.body;
+    const normalizedEmail = String(email || "").trim().toLowerCase();
 
-    if (!email || !clave) {
+    if (!normalizedEmail || !clave) {
       res.status(400).json({
         message: "email y clave son requeridos",
       });
@@ -127,7 +130,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
 
     // Buscar usuario con su rol
     const usuario = await (db.usuario as typeof Usuario).findOne({
-      where: { email },
+      where: { email: normalizedEmail },
       include: [{ model: db.rol, attributes: ["idrol", "nombre"] }],
     });
 

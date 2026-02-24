@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
+import { ConfirmationModalComponent } from '../../admin/confirmation-modal/confirmation-modal.component';
 import { LanguageService } from '../../services/language.service';
 import { Subscription } from 'rxjs';
 
@@ -41,7 +42,12 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
     },
   };
 
-  constructor(private router: Router, private auth: AuthService, private lang: LanguageService) {}
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private lang: LanguageService,
+    private modalCtrl: ModalController,
+  ) {}
 
   ngOnInit(): void {
     this.user$ = this.auth.user$;
@@ -59,6 +65,26 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
 
   goToLogin() {
     this.router.navigate(['/login']);
+  }
+
+  async confirmLogout() {
+    const modal = await this.modalCtrl.create({
+      component: ConfirmationModalComponent,
+      cssClass: 'confirmation-modal',
+      componentProps: {
+        title: 'Cerrar sesión',
+        message: '¿Estás seguro de que quieres cerrar sesión?',
+        isDangerous: true,
+        cancelText: 'Cancelar',
+        confirmText: 'Cerrar sesión',
+      },
+    });
+
+    await modal.present();
+    const result = await modal.onDidDismiss();
+    if (result.data?.confirmed === true) {
+      this.logout();
+    }
   }
 
   logout() {

@@ -62,7 +62,7 @@
         </ng-container>
 
         <ng-template #logoutButton>
-          <ion-button fill="clear" (click)="logout()" class="logout-btn">
+          <ion-button fill="clear" (click)="confirmLogout()" class="logout-btn">
             <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
           </ion-button>
         </ng-template>
@@ -147,7 +147,7 @@
       </ion-menu-toggle>
 
       <ion-menu-toggle *ngIf="user$ | async">
-        <ion-item button (click)="logout()" class="menu-mobile-item">
+        <ion-item button (click)="confirmLogout()" class="menu-mobile-item">
           <ion-icon name="log-out" slot="start"></ion-icon>
           <ion-label>{{ translations[currentLanguage]["cerrar"] }}</ion-label>
         </ion-item>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminService } from '../services/admin.service';
 import { ToastController, ModalController } from '@ionic/angular';
+import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { EditUserModalComponent } from './edit-user-modal/edit-user-modal.component';
 import { EditProductModalComponent } from './edit-product-modal/edit-product-modal.component';
@@ -16,6 +17,13 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
 export class AdminDashboardComponent implements OnInit {
   activeTab = 'users';
   loading = false;
+
+  private roleById: Record<number, string> = {
+    1: 'cliente',
+    2: 'premium',
+    3: 'empleado',
+    4: 'admin',
+  };
 
   // Métricas
   metrics = {
@@ -47,39 +55,64 @@ export class AdminDashboardComponent implements OnInit {
   orderSearch: string = '';
 
   get filteredUsers() {
-    const q = String(this.userSearch || '').trim().toLowerCase();
+    const q = String(this.userSearch || '')
+      .trim()
+      .toLowerCase();
     if (!q) return this.users;
     return this.users.filter((u: any) => {
       return (
-        String(u.username || u.nombre || '').toLowerCase().includes(q) ||
-        String(u.email || '').toLowerCase().includes(q) ||
-        String(u.rol || '').toLowerCase().includes(q)
+        String(u.username || u.nombre || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(u.email || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(u.rol || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }
 
   get filteredProducts() {
-    const q = String(this.productSearch || '').trim().toLowerCase();
+    const q = String(this.productSearch || '')
+      .trim()
+      .toLowerCase();
     if (!q) return this.products;
     return this.products.filter((p: any) => {
-      const categoria = (p.categoria_nombre || p.categoria?.nombre || p.categoria || '') + '';
+      const categoria =
+        (p.categoria_nombre || p.categoria?.nombre || p.categoria || '') + '';
       return (
-        String(p.nombre || '').toLowerCase().includes(q) ||
+        String(p.nombre || '')
+          .toLowerCase()
+          .includes(q) ||
         categoria.toLowerCase().includes(q) ||
-        String(p.tipo || '').toLowerCase().includes(q)
+        String(p.tipo || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }
 
   get filteredOrders() {
-    const q = String(this.orderSearch || '').trim().toLowerCase();
+    const q = String(this.orderSearch || '')
+      .trim()
+      .toLowerCase();
     if (!q) return this.orders;
     return this.orders.filter((o: any) => {
       return (
-        String(o.idventa || '').toLowerCase().includes(q) ||
-        String(o.usuario?.username || o.usuario?.nombre || '').toLowerCase().includes(q) ||
-        String(o.estado || '').toLowerCase().includes(q) ||
-        String(o.total || '').toLowerCase().includes(q)
+        String(o.idventa || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(o.usuario?.username || o.usuario?.nombre || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(o.estado || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(o.total || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }
@@ -109,6 +142,26 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  private getApiErrorMessage(error: any, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage =
+        error.error?.message || error.error?.error || error.message;
+      if (backendMessage) {
+        return String(backendMessage);
+      }
+    }
+
+    if (error?.error?.message) {
+      return String(error.error.message);
+    }
+
+    if (error?.message) {
+      return String(error.message);
+    }
+
+    return fallback;
+  }
+
   async loadMetrics() {
     try {
       const data: any = await firstValueFrom(
@@ -135,9 +188,71 @@ export class AdminDashboardComponent implements OnInit {
   async loadUsers() {
     try {
       const data: any = await firstValueFrom(this.adminService.getAllUsers());
-      this.users = Array.isArray(data) ? data : data.users || [];
+      const users = Array.isArray(data) ? data : data.users || [];
+      this.users = users.map((user: any) => this.toDashboardUser(user));
     } catch (error) {
       console.error('Error loading users:', error);
+    }
+  }
+
+  private toDashboardUser(user: any): any {
+    const rol = this.resolveRole(user);
+    return {
+      ...user,
+      rol,
+      rolLabel: this.getRoleLabel(rol),
+    };
+  }
+
+  private resolveRole(user: any): string {
+    const byId = this.roleById[Number(user?.idrol)];
+    if (byId) {
+      return byId;
+    }
+
+    const roleRaw =
+      user?.rol?.nombre ||
+      user?.rol?.name ||
+      user?.Rol?.nombre ||
+      user?.Rol?.name ||
+      user?.rol ||
+      user?.role ||
+      '';
+
+    const roleNormalized = String(roleRaw)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
+
+    if (roleNormalized.includes('admin')) {
+      return 'admin';
+    }
+
+    if (
+      roleNormalized.includes('emplead') ||
+      roleNormalized.includes('staff')
+    ) {
+      return 'empleado';
+    }
+
+    if (roleNormalized.includes('premium')) {
+      return 'premium';
+    }
+
+    return 'cliente';
+  }
+
+  private getRoleLabel(role: string): string {
+    switch (role) {
+      case 'admin':
+        return 'Admin';
+      case 'empleado':
+        return 'Empleado';
+      case 'premium':
+        return 'Cliente Premium';
+      default:
+        return 'Cliente';
     }
   }
 
@@ -239,11 +354,13 @@ export class AdminDashboardComponent implements OnInit {
           (u) => u.idusuario === user.idusuario,
         );
         if (index > -1) {
-          this.users[index] = result.data.user;
+          this.users[index] = this.toDashboardUser(result.data.user);
         }
         await this.showSuccess('Usuario actualizado correctamente');
       } catch (error) {
-        await this.showError('Error actualizando usuario');
+        await this.showError(
+          this.getApiErrorMessage(error, 'Error actualizando usuario'),
+        );
       }
     }
   }

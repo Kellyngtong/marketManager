@@ -15,30 +15,42 @@
           <ion-card-title>Resumen de productos</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <ng-container *ngIf="items.length; else summaryEmpty">
-            <div class="summary-item" *ngFor="let item of items">
+          <ng-container *ngIf="isPremiumUpgrade; else cartSummary">
+            <div class="summary-item premium-summary-item">
               <div>
-                <strong>{{ item.articulo?.nombre }}</strong>
-                <p>
-                  {{ item.cantidad }} x {{ item.articulo?.precio_venta |
-                  currency:'EUR' }}
-                  <span class="offer-label" *ngIf="item.articulo?.oferta"
-                    >OFERTA</span
-                  >
-                </p>
+                <strong>1 mes de cliente premium</strong>
+                <p>1 x {{ premiumPlanPrice | currency:'EUR' }}</p>
               </div>
-              <span
-                >{{ (item.cantidad * (item.articulo?.precio_venta || 0)) |
-                currency:'EUR' }}</span
-              >
+              <span>{{ premiumPlanPrice | currency:'EUR' }}</span>
             </div>
           </ng-container>
+
+          <ng-template #cartSummary>
+            <ng-container *ngIf="items.length; else summaryEmpty">
+              <div class="summary-item" *ngFor="let item of items">
+                <div>
+                  <strong>{{ item.articulo?.nombre }}</strong>
+                  <p>
+                    {{ item.cantidad }} x {{ item.articulo?.precio_venta |
+                    currency:'EUR' }}
+                    <span class="offer-label" *ngIf="item.articulo?.oferta"
+                      >OFERTA</span
+                    >
+                  </p>
+                </div>
+                <span
+                  >{{ (item.cantidad * (item.articulo?.precio_venta || 0)) |
+                  currency:'EUR' }}</span
+                >
+              </div>
+            </ng-container>
+          </ng-template>
         </ion-card-content>
       </ion-card>
     </section>
 
     <form
-      *ngIf="items.length; else emptyCart"
+      *ngIf="isPremiumUpgrade || items.length; else emptyCart"
       [formGroup]="checkoutForm"
       class="checkout-form"
     >
@@ -96,34 +108,48 @@
         </ion-card-content>
       </ion-card>
 
-      <ion-card *ngIf="totals$ | async as totals">
+      <ion-card *ngIf="isPremiumUpgrade">
         <ion-card-header>
           <ion-card-title>Total a pagar</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <div class="total-row">
-            <span>Subtotal</span>
-            <strong>{{ totals.subtotal | currency:'EUR' }}</strong>
-          </div>
-          <div class="total-row">
-            <span>Impuestos</span>
-            <strong>{{ totals.impuesto | currency:'EUR' }}</strong>
-          </div>
           <div class="total-row total-row__grand">
             <span>Total</span>
-            <strong>{{ totals.total | currency:'EUR' }}</strong>
+            <strong>{{ premiumPlanPrice | currency:'EUR' }}</strong>
           </div>
         </ion-card-content>
       </ion-card>
+
+      <ng-container *ngIf="!isPremiumUpgrade">
+        <ion-card *ngIf="totals$ | async as totals">
+          <ion-card-header>
+            <ion-card-title>Total a pagar</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="total-row">
+              <span>Subtotal</span>
+              <strong>{{ totals.subtotal | currency:'EUR' }}</strong>
+            </div>
+            <div class="total-row">
+              <span>Impuestos</span>
+              <strong>{{ totals.impuesto | currency:'EUR' }}</strong>
+            </div>
+            <div class="total-row total-row__grand">
+              <span>Total</span>
+              <strong>{{ totals.total | currency:'EUR' }}</strong>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ng-container>
 
       <ion-button
         expand="block"
         color="success"
         (click)="irAPago()"
-        [disabled]="checkoutForm.invalid || !items.length || isProcessing"
+        [disabled]="checkoutForm.invalid || (!isPremiumUpgrade && !items.length) || isProcessing"
       >
         <ion-spinner *ngIf="isProcessing" name="crescent"></ion-spinner>
-        {{ isProcessing ? 'Procesando...' : 'Ir a Pagar con Stripe' }}
+        {{ isProcessing ? 'Procesando...' : 'Pagar con Stripe' }}
       </ion-button>
 
       <!-- Instrucciones para pago en desarrollo local -->

@@ -32,6 +32,7 @@ export class AdminMarketingPage {
   isLoading = false;
   offerPriceDrafts: Record<number, string> = {};
   selectedTipo: string | null = null;
+  searchTerm = '';
   private originalPrices: Record<number, number> = {};
 
   readonly tipos = [
@@ -113,6 +114,14 @@ export class AdminMarketingPage {
       return;
     }
     this.selectedTipo = value;
+    this.applyTipoFilter();
+  }
+
+  onSearchInput(event: Event | CustomEvent) {
+    const customEvent = event as CustomEvent<{ value?: string }>;
+    const fromDetail = customEvent?.detail?.value;
+    const fromTarget = (event?.target as HTMLInputElement | null)?.value;
+    this.searchTerm = String(fromDetail ?? fromTarget ?? '').trim();
     this.applyTipoFilter();
   }
 
@@ -200,8 +209,13 @@ export class AdminMarketingPage {
   }
 
   private applyTipoFilter() {
+    const normalizedSearch = this.normalizeText(this.searchTerm);
+
     if (!this.selectedTipo) {
-      this.products = [...this.allProducts];
+      this.products = this.allProducts.filter((product) => {
+        const productName = this.normalizeText(product?.nombre);
+        return normalizedSearch ? productName.includes(normalizedSearch) : true;
+      });
       return;
     }
 
@@ -210,16 +224,22 @@ export class AdminMarketingPage {
 
     this.products = this.allProducts.filter((product) => {
       const productTipo = String(product?.tipo || '').trim().toLowerCase();
-      if (productTipo === selected) {
-        return true;
-      }
-
-      if (!expectedCategory) {
+      const matchesTipo = productTipo === selected || (Number(product?.idcategoria) === expectedCategory && !!expectedCategory);
+      if (!matchesTipo) {
         return false;
       }
 
-      return Number(product?.idcategoria) === expectedCategory;
+      const productName = this.normalizeText(product?.nombre);
+      return normalizedSearch ? productName.includes(normalizedSearch) : true;
     });
+  }
+
+  private normalizeText(value: any) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
   }
 
   private async updateArticulo(id: number, payload: Record<string, any>) {
