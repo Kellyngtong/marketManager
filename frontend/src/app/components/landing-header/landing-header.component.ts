@@ -57,8 +57,8 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
     this.lang.toggle();
   }
 
-  goToWelcome() {
-    this.router.navigate(['/welcome']);
+  goToLogin() {
+    this.router.navigate(['/login']);
   }
 
   logout() {
