@@ -10,15 +10,32 @@
 <ion-content>
   <ion-card>
     <ion-card-content class="profile-header" *ngIf="user as current">
-      <ion-avatar>
-        <img [src]="current.avatar || 'https://www.gravatar.com/avatar?d=mp&s=160'" alt="avatar" />
-      </ion-avatar>
+      <button
+        type="button"
+        class="avatar-button"
+        (click)="triggerAvatarPicker()"
+        [disabled]="isUploadingAvatar"
+        aria-label="Cambiar foto de perfil"
+      >
+        <ion-avatar>
+          <img [src]="current.avatar || 'https://www.gravatar.com/avatar?d=mp&s=160'" alt="avatar" />
+        </ion-avatar>
+        <ion-icon class="camera-icon" name="camera"></ion-icon>
+        <ion-spinner *ngIf="isUploadingAvatar" name="crescent" class="avatar-spinner"></ion-spinner>
+      </button>
+      <input
+        #avatarInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onAvatarSelected($event)"
+      />
       <div>
         <h2>{{ current.nombre || current.username }}</h2>
         <ion-chip color="primary">
-          <ion-label>{{ current.rol?.nombre || 'Cliente' }}</ion-label>
+          <ion-label>{{ getUserRoleLabel(current) }}</ion-label>
         </ion-chip>
-        <p class="hint">Puedes actualizar tu avatar desde la barra superior.</p>
+        <p class="hint">Pulsa la imagen para cambiar tu avatar.</p>
       </div>
     </ion-card-content>
   </ion-card>

@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ModalController, ToastController } from '@ionic/angular';
@@ -13,9 +13,11 @@ import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirma
   standalone: false,
 })
 export class ProfilePage implements OnDestroy {
+  @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
   profileForm: FormGroup;
   userSub?: Subscription;
   user: any = null;
+  isUploadingAvatar = false;
 
   constructor(
     private fb: FormBuilder,
@@ -41,7 +43,7 @@ export class ProfilePage implements OnDestroy {
             email: user.email || '',
             telefono: user.telefono || '',
             direccion: user.direccion || '',
-            rol: user.rol?.nombre || 'Cliente',
+            rol: this.getUserRoleLabel(user),
           },
           { emitEvent: false },
         );
@@ -120,8 +122,107 @@ export class ProfilePage implements OnDestroy {
     return topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
   }
 
+  getUserRoleLabel(userData: any = this.user): string {
+    const rawRoleName = userData?.rol?.nombre || userData?.rol;
+    const roleName = String(rawRoleName || '').trim();
+
+    if (roleName) {
+      return roleName;
+    }
+
+    const roleId = Number(userData?.idrol || userData?.rol?.idrol || 0);
+    switch (roleId) {
+      case 2:
+        return 'Premium';
+      case 3:
+        return 'Vendedor';
+      case 4:
+        return 'Admin';
+      case 1:
+      default:
+        return 'Cliente';
+    }
+  }
+
   goToPremiumCheckout() {
     this.router.navigate(['/checkout'], { queryParams: { mode: 'premium' } });
+  }
+
+  triggerAvatarPicker() {
+    if (this.isUploadingAvatar) {
+      return;
+    }
+    this.avatarInput?.nativeElement?.click();
+  }
+
+  async onAvatarSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const MAX = 2 * 1024 * 1024;
+    if (file.size > MAX) {
+      const warn = await this.toastCtrl.create({
+        message: 'La imagen es demasiado grande (máximo 2MB).',
+        duration: 3000,
+        color: 'warning',
+      });
+      await warn.present();
+      input.value = '';
+      return;
+    }
+
+    this.isUploadingAvatar = true;
+    try {
+      let avatarUrl: string | null = null;
+
+      try {
+        const uploadRes: any = await firstValueFrom(this.auth.uploadAvatar(file));
+        avatarUrl = uploadRes?.imageUrl || uploadRes?.url || null;
+      } catch (uploadError) {
+        avatarUrl = await this.fileToDataUrl(file);
+      }
+
+      if (!avatarUrl) {
+        throw new Error('No se pudo subir la foto');
+      }
+
+      try {
+        await firstValueFrom(this.auth.updateProfile({ avatar: avatarUrl }));
+      } catch (profileError) {
+        this.auth.updateLocalUser({ avatar: avatarUrl });
+      }
+
+      const toast = await this.toastCtrl.create({
+        message: 'Foto de perfil actualizada',
+        duration: 2000,
+        color: 'success',
+      });
+      await toast.present();
+    } catch (error: any) {
+      const msg =
+        error?.error?.message || error?.message || 'No se pudo actualizar la foto de perfil';
+      const toast = await this.toastCtrl.create({
+        message: msg,
+        duration: 3000,
+        color: 'danger',
+      });
+      await toast.present();
+    } finally {
+      this.isUploadingAvatar = false;
+      input.value = '';
+    }
+  }
+
+  private fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('No se pudo leer la imagen'));
+      reader.readAsDataURL(file);
+    });
   }
 
   ngOnDestroy(): void {

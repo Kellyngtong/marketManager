@@ -130,11 +130,23 @@ export class AuthService {
     return this.http.put(`${this.base}/profile`, payload, cfg).pipe(
       tap((res: any) => {
         if (res?.usuario) {
+          const currentUser = this.currentUserValue || {};
+          const normalizedUser = this.normalizeUser(res.usuario);
+
           const merged = {
-            ...this.currentUserValue,
-            ...this.normalizeUser(res.usuario),
+            ...currentUser,
+            ...normalizedUser,
             ...payload,
           };
+
+          if (!normalizedUser?.rol && currentUser?.rol) {
+            merged.rol = currentUser.rol;
+          }
+
+          if (!Number(normalizedUser?.idrol) && Number(currentUser?.idrol)) {
+            merged.idrol = Number(currentUser.idrol);
+          }
+
           this.persistUser(merged);
           return;
         }
@@ -265,19 +277,81 @@ export class AuthService {
 
   private normalizeUser(user: any) {
     if (!user) return null;
-    if (user.idusuario) return user;
-    if (user.id) {
-      return {
-        idusuario: user.id,
-        nombre: user.nombre || user.username,
-        email: user.email,
-        avatar: user.avatar,
-        telefono: user.telefono || null,
-        direccion: user.direccion || null,
-        rol: user.rol || null,
-      };
+
+    const role = this.normalizeRole(user);
+    const idrol =
+      role?.idrol ??
+      (Number(user?.idrol || user?.rol?.idrol) > 0
+        ? Number(user?.idrol || user?.rol?.idrol)
+        : null);
+
+    return {
+      ...user,
+      idusuario: user.idusuario || user.id,
+      nombre: user.nombre || user.username,
+      email: user.email,
+      avatar: user.avatar,
+      telefono: user.telefono || null,
+      direccion: user.direccion || null,
+      rol: role,
+      idrol,
+    };
+  }
+
+  private normalizeRole(user: any): { idrol: number | null; nombre: string } | null {
+    const rawRole = user?.rol;
+    const rawRoleId = Number(user?.idrol || rawRole?.idrol || 0);
+    const roleId = rawRoleId > 0 ? rawRoleId : null;
+
+    const roleNameCandidate =
+      (typeof rawRole === 'string' ? rawRole : rawRole?.nombre) ||
+      user?.rolNombre;
+    const roleName = String(roleNameCandidate || '').trim();
+
+    if (!roleId && !roleName) {
+      return null;
     }
-    return user;
+
+    const inferredRoleId = roleId || this.inferRoleIdByName(roleName);
+
+    return {
+      idrol: inferredRoleId,
+      nombre: roleName || this.getRoleNameById(inferredRoleId),
+    };
+  }
+
+  private inferRoleIdByName(roleName: string): number | null {
+    const name = String(roleName || '').trim().toLowerCase();
+    if (!name) {
+      return null;
+    }
+    if (name.includes('premium')) {
+      return 2;
+    }
+    if (name.includes('vendedor')) {
+      return 3;
+    }
+    if (name.includes('admin')) {
+      return 4;
+    }
+    if (name.includes('cliente')) {
+      return 1;
+    }
+    return null;
+  }
+
+  private getRoleNameById(idrol: number | null): string {
+    switch (idrol) {
+      case 2:
+        return 'Premium';
+      case 3:
+        return 'Vendedor';
+      case 4:
+        return 'Admin';
+      case 1:
+      default:
+        return 'Cliente';
+    }
   }
 
   private loadUser() {
