@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { CarritoService } from '../services/carrito.service';
+import { ProductImageService } from '../services/product-image.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -20,6 +21,7 @@ export class ProductDetailPage implements OnInit {
     private router: Router,
     private carritoService: CarritoService,
     private toastCtrl: ToastController,
+    public imageService: ProductImageService,
   ) {}
 
   async ngOnInit() {
@@ -120,6 +122,16 @@ export class ProductDetailPage implements OnInit {
         color: 'danger',
       });
       await t.present();
+    }
+  }
+
+  handleImageError(event: Event, productName: string): void {
+    const img = event.target as HTMLImageElement;
+    const localUrl = this.imageService.getLocalImageUrl(productName);
+    if (localUrl && img.src !== localUrl) {
+      img.src = localUrl;
+    } else {
+      img.src = this.imageService.getProductImage(productName);
     }
   }
 

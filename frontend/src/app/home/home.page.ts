@@ -204,8 +204,8 @@ export class HomePage implements OnDestroy {
   }
 
   onSearchChange(query: string) {
-    this.searchQuery = query;
-    this.loadProducts();
+    this.searchTerm = query.trim();
+    this.applyFilters();
   }
 
   onFilterChange(filterValue: string | number | null) {

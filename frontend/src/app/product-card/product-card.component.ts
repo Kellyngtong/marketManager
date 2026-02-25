@@ -6,6 +6,7 @@ import {
   getPremiumUnitPrice,
   isOfferProduct,
 } from '../utils/premium-pricing.util';
+import { ProductImageService } from '../services/product-image.service';
 
 @Component({
   selector: 'app-product-card',
@@ -23,9 +24,21 @@ export class ProductCardComponent implements OnChanges {
 
   quantity = 1;
 
+  constructor(public imageService: ProductImageService) {}
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes['product']) {
       this.quantity = 1;
+    }
+  }
+
+  handleImageError(event: Event, productName: string): void {
+    const img = event.target as HTMLImageElement;
+    const localUrl = this.imageService.getLocalImageUrl(productName);
+    if (localUrl && img.src !== localUrl) {
+      img.src = localUrl;
+    } else {
+      img.src = this.imageService.getProductImage(productName);
     }
   }
 

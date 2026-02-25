@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { AuthService } from '../auth/auth.service';
+import { ProductImageDirective } from '../directives/product-image.directive';
 
 interface MarketingProduct {
   idarticulo: number;
@@ -19,7 +20,7 @@ interface MarketingProduct {
 @Component({
   selector: 'app-admin-marketing',
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, ProductImageDirective],
   templateUrl: './admin-marketing.page.html',
   styleUrls: ['./admin-marketing.page.scss'],
 })

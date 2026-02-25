@@ -150,6 +150,39 @@ const startServer = async (): Promise<void> => {
       console.error("❌ Error al registrar rutas:", routeError);
     }
 
+    // Servir imágenes de productos en la raíz `/imagenesProductos` para
+    // mantener compatibilidad con el frontend que espera `/imagenesProductos/<name>.jpg`.
+    // Proporcionar una ruta explícita que devuelva una imagen por defecto
+    // cuando el fichero solicitado no exista, evitando así 404 repetidos.
+    const imagesDir = path.resolve(__dirname, "../public/imagenesProductos");
+    const defaultImagePath = path.join(imagesDir, "leche.jpg");
+
+    app.get('/imagenesProductos/:file', (req, res) => {
+      try {
+        const requested = path.join(imagesDir, req.params.file);
+        // Evitar path traversal
+        if (!requested.startsWith(imagesDir)) {
+          return res.sendFile(defaultImagePath);
+        }
+
+        res.sendFile(requested, (err) => {
+          if (err) {
+            // Si hay cualquier error (no existe), enviar imagen por defecto
+            return res.sendFile(defaultImagePath);
+          }
+        });
+      } catch (error) {
+        return res.sendFile(defaultImagePath);
+      }
+    });
+
+    // También mantener el static para rendimiento/headers automáticos
+    app.use(
+      "/imagenesProductos",
+      express.static(path.resolve(__dirname, "../public/imagenesProductos")),
+    );
+
+    // Mantener la carpeta pública completa disponible en `/public` por compatibilidad
     app.use("/public", express.static(path.resolve(__dirname, "../public")));
 
     // Health check
