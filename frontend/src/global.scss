@@ -294,3 +294,76 @@ ion-searchbar .searchbar-ios button {
   background: transparent !important;
   color: #8c8c8c !important;
 }
+
+/* Popover backdrop y contenedor principal */
+.select-popover {
+  --background: #{colors.$surface} !important;
+  --border-radius: 12px !important;
+  --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.popover-content {
+  background: #{colors.$surface} !important;
+  border-radius: 12px !important;
+}
+
+/* Lista de opciones del popover */
+.select-interface-popover {
+  background: #{colors.$surface} !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+
+  .popover-listbox {
+    padding: 0 !important;
+  }
+
+  /* Opciones individuales */
+  .select-interface-option {
+    background: #{colors.$surface} !important;
+    padding: 1rem 1.5rem !important;
+    border-bottom: 1px solid #{colors.$border} !important;
+    color: #{colors.$textPrimary} !important;
+    font-weight: 500 !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      background: #f9fdf7 !important;
+    }
+
+    &:last-child {
+      border-bottom: none !important;
+    }
+
+    /* Opción seleccionada */
+    &[aria-checked="true"] {
+      background: #f0f9ec !important;
+      color: #{colors.$primary} !important;
+      font-weight: 600 !important;
+
+      &::before {
+        content: "✓" !important;
+        display: inline-block !important;
+        color: #{colors.$primary} !important;
+        font-weight: bold !important;
+        margin-right: 1rem !important;
+      }
+    }
+  }
+}
+
+/* Estilos para ion-select cuando está abierto */
+ion-select-popover {
+  --background: #{colors.$surface} !important;
+}
+
+/* Overlay del popover */
+.overlay-container {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+
+
