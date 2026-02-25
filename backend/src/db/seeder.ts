@@ -7,11 +7,11 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 async function seedDatabase(): Promise<void> {
   try {
-    console.log('🌱 Iniciando seeder de datos multitenant...');
+    console.log('Iniciando seeder de datos multitenant...');
 
     // Esperar a que la BD esté sincronizada
     await db.sequelize.sync();
-    console.log('✅ Base de datos sincronizada');
+    console.log('Base de datos sincronizada');
 
     // 0. TENANTS (NUEVO - MULTITENANT)
     const tenants = await db.sequelize.query(
@@ -20,7 +20,7 @@ async function seedDatabase(): Promise<void> {
        ('Supermercado García', 'garcia@supermercado.local', 'pro'),
        ('Tienda López', 'lopez@tienda.local', 'free')`,
     );
-    console.log('✅ Tenants creados');
+    console.log('Tenants creados');
 
     // 0.5 STORES (NUEVO - MULTITENANT)
     const stores = await db.sequelize.query(
@@ -30,7 +30,7 @@ async function seedDatabase(): Promise<void> {
        (2, 'García - Sucursal Norte', 'Norte 789', '555-0003'),
        (3, 'López - Única', 'Avenida López 100', '555-0004')`,
     );
-    console.log('✅ Stores creados');
+    console.log('Stores creados');
 
     // 1. ROLES
     const roles = await db.rol.bulkCreate(
@@ -46,7 +46,7 @@ async function seedDatabase(): Promise<void> {
       ],
       { ignoreDuplicates: true },
     );
-    console.log('✅ Roles creados');
+    console.log('Roles creados');
 
     // 2. CATEGORÍAS (AHORA CON TENANT)
     const categorias = await db.categoria.bulkCreate(
@@ -95,7 +95,7 @@ async function seedDatabase(): Promise<void> {
       ],
       { ignoreDuplicates: true },
     );
-    console.log('✅ Categorías creadas');
+    console.log('Categorías creadas');
 
     // 3. ARTÍCULOS (PRODUCTOS)
     const articulos = await db.articulo.bulkCreate(
@@ -351,7 +351,7 @@ async function seedDatabase(): Promise<void> {
       ],
       { ignoreDuplicates: true },
     );
-    console.log(`✅ ${articulos.length} Artículos creados`);
+    console.log(`${articulos.length} Artículos creados`);
 
     // 3.5 ASIGNAR ARTÍCULOS A TENANTS (MULTITENANT)
     // Obtener todos los artículos creados
@@ -387,7 +387,7 @@ async function seedDatabase(): Promise<void> {
         );
       }
 
-      console.log(`✅ Artículos asignados a tenants`);
+      console.log(`Artículos asignados a tenants`);
     }
 
     // 4. USUARIOS DE PRUEBA (CON TENANT E ID_STORE)
@@ -436,7 +436,7 @@ async function seedDatabase(): Promise<void> {
       ],
       { ignoreDuplicates: true },
     );
-    console.log(`✅ ${usuarios.length} Usuarios creados`);
+    console.log(`${usuarios.length} Usuarios creados`);
 
     // 5. CLIENTES (VINCULADOS A USUARIOS)
     const clientes = await db.cliente.bulkCreate(
@@ -456,7 +456,7 @@ async function seedDatabase(): Promise<void> {
       ],
       { ignoreDuplicates: true },
     );
-    console.log(`✅ ${clientes.length} Clientes creados`);
+    console.log(`${clientes.length} Clientes creados`);
 
     // 6. PROVEEDORES
     const proveedores = await db.proveedor.bulkCreate(
@@ -485,19 +485,19 @@ async function seedDatabase(): Promise<void> {
       ],
       { ignoreDuplicates: true },
     );
-    console.log(`✅ ${proveedores.length} Proveedores creados`);
+    console.log(`${proveedores.length} Proveedores creados`);
 
     console.log('\n' + '='.repeat(50));
-    console.log('🎉 SEEDER COMPLETADO EXITOSAMENTE');
+    console.log('SEEDER COMPLETADO EXITOSAMENTE');
     console.log('='.repeat(50));
-    console.log('\n📊 DATOS INICIALES:');
+    console.log('\nDATOS INICIALES:');
     console.log(`  • Roles: 4`);
     console.log(`  • Categorías: 9`);
     console.log(`  • Artículos: ${articulos.length}`);
     console.log(`  • Usuarios: ${usuarios.length}`);
     console.log(`  • Clientes: ${clientes.length}`);
     console.log(`  • Proveedores: ${proveedores.length}`);
-    console.log('\n👤 CUENTAS DE PRUEBA:');
+    console.log('\nCUENTAS DE PRUEBA:');
     console.log(`  Admin:     admin@test.com / admin123`);
     console.log(`  Empleado:  empleado@test.com / emp123`);
     console.log(`  Cliente:   cliente@test.com / cli123`);
@@ -507,7 +507,7 @@ async function seedDatabase(): Promise<void> {
     process.exit(0);
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Error al ejecutar seeder:', err.message);
+    console.error('Error al ejecutar seeder:', err.message);
     process.exit(1);
   }
 }

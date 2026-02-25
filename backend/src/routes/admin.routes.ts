@@ -410,7 +410,7 @@ export default (app: Express): void => {
    */
   router.put("/users/:id", async (req: Request, res: Response) => {
     try {
-      console.log("🔧 PUT /users/:id called");
+      console.log("PUT /users/:id called");
       const userId = parseInt(req.params.id as string, 10);
       const { nombre, email, rol } = req.body;
 
@@ -455,7 +455,7 @@ export default (app: Express): void => {
         },
       });
     } catch (error: any) {
-      console.error("❌ Error updating user:", error);
+      console.error("Error updating user:", error);
       res.status(500).json({
         message: "Error actualizando usuario",
         error: error?.message || "Error desconocido",
@@ -606,17 +606,17 @@ export default (app: Express): void => {
       const productId = parseInt(req.params.id as string, 10);
 
       if (!productId || isNaN(productId)) {
-        console.log("❌ Invalid product ID:", req.params.id);
+        console.log("Invalid product ID:", req.params.id);
         res.status(400).json({ message: "ID de producto inválido" });
         return;
       }
 
-      console.log("📝 Updating product with ID:", productId);
+      console.log("Updating product with ID:", productId);
 
       const product = await db.articulo.findByPk(productId);
 
       if (!product) {
-        console.log("❌ Product not found for ID:", productId);
+        console.log("Product not found for ID:", productId);
         res.status(404).json({ message: "Producto no encontrado" });
         return;
       }
@@ -626,7 +626,7 @@ export default (app: Express): void => {
       });
 
       if (updated > 0) {
-        console.log("✅ Product updated successfully:", productId);
+        console.log("Product updated successfully:", productId);
         const updatedProduct = await db.articulo.findByPk(productId, {
           include: [
             {
@@ -638,11 +638,11 @@ export default (app: Express): void => {
         });
         res.json({ success: true, product: updatedProduct });
       } else {
-        console.log("⚠️ No changes made to product:", productId);
+        console.log("No changes made to product:", productId);
         res.json({ success: false, message: "No se realizaron cambios" });
       }
     } catch (error) {
-      console.error("❌ Error updating product:", error);
+      console.error("Error updating product:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       res.status(500).json({
@@ -689,10 +689,10 @@ export default (app: Express): void => {
     async (req: Request, res: Response) => {
       try {
         const orderId = parseInt(req.params.id as string, 10);
-        console.log("📦 Fetching order with ID:", orderId);
+        console.log("Fetching order with ID:", orderId);
 
         if (!orderId || isNaN(orderId)) {
-          console.log("❌ Invalid order ID:", req.params.id);
+          console.log("Invalid order ID:", req.params.id);
           res.status(400).json({ message: "ID de pedido inválido" });
           return;
         }
@@ -702,20 +702,20 @@ export default (app: Express): void => {
         });
 
         if (!order) {
-          console.log("❌ Order not found for ID:", orderId);
+          console.log("Order not found for ID:", orderId);
           res.status(404).json({ message: "Pedido no encontrado" });
           return;
         }
 
-        console.log("✅ Order found:", order.idventa);
+        console.log("Order found:", order.idventa);
 
         // Obtener cliente
         let cliente = null;
         try {
           cliente = await db.cliente.findByPk(order.idcliente);
-          console.log("👤 Cliente loaded:", cliente?.nombre || "Sin cliente");
+          console.log("Cliente loaded:", cliente?.nombre || "Sin cliente");
         } catch (clienteError) {
-          console.error("⚠️ Error loading cliente:", clienteError);
+          console.error("Error loading cliente:", clienteError);
         }
 
         // Obtener detalles de venta
@@ -724,9 +724,9 @@ export default (app: Express): void => {
           detalles = await db.detalle_venta.findAll({
             where: { idventa: orderId },
           });
-          console.log("📋 Detalles loaded:", detalles.length);
+          console.log("Detalles loaded:", detalles.length);
         } catch (detallesError) {
-          console.error("⚠️ Error loading detalles:", detallesError);
+          console.error("Error loading detalles:", detallesError);
         }
 
         // Construir respuesta simple
@@ -799,13 +799,13 @@ export default (app: Express): void => {
         for (const detalle of detalles) {
           try {
             console.log(
-              `🔍 Loading articulo for detalle ${detalle.idarticulo}`,
+              `Loading articulo for detalle ${detalle.idarticulo}`,
             );
             const articulo = await db.articulo.findByPk(detalle.idarticulo);
 
             if (!articulo) {
               console.warn(
-                `⚠️ Articulo not found with ID: ${detalle.idarticulo}`,
+                `Articulo not found with ID: ${detalle.idarticulo}`,
               );
               response.items.push({
                 id: detalle.idarticulo,
@@ -827,7 +827,7 @@ export default (app: Express): void => {
             }
           } catch (articuloError) {
             console.error(
-              `❌ Error loading articulo ${detalle.idarticulo}:`,
+              `Error loading articulo ${detalle.idarticulo}:`,
               articuloError,
             );
             response.items.push({
@@ -841,10 +841,10 @@ export default (app: Express): void => {
           }
         }
 
-        console.log("✅ Response ready with", response.items.length, "items");
+        console.log("Response ready with", response.items.length, "items");
         res.json(response);
       } catch (error) {
-        console.error("❌ Error getting order:", error);
+        console.error("Error getting order:", error);
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
         console.error("Full error stack:", error);
@@ -936,5 +936,5 @@ export default (app: Express): void => {
   );
 
   app.use("/api/admin", router);
-  console.log("✅ Rutas de admin registradas en /api/admin");
+  console.log("Rutas de admin registradas en /api/admin");
 };

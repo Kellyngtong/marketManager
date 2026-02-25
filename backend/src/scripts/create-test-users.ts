@@ -57,7 +57,7 @@ const createMissingUsers = async (): Promise<void> => {
           clave: hashedPassword,
           idusuario: user.idusuario,
         });
-        console.log(`✅ Contraseña actualizada para: ${userData.email}`);
+        console.log(`Contraseña actualizada para: ${userData.email}`);
       } else {
         // Crear nuevo usuario
         await Usuario.create({
@@ -69,14 +69,14 @@ const createMissingUsers = async (): Promise<void> => {
           id_tenant: userData.id_tenant,
           id_store: userData.id_store,
         });
-        console.log(`✅ Usuario creado: ${userData.email}`);
+        console.log(`Usuario creado: ${userData.email}`);
       }
     }
 
-    console.log('\n✅ Usuarios configurados correctamente.');
+    console.log('\nUsuarios configurados correctamente.');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('Error:', error);
     process.exit(1);
   }
 };
