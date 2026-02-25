@@ -15,13 +15,13 @@ export async function discoverAndRunMigrations(): Promise<void> {
       multipleStatements: true,
     });
 
-    console.log('✅ Conectado a MySQL');
+    console.log('Conectado a MySQL');
 
     // Leer archivos de migración
     const migrationsDir = path.join(__dirname, '../../migrations');
 
     if (!fs.existsSync(migrationsDir)) {
-      console.warn('⚠️  Carpeta de migraciones no encontrada:', migrationsDir);
+      console.warn('Carpeta de migraciones no encontrada:', migrationsDir);
       await connection.end();
       return;
     }
@@ -33,13 +33,13 @@ export async function discoverAndRunMigrations(): Promise<void> {
       .sort();
 
     if (migrationFiles.length === 0) {
-      console.warn('⚠️  No se encontraron archivos de migración');
+      console.warn('No se encontraron archivos de migración');
       await connection.end();
       return;
     }
 
-    console.log(`📁 Encontradas ${migrationFiles.length} migraciones`);
-    console.log('📝 Ejecutando migraciones en orden...\n');
+    console.log(`Encontradas ${migrationFiles.length} migraciones`);
+    console.log('Ejecutando migraciones en orden...\n');
 
     let successCount = 0;
 
@@ -49,34 +49,34 @@ export async function discoverAndRunMigrations(): Promise<void> {
       const sqlContent = fs.readFileSync(migrationPath, 'utf8');
 
       try {
-        console.log(`⏳ Ejecutando: ${migrationFile}`);
+        console.log(`Ejecutando: ${migrationFile}`);
         await connection.query(sqlContent);
         successCount++;
-        console.log(`✅ ${migrationFile} completada\n`);
+        console.log(`${migrationFile} completada\n`);
       } catch (error: any) {
         if (
           error.message.includes('Duplicate column') ||
           error.message.includes('already exists') ||
           error.message.includes('Duplicate key')
         ) {
-          console.log(`⚠️  ${migrationFile} - Columnas/índices ya existen (ignorado)\n`);
+          console.log(`${migrationFile} - Columnas/índices ya existen (ignorado)\n`);
           successCount++;
         } else {
-          console.error(`❌ Error en ${migrationFile}:`, error.message);
+          console.error(`Error en ${migrationFile}:`, error.message);
           throw error;
         }
       }
     }
 
     console.log(
-      `\n✅ Todas las migraciones completadas (${successCount}/${migrationFiles.length})`
+      `\nTodas las migraciones completadas (${successCount}/${migrationFiles.length})`
     );
-    console.log('📦 Base de datos actualizada exitosamente');
+    console.log('Base de datos actualizada exitosamente');
 
     await connection.end();
     process.exit(0);
   } catch (error: any) {
-    console.error('❌ Error al ejecutar migraciones:', error.message);
+    console.error('Error al ejecutar migraciones:', error.message);
     process.exit(1);
   }
 }

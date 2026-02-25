@@ -27,11 +27,11 @@ const shouldMigrate = process.argv.includes("--revert-db");
 // Función para ejecutar migraciones y luego iniciar el servidor
 const initializeApp = async (): Promise<void> => {
   if (shouldMigrate) {
-    console.log("🔄 Relanzando migraciones de base de datos...");
+    console.log("Relanzando migraciones de base de datos...");
     try {
       await discoverAndRunMigrations();
     } catch (error) {
-      console.error("❌ Error al ejecutar migraciones:", error);
+      console.error("Error al ejecutar migraciones:", error);
       process.exit(1);
     }
   }
@@ -120,13 +120,13 @@ const startServer = async (): Promise<void> => {
 
   // Manejador de promesas rechazadas no capturadas
   process.on("unhandledRejection", (reason, promise) => {
-    console.error("❌ Promesa rechazada no capturada:", reason);
+    console.error("Promesa rechazada no capturada:", reason);
     console.error("Promise:", promise);
   });
 
   // Manejador de excepciones no capturadas
   process.on("uncaughtException", (error) => {
-    console.error("❌ Excepción no capturada:", error);
+    console.error("Excepción no capturada:", error);
     // No salir del proceso, continuar ejecutando
   });
 
@@ -147,7 +147,7 @@ const startServer = async (): Promise<void> => {
       ventasRoutes(app);
       uploadRoutes(app);
     } catch (routeError) {
-      console.error("❌ Error al registrar rutas:", routeError);
+      console.error("Error al registrar rutas:", routeError);
     }
 
     // Servir imágenes de productos en la raíz `/imagenesProductos` para
@@ -190,7 +190,7 @@ const startServer = async (): Promise<void> => {
       try {
         res.json({ status: "OK", timestamp: new Date().toISOString() });
       } catch (error) {
-        console.error("❌ Error en health check:", error);
+        console.error("Error en health check:", error);
         res.status(500).json({ message: "Error en health check" });
       }
     });
@@ -205,7 +205,7 @@ const startServer = async (): Promise<void> => {
         try {
           next();
         } catch (error) {
-          console.error("❌ Error en middleware:", error);
+          console.error("Error en middleware:", error);
           if (!res.headersSent) {
             res.status(500).json({
               message: "Error interno del servidor",
@@ -230,7 +230,7 @@ const startServer = async (): Promise<void> => {
         next: express.NextFunction,
       ) => {
         try {
-          console.error("❌ Error capturado en handler global:");
+          console.error("Error capturado en handler global:");
           console.error("  Mensaje:", err.message);
           console.error("  Stack:", err.stack);
           console.error("  URL:", req.url);
@@ -246,28 +246,28 @@ const startServer = async (): Promise<void> => {
             });
           }
         } catch (handlerError) {
-          console.error("❌ Error en el mismo error handler:", handlerError);
+          console.error("Error en el mismo error handler:", handlerError);
         }
       },
     );
 
     const PORT = process.env.PORT || 4800;
     const server = app.listen(PORT, () => {
-      console.log(`✅ Server is running on port ${PORT}.`);
+      console.log(`Server is running on port ${PORT}.`);
       console.log(
-        `📚 Documentación disponible en http://localhost:${PORT}/api-docs`,
+        `Documentación disponible en http://localhost:${PORT}/api-docs`,
       );
     });
 
     // Manejador de errores del servidor
     server.on("error", (error) => {
-      console.error("❌ Error en servidor HTTP:", error);
+      console.error("Error en servidor HTTP:", error);
     });
   } catch (error) {
-    console.error("❌ Error al inicializar base de datos:", error);
+    console.error("Error al inicializar base de datos:", error);
     // No salir del proceso, esperar a que se estabilice
     setTimeout(() => {
-      console.log("🔄 Reintentando inicialización...");
+      console.log("Reintentando inicialización...");
       process.emit("SIGTERM");
     }, 5000);
   }
@@ -275,9 +275,9 @@ const startServer = async (): Promise<void> => {
 
 // Iniciar aplicación
 initializeApp().catch((error) => {
-  console.error("❌ Error fatal al inicializar aplicación:", error);
+  console.error("Error fatal al inicializar aplicación:", error);
   // No hacer exit, dejar el proceso corriendo para debugging
-  console.error("⚠️ El servidor continuará intentando operar...");
+  console.error("El servidor continuará intentando operar...");
 });
 
 export default app;

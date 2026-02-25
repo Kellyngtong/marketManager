@@ -25,11 +25,11 @@ export class RoleGuard implements CanActivate {
     const token = this.auth.getToken();
     const user = this.auth.currentUserValue;
 
-    console.log('🛡️ RoleGuard - Verificando acceso a:', state.url);
-    console.log('🛡️ RoleGuard - Usuario:', user?.nombre, 'Rol:', user?.idrol);
+    console.log('RoleGuard - Verificando acceso a:', state.url);
+    console.log('RoleGuard - Usuario:', user?.nombre, 'Rol:', user?.idrol);
 
     if (!token || !user) {
-      console.log('❌ RoleGuard - Sin token/usuario');
+      console.log('RoleGuard - Sin token/usuario');
       this.router.navigate(['/login']);
       return false;
     }
@@ -38,7 +38,7 @@ export class RoleGuard implements CanActivate {
     const requiredRoles = route.data['roles'] as number[];
 
     if (!requiredRoles || requiredRoles.length === 0) {
-      console.log('✅ RoleGuard - Acceso permitido (sin restricción de roles)');
+      console.log('RoleGuard - Acceso permitido (sin restricción de roles)');
       return true;
     }
 
@@ -46,11 +46,11 @@ export class RoleGuard implements CanActivate {
     const hasRole = requiredRoles.includes(user.idrol);
 
     if (hasRole) {
-      console.log('✅ RoleGuard - Acceso permitido (rol autorizado)');
+      console.log('RoleGuard - Acceso permitido (rol autorizado)');
       return true;
     }
 
-    console.log('❌ RoleGuard - Rol no autorizado');
+    console.log('RoleGuard - Rol no autorizado');
     const toast = await this.toastCtrl.create({
       message: 'No tienes permisos para acceder a esta sección',
       duration: 3000,

@@ -37,10 +37,10 @@ export class AuthService {
   public user$ = this.userSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    console.log('🔧 AuthService constructor - Inicializando...');
+    console.log('AuthService constructor - Inicializando...');
     const token = this.getToken();
     console.log(
-      '🔧 AuthService constructor - Token al iniciar:',
+      'AuthService constructor - Token al iniciar:',
       token ? 'EXISTE' : 'NO EXISTE',
     );
 
@@ -48,7 +48,7 @@ export class AuthService {
     window.addEventListener('storage', (event) => {
       if (event.key === 'accessToken') {
         console.log(
-          '⚠️ localStorage "accessToken" cambió externamente:',
+          'localStorage "accessToken" cambió externamente:',
           event.newValue ? 'EXISTE' : 'ELIMINADO',
         );
       }
@@ -80,12 +80,12 @@ export class AuthService {
     };
 
     console.log(
-      '🔐 AuthService.login() - Intentando login con email:',
+      'AuthService.login() - Intentando login con email:',
       payload.email,
     );
     return this.http.post(`${this.base}/login`, body).pipe(
       tap((res: any) => {
-        console.log('✅ Login exitoso - Response:', res);
+        console.log('Login exitoso - Response:', res);
         this.persistSession(res);
       }),
     );
@@ -179,7 +179,7 @@ export class AuthService {
   getToken() {
     const token = localStorage.getItem('accessToken');
     console.log(
-      '🔑 getToken() - Token recuperado:',
+      'getToken() - Token recuperado:',
       token ? token.substring(0, 20) + '...' : 'NO EXISTE',
     );
     return token;
@@ -187,7 +187,7 @@ export class AuthService {
 
   isLogged() {
     const logged = !!this.getToken();
-    console.log('📊 isLogged():', logged);
+    console.log('isLogged():', logged);
     return logged;
   }
 
@@ -196,29 +196,29 @@ export class AuthService {
   }
 
   private persistSession(res: any) {
-    console.log('💾 persistSession() LLAMADO - Response:', res);
+    console.log('persistSession() LLAMADO - Response:', res);
 
     if (res && res.accessToken) {
       console.log(
-        '💾 persistSession() - accessToken recibido:',
+        'persistSession() - accessToken recibido:',
         res.accessToken.substring(0, 20) + '...',
       );
       console.log(
-        '💾 persistSession() - localStorage antes:',
+        'persistSession() - localStorage antes:',
         localStorage.getItem('accessToken') ? 'EXISTE' : 'VACÍO',
       );
 
       localStorage.setItem('accessToken', res.accessToken);
-      console.log('💾 persistSession() - Token guardado ✅');
+      console.log('persistSession() - Token guardado');
       console.log(
-        '💾 persistSession() - localStorage después:',
+        'persistSession() - localStorage después:',
         localStorage.getItem('accessToken') ? 'EXISTE' : 'VACÍO',
       );
 
       const user = this.normalizeUser(res.usuario || res.user);
       if (user) {
         console.log(
-          '💾 persistSession() - Guardando usuario:',
+          'persistSession() - Guardando usuario:',
           user.idusuario,
           user.email,
         );
@@ -226,10 +226,10 @@ export class AuthService {
       }
     } else {
       console.error(
-        '❌ persistSession() - No hay accessToken en la respuesta:',
+        'persistSession() - No hay accessToken en la respuesta:',
         res,
       );
-      console.error('❌ Propiedades de res:', Object.keys(res || {}));
+      console.error('Propiedades de res:', Object.keys(res || {}));
     }
   }
 
@@ -260,16 +260,16 @@ export class AuthService {
 
   private persistUser(user: any) {
     if (!user) {
-      console.error('❌ persistUser() - Usuario es null/undefined');
+      console.error('persistUser() - Usuario es null/undefined');
       return;
     }
     console.log(
-      '💾 persistUser() - Guardando usuario en localStorage:',
+      'persistUser() - Guardando usuario en localStorage:',
       user.idusuario,
     );
     localStorage.setItem('currentUser', JSON.stringify(user));
     console.log(
-      '💾 persistUser() - Verificando guardado:',
+      'persistUser() - Verificando guardado:',
       localStorage.getItem('currentUser') ? 'OK' : 'FALLO',
     );
     this.userSubject.next(user);
