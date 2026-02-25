@@ -1,4 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import {
   getBaseOriginalPrice,
   getOfferDiscountPercent,
@@ -57,7 +64,10 @@ export class ProductCardComponent implements OnChanges {
 
   normalizeQuantity(event?: any) {
     const rawValue = event?.detail?.value ?? this.quantity;
-    const parsed = Math.max(1, Math.min(parseInt(rawValue, 10) || 1, this.product?.stock ?? 1));
+    const parsed = Math.max(
+      1,
+      Math.min(parseInt(rawValue, 10) || 1, this.product?.stock ?? 1),
+    );
     this.quantity = parsed;
   }
 
@@ -139,7 +149,10 @@ export class ProductCardComponent implements OnChanges {
 
   getDiscountPercent(product: any): number {
     if (this.isPremiumClient && this.isOfferProduct(product)) {
-      const base = getOfferDiscountPercent(product, this.getOriginalPricesMap());
+      const base = getOfferDiscountPercent(
+        product,
+        this.getOriginalPricesMap(),
+      );
       if (base > 0) {
         return Math.min(base + 10, 95);
       }

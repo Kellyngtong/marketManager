@@ -82,11 +82,15 @@ export class AdminMarketingPage {
       while (page <= totalPages) {
         const query = new URLSearchParams(params);
         query.set('page', String(page));
-        const response = await fetch(`${this.API_HOST}/api/articulos?${query.toString()}`);
+        const response = await fetch(
+          `${this.API_HOST}/api/articulos?${query.toString()}`,
+        );
 
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
-          throw new Error(body?.message || 'No se pudo obtener la lista de productos');
+          throw new Error(
+            body?.message || 'No se pudo obtener la lista de productos',
+          );
         }
 
         const data = await response.json();
@@ -96,15 +100,22 @@ export class AdminMarketingPage {
         page += 1;
       }
 
-      this.allProducts = fullList.sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
+      this.allProducts = fullList.sort((a, b) =>
+        String(a.nombre || '').localeCompare(String(b.nombre || '')),
+      );
       this.applyTipoFilter();
 
       for (const product of this.allProducts) {
-        this.offerPriceDrafts[product.idarticulo] = String(Number(product.precio_venta || 0));
+        this.offerPriceDrafts[product.idarticulo] = String(
+          Number(product.precio_venta || 0),
+        );
       }
     } catch (error: any) {
       console.error('Error loading products for marketing admin', error);
-      this.presentToast(error?.message || 'No se pudo cargar productos', 'danger');
+      this.presentToast(
+        error?.message || 'No se pudo cargar productos',
+        'danger',
+      );
     } finally {
       this.isLoading = false;
     }
@@ -133,7 +144,9 @@ export class AdminMarketingPage {
   async onOfertaToggle(product: MarketingProduct, checked: boolean) {
     if (checked) {
       if (this.originalPrices[product.idarticulo] === undefined) {
-        this.originalPrices[product.idarticulo] = Number(product.precio_venta || 0);
+        this.originalPrices[product.idarticulo] = Number(
+          product.precio_venta || 0,
+        );
         this.persistOriginalPrices();
       }
 
@@ -145,7 +158,10 @@ export class AdminMarketingPage {
       }
 
       product.oferta = true;
-      this.presentToast('Oferta activada. Ahora puedes fijar el nuevo precio.', 'success');
+      this.presentToast(
+        'Oferta activada. Ahora puedes fijar el nuevo precio.',
+        'success',
+      );
       return;
     }
 
@@ -179,7 +195,9 @@ export class AdminMarketingPage {
     }
 
     if (!product.oferta) {
-      const enabled = await this.updateArticulo(product.idarticulo, { oferta: true });
+      const enabled = await this.updateArticulo(product.idarticulo, {
+        oferta: true,
+      });
       if (!enabled) {
         return;
       }
@@ -187,7 +205,9 @@ export class AdminMarketingPage {
     }
 
     if (this.originalPrices[product.idarticulo] === undefined) {
-      this.originalPrices[product.idarticulo] = Number(product.precio_venta || 0);
+      this.originalPrices[product.idarticulo] = Number(
+        product.precio_venta || 0,
+      );
       this.persistOriginalPrices();
     }
 
@@ -224,8 +244,13 @@ export class AdminMarketingPage {
     const expectedCategory = this.tipoCategoriaMap[selected];
 
     this.products = this.allProducts.filter((product) => {
-      const productTipo = String(product?.tipo || '').trim().toLowerCase();
-      const matchesTipo = productTipo === selected || (Number(product?.idcategoria) === expectedCategory && !!expectedCategory);
+      const productTipo = String(product?.tipo || '')
+        .trim()
+        .toLowerCase();
+      const matchesTipo =
+        productTipo === selected ||
+        (Number(product?.idcategoria) === expectedCategory &&
+          !!expectedCategory);
       if (!matchesTipo) {
         return false;
       }
@@ -247,7 +272,9 @@ export class AdminMarketingPage {
     try {
       const token = this.authService.getToken();
       if (!token) {
-        throw new Error('Debes iniciar sesión como admin para gestionar ofertas');
+        throw new Error(
+          'Debes iniciar sesión como admin para gestionar ofertas',
+        );
       }
 
       const response = await fetch(`${this.API_HOST}/api/articulos/${id}`, {
@@ -267,7 +294,10 @@ export class AdminMarketingPage {
       return true;
     } catch (error: any) {
       console.error('Error updating articulo from marketing admin', error);
-      this.presentToast(error?.message || 'No se pudo guardar el cambio', 'danger');
+      this.presentToast(
+        error?.message || 'No se pudo guardar el cambio',
+        'danger',
+      );
       return false;
     }
   }
@@ -286,10 +316,16 @@ export class AdminMarketingPage {
   }
 
   private persistOriginalPrices() {
-    localStorage.setItem(this.originalPricesKey, JSON.stringify(this.originalPrices));
+    localStorage.setItem(
+      this.originalPricesKey,
+      JSON.stringify(this.originalPrices),
+    );
   }
 
-  private async presentToast(message: string, color: 'success' | 'danger' | 'warning') {
+  private async presentToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning',
+  ) {
     const toast = await this.toastCtrl.create({
       message,
       color,

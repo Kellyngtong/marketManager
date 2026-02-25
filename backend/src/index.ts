@@ -157,7 +157,7 @@ const startServer = async (): Promise<void> => {
     const imagesDir = path.resolve(__dirname, "../public/imagenesProductos");
     const defaultImagePath = path.join(imagesDir, "leche.jpg");
 
-    app.get('/imagenesProductos/:file', (req, res) => {
+    app.get("/imagenesProductos/:file", (req, res) => {
       try {
         const requested = path.join(imagesDir, req.params.file);
         // Evitar path traversal

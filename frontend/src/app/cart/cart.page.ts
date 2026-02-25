@@ -129,7 +129,9 @@ export class CartPage {
     const user = this.auth.currentUserValue;
     const topLevelRol = user?.idrol;
     const nestedRol = user?.rol?.idrol;
-    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+    const rolNombre = String(
+      user?.rol?.nombre || user?.rol || '',
+    ).toLowerCase();
     const isPremium =
       topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
 

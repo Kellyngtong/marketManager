@@ -47,62 +47,62 @@ export class ProductImageService {
   // para evitar que "naranja" en "jugo de naranja" mapee a naranja.jpg en lugar de zumo.jpg
   private readonly keywordToImage: Record<string, string> = {
     // Bebidas primero (más específicas)
-    'zumo': 'zumo',
-    'jugo': 'zumo',
-    'zumanaranja': 'zumanaranja',
-    'cerveza': 'cerveza',
-    'vino': 'vino',
-    'alcohol': 'vino',
-    'cafe': 'cafe',
-    'café': 'cafe',
-    'natural': 'zumo',
-    
+    zumo: 'zumo',
+    jugo: 'zumo',
+    zumanaranja: 'zumanaranja',
+    cerveza: 'cerveza',
+    vino: 'vino',
+    alcohol: 'vino',
+    cafe: 'cafe',
+    café: 'cafe',
+    natural: 'zumo',
+
     // Lácteos
-    'leche': 'leche',
-    'queso': 'queso',
-    
+    leche: 'leche',
+    queso: 'queso',
+
     // Agua
-    'agua': 'agua',
-    'mineral': 'agua',
-    
+    agua: 'agua',
+    mineral: 'agua',
+
     // Carnes y pescados
-    'bacalao': 'merluza',
-    'pescado': 'merluza',
-    'merluza': 'merluza',
-    'salmon': 'salmon',
-    'salmón': 'salmon',
-    'jamon': 'serrano',
-    'jamón': 'serrano',
-    'serrano': 'serrano',
-    'embutido': 'serrano',
-    'mortadela': 'mortadela',
-    'filete': 'filete',
-    'carne': 'filete',
-    'pollo': 'pechugapollo',
-    'pechuga': 'pechugapollo',
-    
+    bacalao: 'merluza',
+    pescado: 'merluza',
+    merluza: 'merluza',
+    salmon: 'salmon',
+    salmón: 'salmon',
+    jamon: 'serrano',
+    jamón: 'serrano',
+    serrano: 'serrano',
+    embutido: 'serrano',
+    mortadela: 'mortadela',
+    filete: 'filete',
+    carne: 'filete',
+    pollo: 'pechugapollo',
+    pechuga: 'pechugapollo',
+
     // Frutas y verduras
-    'brocoli': 'brocoli',
-    'brócoli': 'brocoli',
-    'zanahoria': 'zanaoria',
-    'zanahorie': 'zanaoria',
-    'manzana': 'manzana',
-    'peras': 'peras',
-    'pera': 'peras',
-    'platano': 'platano',
-    'plátano': 'platano',
-    'naranja': 'naranja',
-    'tomate': 'tomate',
-    'lechuga': 'lechuga',
-    
+    brocoli: 'brocoli',
+    brócoli: 'brocoli',
+    zanahoria: 'zanaoria',
+    zanahorie: 'zanaoria',
+    manzana: 'manzana',
+    peras: 'peras',
+    pera: 'peras',
+    platano: 'platano',
+    plátano: 'platano',
+    naranja: 'naranja',
+    tomate: 'tomate',
+    lechuga: 'lechuga',
+
     // Otros
-    'arroz': 'arroz',
-    'pan': 'pan',
-    'croisant': 'croisant',
-    'integral': 'panintegral',
-    'pastaintegral': 'pastaintegral',
-    'aceite': 'aceite',
-    'croqueta': 'croquetas',
+    arroz: 'arroz',
+    pan: 'pan',
+    croisant: 'croisant',
+    integral: 'panintegral',
+    pastaintegral: 'pastaintegral',
+    aceite: 'aceite',
+    croqueta: 'croquetas',
   };
 
   // Usar una imagen local existente como fallback para evitar 404 si falta default.jpg
@@ -133,7 +133,7 @@ export class ProductImageService {
     if (!productName) return null;
 
     const normalized = this.normalizeProductName(productName);
-    
+
     // Intento 1: Match directo
     if (this.localImages.has(normalized)) {
       return `${this.imagenesProductosPath}/${normalized}.jpg`;
@@ -163,7 +163,9 @@ export class ProductImageService {
       return localUrl;
     }
 
-    console.warn(`[ProductImageService] No local image found for "${productName}", using default`);
+    console.warn(
+      `[ProductImageService] No local image found for "${productName}", using default`,
+    );
     return this.defaultImage;
   }
 

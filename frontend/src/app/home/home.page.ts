@@ -401,7 +401,12 @@ export class HomePage implements OnDestroy {
       .trim()
       .toLowerCase();
 
-    return normalizedOferta === '1' || normalizedOferta === 'true' || normalizedOferta === 'si' || normalizedOferta === 'sí';
+    return (
+      normalizedOferta === '1' ||
+      normalizedOferta === 'true' ||
+      normalizedOferta === 'si' ||
+      normalizedOferta === 'sí'
+    );
   }
 
   private fileToDataUrl(file: File): Promise<string> {
