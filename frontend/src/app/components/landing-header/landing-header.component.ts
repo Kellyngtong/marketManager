@@ -24,7 +24,7 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
       conocenos: 'Conócenos',
       supermercados: 'Supermercados',
       trabaja: 'Trabaja con nosotros',
-      atencion: 'Atención al cliente',
+      // atencion: 'Atención al cliente',
       acceder: 'Acceder',
       menu: 'Menú',
       carrito: 'Carrito',
