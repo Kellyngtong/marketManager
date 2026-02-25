@@ -24,9 +24,9 @@
           <a routerLink="/trabaja" class="menu-item">{{
             translations[currentLanguage]["trabaja"]
           }}</a>
-          <a routerLink="/atencion" class="menu-item">{{
+          <!-- <a routerLink="/atencion" class="menu-item">{{
             translations[currentLanguage]["atencion"]
-          }}</a>
+          }}</a> -->
         </nav>
       </ng-container>
 
@@ -125,12 +125,12 @@
         </ion-item>
       </ion-menu-toggle>
 
-      <ion-menu-toggle *ngIf="!(user$ | async)">
+      <!-- <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button routerLink="/atencion" class="menu-mobile-item">
           <ion-icon name="help-circle" slot="start"></ion-icon>
           <ion-label>{{ translations[currentLanguage]["atencion"] }}</ion-label>
         </ion-item>
-      </ion-menu-toggle>
+      </ion-menu-toggle> -->
 
       <ion-menu-toggle *ngIf="!(user$ | async)">
         <ion-item button (click)="goToLogin()" class="menu-mobile-item">

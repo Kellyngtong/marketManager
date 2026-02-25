@@ -1,39 +1,191 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button routerLink="/">
-        <ion-icon name="arrow-back"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Conócenos</ion-title>
-  </ion-toolbar>
+<!-- conocenos.page.html -->
+
+<ion-header class="mc-header">
+  <nav>
+    <a routerLink="" class="logo">
+      <img src="assets/icon/logoHorizontal.png" alt="Mercachona" class="logo-horizontal" />
+    </a>
+
+    <div class="nav-right">
+      <!-- <button class="btn-lang">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        ES
+      </button> -->
+      <button class="btn-access">Acceder</button>
+    </div>
+  </nav>
 </ion-header>
 
-<ion-content class="conocenos-page">
-  <div class="hero">
-    <h1>Conócenos</h1>
-    <p>Somos una plataforma local que acerca productos frescos y de calidad a tu puerta, conectando productores cercanos con consumidores de la comunidad.</p>
+<ion-content [fullscreen]="true">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-shapes"><span></span><span></span><span></span></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Nuestra historia</div>
+      <h1 class="hero-title">Más que un<br/><em>supermercado</em>,<br/>una familia.</h1>
+      <p class="hero-sub">Desde 2008, llevamos frescura, calidad y cercanía a millones de hogares españoles cada día.</p>
+    </div>
+    <div class="hero-badge">
+      <strong>+15</strong>
+      <span>años contigo</span>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="inner">
+      <div class="stat-item" *ngFor="let s of stats">
+        <div class="stat-num">{{ s.value }}<sup>{{ s.suffix }}</sup></div>
+        <div class="stat-label">{{ s.label }}</div>
+      </div>
+    </div>
   </div>
 
-  <section class="info">
-    <h2>Nuestra misión</h2>
-    <p>Facilitar la compra de productos del día a día impulsando la economía local y reduciendo la huella ambiental. Trabajamos con agricultores y proveedores de la zona para ofrecer productos frescos, trazables y a precios justos, fomentando prácticas sostenibles y el consumo responsable.</p>
-    <ul>
-      <li>Apoyar al pequeño productor local.</li>
-      <li>Reducir desperdicio mediante logística eficiente.</li>
-      <li>Ofrecer transparencia y calidad en cada pedido.</li>
-    </ul>
+  <!-- HISTORIA -->
+  <section class="section">
+    <div class="historia-grid">
+      <div class="historia-visual">
+        <div class="historia-img">
+          <div class="historia-img-inner">MC</div>
+        </div>
+        <div class="float-card">
+          <div class="float-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 8C8 10 5.9 16.17 3.82 19.9A10 10 0 0 0 21 12C21 12 17 8 17 8z"/>
+              <path d="M3.82 19.9C3.82 19.9 8 15 12 14"/>
+            </svg>
+          </div>
+          <div class="float-card-text">
+            <strong>100% producto fresco</strong>
+            <span>De origen local</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-tag">Nuestra historia</div>
+        <h2 class="section-title">Nacimos para acercarte lo <em>mejor</em> del mercado</h2>
+        <p class="section-body">Mercachona nació en Valencia en 2008 con una idea sencilla: que cualquier persona pudiera acceder a productos frescos, de calidad y a buen precio sin tener que recorrer varios establecimientos.</p>
+        <p class="section-body mt-16">Hoy, con más de 320 tiendas en toda España y una sólida plataforma online, seguimos fieles a ese compromiso: escuchar a nuestros clientes, apostar por proveedores locales y reinventarnos cada día.</p>
+      </div>
+    </div>
   </section>
 
-  <section class="history-team">
-    <h2>Nuestra historia y equipo</h2>
+  <!-- MISIÓN / VALORES -->
+  <section class="section section-alt">
+    <div class="mv-intro">
+      <div class="section-tag centered">Misión, visión y valores</div>
+      <h2 class="section-title centered">Lo que nos mueve y <em>nos define</em></h2>
+      <p class="section-body centered">Cada decisión que tomamos parte de los mismos principios: calidad, personas y planeta.</p>
+    </div>
 
-    <p>Érase una vez en la pequeña población de Essen, en Alemania… Así podría empezar nuestra historia: después de la Primera Guerra Mundial la familia inició un pequeño negocio de alimentación en 1913, y en 1945 continuó con la visión de conocer al cliente y ofrecer lo que necesita al mejor precio. De esa idea surgió la filosofía que aún hoy nos guía.</p>
+    <div class="mv-cards">
+      <!-- Misión + Visión full width -->
+      <div class="mv-card full">
+        <div>
+          <div class="mv-card-header">
+            <div class="mv-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+              </svg>
+            </div>
+            <div class="mv-card-title">Nuestra misión</div>
+          </div>
+          <p class="mv-card-body">Ser el supermercado de confianza de cada familia española, ofreciendo productos de máxima frescura a precios justos, con un servicio cercano y sostenible.</p>
+        </div>
+        <div>
+          <div class="mv-card-header">
+            <div class="mv-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+            <div class="mv-card-title">Nuestra visión</div>
+          </div>
+          <p class="mv-card-body">Para 2030, ser la cadena líder en distribución de productos frescos en el sur de Europa, referente en sostenibilidad y bienestar del empleado.</p>
+        </div>
+      </div>
 
-    <p>Durante los años siguientes, y especialmente en contextos difíciles como la posguerra, se apostó por ayudar a la comunidad cubriendo necesidades básicas con precios accesibles. Esa sensibilidad por el vecindario y la cercanía con el cliente han llegado hasta hoy como principios que mantenemos en cada acción.</p>
-
-    <p>Trabajamos con comercios de todas las escalas: desde pequeñas tiendas de barrio y mercados locales hasta comercios más grandes. Nuestro objetivo es crear puentes entre productores y puntos de venta para que la cadena sea eficiente, justa y sostenible, adaptándonos a las necesidades de cada tipo de comercio.</p>
-
-    <p>Nuestro equipo es multidisciplinar y está comprometido con la calidad, la transparencia y el servicio cercano. Contamos con profesionales en compras, logística, producto y atención al cliente que colaboran para optimizar procesos, reducir desperdicios y ofrecer la mejor experiencia tanto a tiendas como a consumidores. Escuchamos sugerencias y mejoramos continuamente para servir mejor a la comunidad.</p>
+      <!-- 4 valores -->
+      <div class="mv-card" *ngFor="let v of values">
+        <div class="mv-card-header">
+          <div class="mv-card-icon green-bg" [innerHTML]="v.icon"></div>
+          <div class="mv-card-title">{{ v.title }}</div>
+        </div>
+        <p class="mv-card-body">{{ v.desc }}</p>
+      </div>
+    </div>
   </section>
+
+  <!-- EQUIPO -->
+  <section class="section team-section">
+    <div class="section-tag centered">Las personas</div>
+    <h2 class="section-title centered">El equipo que hace <em>posible</em> Mercachona</h2>
+    <p class="section-body centered">Somos más de 18.000 personas comprometidas con darte el mejor servicio.</p>
+
+    <div class="team-grid">
+      <div class="team-card" *ngFor="let m of teamMembers; let i = index">
+        <div class="team-avatar" [ngClass]="'avatar-' + (i + 1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="team-info">
+          <div class="team-name">{{ m.name }}</div>
+          <div class="team-role">{{ m.role }}</div>
+          <div class="team-quote">"{{ m.quote }}"</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="timeline-section section-alt">
+    <div class="timeline-inner">
+      <div class="timeline-title">
+        <div class="section-tag centered">Cronología</div>
+        <h2 class="section-title centered">Nuestra trayectoria, <em>año a año</em></h2>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-item" *ngFor="let item of timelineItems">
+          <div class="tl-dot"></div>
+          <div class="tl-year">{{ item.year }}</div>
+          <div class="tl-title">{{ item.title }}</div>
+          <div class="tl-body">{{ item.description }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-inner">
+      <h2 class="cta-title">Forma parte de la familia<br/>Mercachona</h2>
+      <p class="cta-sub">Ya seas cliente, proveedor o futuro empleado, hay un lugar para ti en nuestra historia.</p>
+      <div class="cta-btns">
+        <button class="btn-white">Comienza tu compra</button>
+        <button class="btn-outline-white" routerLink="/trabaja">Trabaja con nosotros</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a routerLink="/home" class="footer-logo">
+      <img src="assets/icon/logoHorizontal.png" alt="Mercachona" class="logo-horizontal-footer"/>
+    </a>
+    <span>© 2024 Mercachona S.L. — Todos los derechos reservados</span>
+    <div class="footer-links">
+      <a href="#">Aviso legal</a>
+      <a href="#">Privacidad</a>
+      <a href="#">Cookies</a>
+    </div>
+  </footer>
+
 </ion-content>
