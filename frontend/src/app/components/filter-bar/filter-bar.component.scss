@@ -40,9 +40,10 @@
   }
 
   &.active {
-    background: colors.$primary;
-    color: colors.$surface;
-    border-color: colors.$primary;
+    background: colors.$secondary;
+    color: colors.$textPrimary;
+    border-color: colors.$secondary;
+    background: #2e7d32 !important;
   }
 }
 
