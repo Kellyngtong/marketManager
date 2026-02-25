@@ -13,9 +13,10 @@
     <div class="product-image-container">
       <div class="product-image-card">
         <img
-          [src]="product.imagen || product.image"
+          [src]="imageService.getProductImage(product.nombre || 'producto')"
           [alt]="product.nombre"
           class="product-image"
+          (error)="handleImageError($event, product.nombre || 'producto')"
         />
 
         <!-- Discount Badge -->
@@ -136,7 +137,7 @@
       >
         <a [href]="'/producto/' + relProduct.idarticulo">
           <img
-            [src]="relProduct.imagen || relProduct.image"
+            [src]="imageService.getProductImage(relProduct.nombre || 'producto')"
             [alt]="relProduct.nombre"
             class="related-product-image"
           />

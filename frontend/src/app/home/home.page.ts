@@ -204,8 +204,8 @@ export class HomePage implements OnDestroy {
   }
 
   onSearchChange(query: string) {
-    this.searchQuery = query;
-    this.loadProducts();
+    this.searchTerm = query.trim();
+    this.applyFilters();
   }
 
   onFilterChange(filterValue: string | number | null) {
@@ -401,7 +401,12 @@ export class HomePage implements OnDestroy {
       .trim()
       .toLowerCase();
 
-    return normalizedOferta === '1' || normalizedOferta === 'true' || normalizedOferta === 'si' || normalizedOferta === 'sí';
+    return (
+      normalizedOferta === '1' ||
+      normalizedOferta === 'true' ||
+      normalizedOferta === 'si' ||
+      normalizedOferta === 'sí'
+    );
   }
 
   private fileToDataUrl(file: File): Promise<string> {

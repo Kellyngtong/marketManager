@@ -11,13 +11,14 @@ import { Router } from '@angular/router';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { AuthService } from '../auth/auth.service';
 import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
+import { ProductImageDirective } from '../directives/product-image.directive';
 
 @Component({
   selector: 'app-employers',
   templateUrl: './employers.page.html',
   styleUrls: ['./employers.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, ProductImageDirective],
 })
 export class EmployersPage {
   private readonly API_HOST = `${window.location.protocol}//${window.location.hostname}:4800`;

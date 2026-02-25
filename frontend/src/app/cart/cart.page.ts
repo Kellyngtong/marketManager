@@ -4,6 +4,7 @@ import { ToastController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { CarritoService, CartItem } from '../services/carrito.service';
+import { ProductImageService } from '../services/product-image.service';
 
 @Component({
   selector: 'app-cart',
@@ -18,10 +19,21 @@ export class CartPage {
 
   constructor(
     private carritoService: CarritoService,
-    private toastCtrl: ToastController,
     private auth: AuthService,
     private router: Router,
+    private toastCtrl: ToastController,
+    public imageService: ProductImageService,
   ) {}
+
+  handleImageError(event: Event, productName: string): void {
+    const img = event.target as HTMLImageElement;
+    const localUrl = this.imageService.getLocalImageUrl(productName);
+    if (localUrl && img.src !== localUrl) {
+      img.src = localUrl;
+    } else {
+      img.src = this.imageService.getProductImage(productName);
+    }
+  }
 
   ionViewWillEnter() {
     this.refreshCart();
@@ -117,7 +129,9 @@ export class CartPage {
     const user = this.auth.currentUserValue;
     const topLevelRol = user?.idrol;
     const nestedRol = user?.rol?.idrol;
-    const rolNombre = String(user?.rol?.nombre || user?.rol || '').toLowerCase();
+    const rolNombre = String(
+      user?.rol?.nombre || user?.rol || '',
+    ).toLowerCase();
     const isPremium =
       topLevelRol === 2 || nestedRol === 2 || rolNombre.includes('premium');
 

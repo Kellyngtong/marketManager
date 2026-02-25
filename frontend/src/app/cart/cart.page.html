@@ -44,8 +44,9 @@
             >
               <div class="item-image">
                 <img
-                  [src]="item.articulo?.imagen || 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200&auto=format'"
+                  [src]="imageService.getProductImage(item.articulo?.nombre || 'producto')"
                   alt="{{ item.articulo?.nombre }}"
+                  (error)="handleImageError($event, item.articulo?.nombre || 'producto')"
                 />
               </div>
 
