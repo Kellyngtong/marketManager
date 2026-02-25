@@ -256,6 +256,20 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  private normalizeProductCategoria(product: any): any {
+    const categoriaObj = product?.categoria;
+    let categoriaNombre = null;
+    if (categoriaObj && typeof categoriaObj === 'object') {
+      categoriaNombre = categoriaObj.nombre || categoriaObj.name || null;
+    }
+    if (!categoriaNombre && product?.idcategoria) {
+      categoriaNombre = this.categoriaMap[Number(product.idcategoria)];
+    }
+    // attach display property
+    product.categoria_nombre = categoriaNombre || null;
+    return product;
+  }
+
   async loadProducts() {
     try {
       const data: any = await firstValueFrom(
@@ -264,19 +278,7 @@ export class AdminDashboardComponent implements OnInit {
       this.products = Array.isArray(data) ? data : data.data || [];
 
       // Normalize category display
-      this.products = this.products.map((p: any) => {
-        const categoriaObj = p?.categoria;
-        let categoriaNombre = null;
-        if (categoriaObj && typeof categoriaObj === 'object') {
-          categoriaNombre = categoriaObj.nombre || categoriaObj.name || null;
-        }
-        if (!categoriaNombre && p?.idcategoria) {
-          categoriaNombre = this.categoriaMap[Number(p.idcategoria)];
-        }
-        // attach display property
-        p.categoria_nombre = categoriaNombre || null;
-        return p;
-      });
+      this.products = this.products.map((p: any) => this.normalizeProductCategoria(p));
     } catch (error) {
       console.error('Error loading products:', error);
     }
@@ -406,6 +408,8 @@ export class AdminDashboardComponent implements OnInit {
         const created: any = await firstValueFrom(
           this.adminService.createProduct(result.data.product),
         );
+        // Normalize category before adding to products array
+        this.normalizeProductCategoria(created);
         this.products.unshift(created);
         await this.showSuccess('Producto creado correctamente');
       } catch (error) {
@@ -438,6 +442,8 @@ export class AdminDashboardComponent implements OnInit {
           (p) => p.idarticulo === product.idarticulo,
         );
         if (index > -1) {
+          // Normalize category after updating
+          this.normalizeProductCategoria(result.data.product);
           this.products[index] = result.data.product;
         }
         await this.showSuccess('Producto actualizado correctamente');

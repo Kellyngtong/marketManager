@@ -138,14 +138,46 @@ ion-header.landing-header {
         }
       }
 
+      .auth-btn {
+        padding: 8px 16px;
+        background-color: $primary;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background-color: $primary-dark;
+        }
+        
+        &:active {
+          opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+          padding: 6px 12px;
+          font-size: 13px;
+        }
+      }
+
       .menu-mobile-btn {
         display: none;
         color: #254e2f;
 
         @media (max-width: 768px) {
-          display: block!important;
-          pointer-events: auto; 
+          display: block !important;
+          pointer-events: auto;
         }
+      }
+
+      .auth-btn {
+        --color: #ffffff !important;
+      }
+      .auth-btn::after {
+        --color: #ffffff !important;
       }
     }
   }

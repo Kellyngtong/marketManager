@@ -1,258 +1,306 @@
-# 🛒 La Tiendita - Sistema de Comercio Online
+# MarketManager
 
-Una aplicación web de comercio electrónico para supermercado que permite gestionar productos, realizar compras y administrar el inventario de forma simple e intuitiva.
+Sistema de gestión y venta online para supermercado, con backend API en TypeScript y frontend web/móvil con Ionic + Angular.
 
-# GITHUB
+## 1) ¿Para qué sirve este sistema?
 
-https://github.com/Kellyngtong/ionicApp. Sí te gusta deja una estrella! ;)
+MarketManager permite operar una tienda/supermercado con flujo completo de catálogo y compra:
 
-## Comenzando 🚀
+- Autenticación de usuarios con roles.
+- Gestión de artículos (catálogo, stock, filtros, búsqueda).
+- Carrito de compra por usuario.
+- Checkout y registro de ventas.
+- Integración de pagos con Stripe.
+- Funciones administrativas (métricas, pedidos, usuarios, productos).
+- Soporte multitenant (aislamiento por tenant/store).
 
-Estas instrucciones te permitirán obtener una copia del proyecto en funcionamiento en tu máquina local para propósitos de desarrollo y pruebas.
+## 2) Arquitectura del proyecto
 
-### Pre-requisitos 📋
-
-Necesitas tener instalado lo siguiente en tu sistema:
-
-```bash
-Node.js (v14 o superior)
-npm (v6 o superior)
-MySQL (v5.7 o superior)
-Angular CLI (v20 o superior)
+```text
+marketManager/
+├── backend/                 # API REST + lógica de negocio
+│   ├── src/
+│   │   ├── config/          # Config DB/Swagger
+│   │   ├── controllers/     # Casos de uso
+│   │   ├── db/              # Inicialización DB, migraciones, seeder
+│   │   ├── middlewares/     # JWT, roles, tenant
+│   │   ├── models/          # Modelos Sequelize
+│   │   ├── routes/          # Endpoints
+│   │   └── index.ts         # Entrada principal del servidor
+│   ├── migrations/          # Migraciones SQL
+│   ├── public/images/       # Imágenes subidas
+│   └── package.json
+├── frontend/                # App cliente Angular + Ionic
+│   ├── src/
+│   └── package.json
+└── README.md                # Documentación única del proyecto
 ```
 
-Verifica que tienes Node.js instalado:
-
-```bash
-node --version
-npm --version
-```
-
-### Instalación 🔧
-
-Sigue estos pasos para configurar el entorno de desarrollo:
-
-#### 1. Clona el repositorio
-
-```bash
-git clone <url-del-repositorio>
-cd Proyecto1
-```
-
-#### 2. Configura la base de datos
-
-Crea una base de datos MySQL:
-
-```sql
-CREATE DATABASE db_ionic;
-```
-
-#### 3. Configura el Backend
-
-```bash
-cd backend
-npm install
-```
-
-Crea un archivo `.env` en la carpeta `backend` con la siguiente configuración:
-
-```env
-DB_HOST=localhost
-DB_USER=tu_usuario
-DB_PASSWORD=tu_contraseña
-DB_NAME=db_ionic
-PORT=4800
-```
-
-Inicia el servidor backend:
-
-```bash
-npm run dev
-```
-
-El servidor estará corriendo en `http://localhost:4800`
-
-#### 4. Configura el Frontend
-
-```bash
-cd frontend
-npm install
-```
-
-Inicia el servidor de desarrollo:
-
-```bash
-ionic serve
-```
-
-La aplicación estará disponible en `http://localhost:8100`
-
-#### 5. Prueba la instalación
-
-Accede a `http://localhost:8100` y deberías ver la lista de productos del supermercado.
-
-## Ejecutando el proyecto ⚙️
-
-### Backend (API REST)
-
-```bash
-cd backend
-npm run dev
-```
-
-Esto iniciará:
-
-- El servidor Express en el puerto 4800
-- La conexión a la base de datos MySQL
-- La creación automática de 7 productos de ejemplo
-- La documentación Swagger en `http://localhost:4800/api-docs`
-
-### Frontend (Aplicación Angular + Ionic)
-
-```bash
-cd frontend
-ng serve --port 49469
-```
-
-Esto iniciará:
-
-- El servidor de desarrollo de Angular
-- Hot reload para cambios en tiempo real
-- La aplicación en `http://localhost:8100`
-
-### Documentación de la API 📚
-
-La documentación interactiva de la API está disponible en:
-
-```
-http://localhost:4800/api-docs
-```
-
-Aquí puedes:
-
-- Ver todos los endpoints disponibles
-- Probar cada endpoint directamente
-- Ver los esquemas de request/response
-- Consultar los códigos de respuesta HTTP
-
-## Funcionalidades ✨
-
-### Para Usuarios
-
-- ✅ **Ver productos**: Lista completa de productos del supermercado
-- ✅ **Ver detalles**: Información detallada de cada producto
-- ✅ **Carrito de compras**: Agregar, modificar cantidades y eliminar productos
-- ✅ **Checkout**: Vista de finalización de compra (próximamente)
-
-### Para Administradores
-
-- ✅ **Crear productos**: Añadir nuevos productos al catálogo
-- ✅ **Editar productos**: Modificar nombre, precio y stock
-- ✅ **Eliminar productos**: Borrar productos del inventario
-- ✅ **Gestión visual**: Botones intuitivos en cada tarjeta de producto
-
-## API Endpoints 🔌
-
-### Productos
-
-GET | `/api/products` | Obtener todos los productos
-GET | `/api/products/:id` | Obtener un producto por ID
-POST | `/api/products` | Crear un nuevo producto
-PUT | `/api/products/:id` | Actualizar un producto
-DELETE | `/api/products/:id` | Eliminar un producto
-
-# Para más información consultar el sguiente enlace a la colección de Postman.
-
-https://cloudy-rocket-987271.postman.co/workspace/WorkSpace-Murcia-Compartido~d9c18655-e906-494d-8d92-e20ad0d82e84/collection/33985259-b2eda180-e996-4e1c-a7cb-dcaf26df581e?action=share&creator=33985259&active-environment=33985259-c1b0753e-d014-458c-acfc-44e41c7d4f0c
-
-
-### Ejemplo de uso:
-
-```bash
-# Obtener todos los productos
-curl http://localhost:4800/api/products
-
-# Crear un nuevo producto
-curl -X POST http://localhost:4800/api/products \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Café 250g",
-    "description": "Café molido premium",
-    "price": 4.50,
-    "stock": 15,
-    "image": "https://images.unsplash.com/photo-1..."
-  }'
-```
-
-## Construido con 🛠️
+## 3) Tecnologías empleadas
 
 ### Backend
 
-- **Node.js** - Entorno de ejecución para JavaScript
-- **Express.js** - Framework web para Node.js
-- **MySQL** - Sistema de gestión de base de datos
-- **Sequelize** - ORM para Node.js
-- **Swagger UI Express** - Documentación interactiva de API
-- **swagger-jsdoc** - Generación de especificaciones OpenAPI
-- **dotenv** - Gestión de variables de entorno
-- **CORS** - Manejo de peticiones cross-origin
+- Node.js
+- TypeScript
+- Express 5
+- Sequelize + MySQL (`mysql2`)
+- JWT (`jsonwebtoken`) + bcrypt
+- Swagger (`swagger-jsdoc`, `swagger-ui-express`)
+- Stripe
+- Multer (subida de imágenes)
 
 ### Frontend
 
-- **Angular 16+** - Framework de desarrollo web
-- **Ionic Framework** - Componentes UI móviles
-- **TypeScript** - Superset tipado de JavaScript
-- **RxJS** - Programación reactiva
-- **Capacitor** - Runtime nativo para apps híbridas
+- Angular 20
+- Ionic 8
+- Capacitor 7
+- RxJS
+- TypeScript
 
-## Características Técnicas 🔧
+## 4) Requisitos previos
 
-- **Arquitectura**: Cliente-Servidor (API REST)
-- **Patrón de diseño**: MVC (Model-View-Controller)
-- **Base de datos**: Relacional (MySQL)
-- **ORM**: Sequelize con sincronización automática
-- **Componentes**: Angular Modules (no standalone)
-- **Estado**: LocalStorage para persistencia del carrito
-- **Estilos**: SCSS con variables de Ionic
-- **API Docs**: OpenAPI 3.0.0 (Swagger)
+- Node.js 18 o superior
+- npm 9 o superior
+- MySQL 8 o compatible
 
-## Configuración de Entorno 🔐
+## 5) Variables de entorno (backend)
 
-### Backend (.env)
+Crea `backend/.env` (puedes copiar de `backend/.env.example`).
+
+Ejemplo recomendado para local:
 
 ```env
-# Base de datos
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=tu_password
 DB_NAME=db_ionic
+DB_DIALECT=mysql
 
-# Servidor
+DB_POOL_MAX=5
+DB_POOL_MIN=0
+DB_POOL_ACQUIRE=30000
+DB_POOL_IDLE=10000
+
 PORT=4800
 NODE_ENV=development
+JWT_SECRET=pon_una_clave_larga_y_segura
+
+# Opcional
+DB_LOGGING=false
+# CORS_ORIGINS=http://localhost:4200,http://localhost:8100
+
+# Stripe (necesario para pagos)
+STRIPE_SECRET_KEY=
+STRIPE_PUBLIC_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_SUCCESS_URL=http://localhost:8100/payment-success
+STRIPE_CANCEL_URL=http://localhost:8100/payment-cancel
 ```
 
-### Frontend (environment.ts)
+## 6) Instalación
 
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: "http://localhost:4800/api",
-};
+Instala dependencias por separado:
+
+```bash
+cd backend
+npm install
+
+cd ../frontend
+npm install
 ```
 
-## Productos de Ejemplo 🥫
+## 7) Migraciones y seeder
 
-El sistema se inicializa con 7 productos de supermercado:
+### Ejecutar migraciones
 
-1. Leche Entera 1L - €1.25
-2. Pan Integral 500g - €2.50
-3. Huevos Docena - €3.20
-4. Tomates 1kg - €2.80
-5. Manzanas Golden 1kg - €2.30
-6. Aceite de Oliva 1L - €8.50
-7. Arroz Blanco 1kg - €1.80
+```bash
+cd backend
+npm run migrate
+```
 
-## Autores ✒️
+Esto ejecuta en orden los SQL de `backend/migrations`:
+- `01_schema_mvp.sql`
+- `02_add_multitenant.sql`
+- `03_add_customer_snapshot_to_venta.sql`
 
-- **Aitor Aridane Peña Sánchez** - _Desarrollo completo_ - Proyectito de tienda online para supermercado
+### Ejecutar seeder
+
+```bash
+cd backend
+npm run seed
+```
+
+El seeder (`backend/src/db/seeder.ts`) inserta datos iniciales multitenant (tenants, stores, roles, categorías, artículos, usuarios, etc.).
+
+### Alternativa: migrar al iniciar backend
+
+```bash
+cd backend
+npm run dev -- --revert-db
+```
+
+## 8) Cómo levantar el sistema (paso a paso)
+
+### 1. Levantar backend
+
+```bash
+cd backend
+npm run dev
+```
+
+Backend disponible en: `http://localhost:4800`
+
+### 2. Levantar frontend
+
+```bash
+cd frontend
+npm start
+```
+
+Frontend (Angular dev server) en: `http://localhost:4200`
+
+## 9) URLs útiles
+
+- API: `http://localhost:4800`
+- Swagger: `http://localhost:4800/api-docs`
+- Healthcheck: `http://localhost:4800/api/health`
+- Archivos públicos (imágenes): `http://localhost:4800/public/...`
+
+## 10) ¿Qué hace cada parte del sistema?
+
+### Módulos funcionales del backend (API)
+
+- **Auth (`/api/auth`)**
+  - Alta y autenticación de usuarios con JWT.
+  - Entrega el perfil del usuario autenticado y permite actualizar datos personales.
+  - Expone listado de usuarios para administración (según permisos).
+
+- **Artículos (`/api/articulos`)**
+  - Catálogo público de productos con filtros (`idcategoria`), búsqueda (`search`), paginación y ordenamiento.
+  - Gestión interna del inventario: crear, editar, desactivar y actualizar stock.
+  - Aplica validaciones de negocio (campos requeridos, duplicados, stock, etc.).
+
+- **Carrito (`/api/carrito`)**
+  - Mantiene el carrito por usuario autenticado en base de datos.
+  - Permite agregar artículos, modificar cantidades, eliminar líneas y vaciar carrito.
+  - Es la base del flujo de checkout.
+
+- **Ventas (`/api/ventas`, `/api/mis-compras`)**
+  - Cierra la compra (checkout) creando venta y detalle de venta.
+  - Permite consultar una venta concreta y el historial de compras del cliente.
+  - Centraliza el estado de la operación comercial.
+
+- **Pagos (`/api/pagos`)**
+  - Integra Stripe Checkout para pago online.
+  - Crea sesiones de pago, consulta sesiones y confirma operaciones.
+  - Procesa webhooks para sincronizar el estado real del pago.
+
+- **Admin (`/api/admin`)**
+  - Entrega métricas para dashboard (usuarios, ventas, ingresos, productos).
+  - Gestiona pedidos y consultas administrativas de usuarios/productos.
+  - Facilita operación interna para staff (empleado/admin).
+
+- **Upload (`/api/upload`)**
+  - Sube imágenes de producto al servidor.
+  - Valida tipo y tamaño de archivo.
+  - Devuelve URL pública para persistirla en catálogo.
+
+### Capas técnicas del backend (cómo se organiza)
+
+- **`routes/`**
+  - Define endpoints HTTP y conecta cada ruta con su middleware y controller.
+
+- **`controllers/`**
+  - Implementa la lógica de negocio de cada caso de uso (auth, catálogo, carrito, pagos, ventas, admin).
+
+- **`models/`**
+  - Define entidades Sequelize y sus relaciones (usuarios, roles, artículos, ventas, etc.).
+
+- **`middlewares/`**
+  - Seguridad y contexto de ejecución: validación JWT, control por rol y aislamiento tenant/store.
+
+- **`db/`**
+  - Inicialización de conexión Sequelize, ejecución de migraciones SQL y carga de datos seed.
+
+- **`config/`**
+  - Configuración central de base de datos y documentación Swagger/OpenAPI.
+
+### Frontend (Angular + Ionic)
+
+- Consume la API del backend y presenta la experiencia de usuario.
+- Gestiona navegación, pantallas, formularios y estado de sesión.
+- Soporta el flujo completo: explorar catálogo → carrito → checkout → seguimiento de compras.
+- Está preparado para ejecución web y base para despliegue móvil mediante Capacitor.
+
+## 11) Roles y permisos
+
+El sistema trabaja con jerarquía de roles:
+
+- `1`: cliente
+- `2`: premium
+- `3`: empleado
+- `4`: admin
+
+Middleware de seguridad:
+- Verificación JWT
+- Validación por rol
+- Extracción de contexto tenant/store
+
+## 12) Scripts disponibles
+
+### Backend (`backend/package.json`)
+
+```bash
+npm run build       # Compila TypeScript y resuelve aliases
+npm run start       # Ejecuta versión compilada (dist)
+npm run dev         # Ejecuta backend en TS (ts-node)
+npm run dev:watch   # Modo watch
+npm run migrate     # Ejecuta migraciones SQL
+npm run seed        # Ejecuta seeder de datos
+```
+
+### Frontend (`frontend/package.json`)
+
+```bash
+npm start           # ng serve
+npm run build       # build
+npm run watch       # build en watch
+npm test            # tests unitarios
+npm run lint        # lint
+```
+
+## 13) Flujo recomendado para desarrollo
+
+1. Configurar `backend/.env`.
+2. Ejecutar `npm install` en backend y frontend.
+3. Ejecutar `npm run migrate` en backend.
+4. Ejecutar `npm run seed` en backend.
+5. Levantar backend con `npm run dev`.
+6. Levantar frontend con `npm start`.
+7. Probar endpoints en Swagger (`/api-docs`).
+
+## 14) Troubleshooting rápido
+
+- **No conecta a MySQL**
+  - Revisa `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`.
+
+- **Error CORS**
+  - Configura `CORS_ORIGINS` en backend `.env`.
+
+- **Token inválido o expirado**
+  - Inicia sesión de nuevo y envía `Authorization: Bearer <token>`.
+
+- **Stripe no funciona**
+  - Verifica `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_SUCCESS_URL`, `STRIPE_CANCEL_URL`.
+
+## 15) Notas importantes
+
+- El backend está en TypeScript y usa rutas versionadas bajo `/api`.
+- Existe soporte multitenant en middleware y modelos.
+- La documentación de API se genera con Swagger leyendo rutas/controladores del backend.
+
+## 16) Equipo
+
+- Aitor Peña Sánchez
+- Eduardo Romero Afonso
+- Verónica Londoño Pereira

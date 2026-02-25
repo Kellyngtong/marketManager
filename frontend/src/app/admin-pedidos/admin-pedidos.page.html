@@ -82,14 +82,8 @@
   <section class="panel" *ngIf="!isLoading && !orders.length">
     <h2>Sin pedidos</h2>
     <p>No hay pedidos registrados todavía.</p>
-    <ion-button expand="block" (click)="openCreateOrder()">Crear primer pedido</ion-button>
   </section>
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fixed-add-fab">
-    <ion-fab-button (click)="openCreateOrder()" aria-label="Añadir pedido">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 
   <ion-modal [isOpen]="isEditModalOpen" (didDismiss)="closeEditModal()">
     <ng-template>

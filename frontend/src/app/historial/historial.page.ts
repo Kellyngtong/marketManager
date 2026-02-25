@@ -23,7 +23,7 @@ export class HistorialPage {
   ) {}
 
   ionViewWillEnter() {
-    console.log('📄 HistorialPage.ionViewWillEnter() - Cargando historial...');
+    console.log('HistorialPage.ionViewWillEnter() - Cargando historial...');
     this.loadHistorial();
   }
 
@@ -32,12 +32,12 @@ export class HistorialPage {
       this.isLoading = true;
     }
     try {
-      console.log('⏳ loadHistorial() - Iniciando carga del historial...');
+      console.log('loadHistorial() - Iniciando carga del historial...');
       const res = await firstValueFrom(this.ventasService.getHistorial());
-      console.log('✅ loadHistorial() - Datos recibidos:', res);
+      console.log('loadHistorial() - Datos recibidos:', res);
       this.historial = res?.historial || [];
     } catch (error) {
-      console.error('❌ loadHistorial() - Error:', error);
+      console.error('loadHistorial() - Error:', error);
       await this.presentError(error);
     } finally {
       this.isLoading = false;

@@ -88,7 +88,7 @@ export class OrderDetailPage implements OnInit {
 
   async loadOrder() {
     const id = this.route.snapshot.paramMap.get('id');
-    console.log('🔍 Order ID from route:', id);
+    console.log('Order ID from route:', id);
     if (!id) {
       this.error = 'ID de pedido inválido';
       this.loading = false;
@@ -106,12 +106,12 @@ export class OrderDetailPage implements OnInit {
       if (venta) {
         this.isUserView = true;
         this.order = this.transformVentaToOrder(venta);
-        console.log('✅ Order data loaded (user view):', this.order);
+        console.log('Order data loaded (user view):', this.order);
         this.loading = false;
         return;
       }
     } catch (err) {
-      console.log('⚠️ No se encontró en ventas, intentando con admin...');
+      console.log('No se encontró en ventas, intentando con admin...');
     }
 
     // Si falla, intentar con admin
@@ -119,12 +119,12 @@ export class OrderDetailPage implements OnInit {
       const adminData = await firstValueFrom(
         this.adminService.getOrderDetails(parseInt(id, 10)),
       );
-      console.log('✅ Order data loaded (admin view):', adminData);
+      console.log('Order data loaded (admin view):', adminData);
       this.order = adminData;
       this.isUserView = false;
       this.loading = false;
     } catch (err) {
-      console.error('❌ Error loading order:', err);
+      console.error('Error loading order:', err);
       this.error = 'No se pudo cargar el pedido';
       this.loading = false;
     }

@@ -106,28 +106,6 @@ export class AdminPedidosPage {
     }
   }
 
-  async openCreateOrder() {
-    const alert = await this.alertCtrl.create({
-      header: 'Nuevo pedido',
-      inputs: [
-        { name: 'idcliente', type: 'number', placeholder: 'ID Cliente' },
-        { name: 'idusuario', type: 'number', placeholder: 'ID Usuario (opcional)' },
-        { name: 'total', type: 'number', placeholder: 'Total (€)' },
-      ],
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Crear',
-          handler: async (values) => {
-            await this.createOrder(values);
-          },
-        },
-      ],
-    });
-
-    await alert.present();
-  }
-
   editOrder(order: AdminOrder) {
     this.editingOrder = order;
     this.editDraft = {

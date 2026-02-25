@@ -20,16 +20,16 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): boolean {
-    console.log('🛡️ AuthGuard - Verificando acceso a:', state.url);
+    console.log('AuthGuard - Verificando acceso a:', state.url);
     const token = this.auth.getToken();
-    console.log('🛡️ AuthGuard - Token encontrado:', token ? 'SÍ' : 'NO');
+    console.log('AuthGuard - Token encontrado:', token ? 'SÍ' : 'NO');
 
     if (token) {
-      console.log('✅ AuthGuard - Acceso permitido');
+      console.log('AuthGuard - Acceso permitido');
       return true;
     }
 
-    console.log('❌ AuthGuard - Sin token, redirigiendo a login');
+    console.log('AuthGuard - Sin token, redirigiendo a login');
     this.router.navigate(['/login']);
     return false;
   }

@@ -24,7 +24,7 @@ const updatePasswordsForUsers = async (): Promise<void> => {
       const user = await Usuario.findOne({ where: { email } });
       
       if (!user) {
-        console.log(`❌ Usuario no encontrado: ${email}`);
+        console.log(`Usuario no encontrado: ${email}`);
         continue;
       }
 
@@ -34,13 +34,13 @@ const updatePasswordsForUsers = async (): Promise<void> => {
       // Actualizar en la base de datos
       await user.update({ clave: hashedPassword });
       
-      console.log(`✅ Contraseña actualizada para: ${email}`);
+      console.log(`Contraseña actualizada para: ${email}`);
     }
 
-    console.log('\n✅ Todas las contraseñas han sido actualizadas correctamente.');
+    console.log('\nTodas las contraseñas han sido actualizadas correctamente.');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error al actualizar contraseñas:', error);
+    console.error('Error al actualizar contraseñas:', error);
     process.exit(1);
   }
 };

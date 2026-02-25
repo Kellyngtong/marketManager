@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "======================================"
-echo "🧪 TEST MULTITENANT - MARKETMANAGER"
+echo "TEST MULTITENANT - MARKETMANAGER"
 echo "======================================"
 echo ""
 
@@ -94,5 +94,5 @@ decode_jwt "$ADMIN_TOKEN"
 echo ""
 
 echo "======================================"
-echo "✅ Tests completados"
+echo "Tests completados"
 echo "======================================"

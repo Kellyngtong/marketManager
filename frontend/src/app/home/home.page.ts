@@ -5,6 +5,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { CarritoService } from '../services/carrito.service';
 import { AuthService } from '../auth/auth.service';
 import { ConfirmationModalComponent } from '../admin/confirmation-modal/confirmation-modal.component';
+import { FilterOption } from '../components/filter-bar/filter-bar.component';
 
 @Component({
   selector: 'app-home',
@@ -36,26 +37,40 @@ export class HomePage implements OnDestroy {
   searchQuery: string = '';
   showOnlyOffers = false;
   isUploadingAvatar = false;
+  filterOptions: FilterOption[] = [
+    { label: 'Todos', value: null },
+    { label: 'Fruta', value: 'fruta' },
+    { label: 'Verdura', value: 'verdura' },
+    { label: 'Bebidas', value: 'bebidas' },
+    { label: 'Panadería', value: 'panaderia' },
+    { label: 'Embutidos', value: 'embutidos' },
+    { label: 'Carnes', value: 'carne' },
+    { label: 'Pescados', value: 'pescado' },
+    { label: 'Alcohólicas', value: 'alcoholicas' },
+    { label: 'Lácteos', value: 'lacteos' },
+  ];
   readonly tipos = [
     { label: 'Todos', value: null },
     { label: 'Fruta', value: 'fruta' },
     { label: 'Verdura', value: 'verdura' },
-    { label: 'Carne', value: 'carne' },
-    { label: 'Pescado', value: 'pescado' },
-    { label: 'Lácteos', value: 'lacteos' },
     { label: 'Bebidas', value: 'bebidas' },
-    { label: 'Congelados', value: 'congelados' },
     { label: 'Panadería', value: 'panaderia' },
+    { label: 'Embutidos', value: 'embutidos' },
+    { label: 'Carnes', value: 'carne' },
+    { label: 'Pescados', value: 'pescado' },
+    { label: 'Alcohólicas', value: 'alcoholicas' },
+    { label: 'Lácteos', value: 'lacteos' },
   ];
   private readonly tipoCategoriaMap: Record<string, number> = {
     fruta: 1,
     verdura: 2,
-    carne: 3,
-    pescado: 4,
-    lacteos: 5,
-    bebidas: 6,
-    congelados: 7,
-    panaderia: 8,
+    bebidas: 3,
+    panaderia: 4,
+    embutidos: 5,
+    carne: 6,
+    pescado: 7,
+    alcoholicas: 8,
+    lacteos: 9,
   };
   private subscriptions = new Subscription();
 
@@ -189,8 +204,13 @@ export class HomePage implements OnDestroy {
   }
 
   onSearchChange(query: string) {
-    this.searchQuery = query;
-    this.loadProducts();
+    this.searchTerm = query.trim();
+    this.applyFilters();
+  }
+
+  onFilterChange(filterValue: string | number | null) {
+    this.selectedTipo = filterValue as string | null;
+    this.applyFilters();
   }
 
   getTipoLabel(value: string | null) {
@@ -381,7 +401,12 @@ export class HomePage implements OnDestroy {
       .trim()
       .toLowerCase();
 
-    return normalizedOferta === '1' || normalizedOferta === 'true' || normalizedOferta === 'si' || normalizedOferta === 'sí';
+    return (
+      normalizedOferta === '1' ||
+      normalizedOferta === 'true' ||
+      normalizedOferta === 'si' ||
+      normalizedOferta === 'sí'
+    );
   }
 
   private fileToDataUrl(file: File): Promise<string> {

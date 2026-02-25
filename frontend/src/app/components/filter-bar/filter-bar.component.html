@@ -1,0 +1,26 @@
+<div class="filter-bar-container">
+  <!-- Search Bar -->
+  <ion-searchbar
+    *ngIf="showSearch"
+    class="filter-searchbar"
+    [value]="searchTerm"
+    (ionInput)="onSearchInput($event)"
+    [placeholder]="searchPlaceholder"
+    showClearButton="always"
+    inputmode="search"
+    type="search"
+  ></ion-searchbar>
+
+  <!-- Filter Chips -->
+  <div *ngIf="filterOptions.length > 0" class="filter-chips" role="tablist" aria-label="Filtros">
+    <button
+      type="button"
+      class="filter-chip"
+      *ngFor="let option of filterOptions"
+      [class.active]="selectedFilter === option.value"
+      (click)="selectFilter(option.value)"
+    >
+      {{ option.label }}
+    </button>
+  </div>
+</div>
