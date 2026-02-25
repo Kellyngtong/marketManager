@@ -33,10 +33,7 @@
     <!-- Categoría -->
     <ion-item class="ion-margin-bottom ion-margin-top">
       <ion-label position="stacked">Categoría</ion-label>
-      <ion-select 
-        formControlName="idcategoria"
-        interface="popover"
-      >
+      <ion-select formControlName="idcategoria" interface="popover">
         <ion-select-option *ngFor="let cat of categories" [value]="cat.id">
           {{ cat.nombre }}
         </ion-select-option>
